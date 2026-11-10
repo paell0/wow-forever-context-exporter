@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.1.0 — 2026-11-10
+
+- Added a per-character progress planner with preview-before-acceptance, automatic checks for level, skill, equipment, committed talent ranks and gold balance, plus player-controlled manual tasks.
+- Added comparison of two dragged/pasted item candidates. Full item references are preserved, uncached data is retried, and hypothetical loadout effects are distinguished from current-character effects.
+- Added focused Overview, Talent points, Gear advice, Next session and Review plan reports with purpose-specific AI requests.
+- Added accepted-plan reviews, reference snapshots, observed changes, and the two most recent archived plans. New reports do not overwrite the active plan's reference.
+- Added a bounded FCPLAN/1 data format requested in exported prompts. Imports are never executed and invalid drafts cannot replace an accepted plan.
+- Moved goals/options, plans, candidates and snapshots into per-character saved variables, with migration of existing goal/options defaults. Minimap settings remain account-level.
+- Added planner/comparison windows, task pagination, relevant game-event refreshes, combat guards, documentation and commands. Previous precision fixes and the minimap button are retained.
+
+Validation: 64 simulated Lua 5.1 tests passed. Live verification of this larger feature update is pending.
+
 ## v1.0.5 — 2026-11-10
 
 - Fixed phantom off-hand damage and attack speed when no off-hand weapon is equipped. Shields are not treated as weapons; missing metadata is marked unavailable.

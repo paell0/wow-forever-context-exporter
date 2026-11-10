@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.0.5](https://img.shields.io/static/v1?label=version&message=1.0.5&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.5) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](LICENSE) [![37 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=37+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.1.0](https://img.shields.io/static/v1?label=version&message=1.1.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.1.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](LICENSE) [![64 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=64+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -14,13 +14,13 @@
 
 Export your WoW Forever character's talents, professions, gear, and stats as plain text for AI advice.
 
-**Status: public preview.** Targets Forever interface **16001**. The addon passes 37 simulated Lua 5.1 tests, but has **not been tested in a live WoW Forever session**. Please report client-specific issues with your build number.
+**Status: public preview.** Targets Forever interface **16001**. The addon passes 64 simulated Lua 5.1 tests, but has **not been tested in a live WoW Forever session**. Please report client-specific issues with your build number.
 
 [Changelog](CHANGELOG.md)
 
 ## Install
 
-1. Download `ForeverContext-1.0.5.zip` from [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
+1. Download `ForeverContext-1.1.0.zip` from [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
 2. Close the game and extract the archive into `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Check that the final path is `AddOns/ForeverContext/ForeverContext.toc`.
 4. Start Forever and enable **ForeverContext** in the AddOns list.
@@ -32,15 +32,28 @@ If you installed the previous `ContextoPJ` version, remove that addon folder fir
 ## Use
 
 1. Outside combat, click the **minimap button** or type **`/fcontext`**.
-2. Optionally enter your goal, such as “solo leveling on a small budget” or “healing dungeons with friends.”
-3. Click **Generate / refresh** after changing goals or options.
-4. Click **Select all**, press **Ctrl+C**, then paste into your AI with **Ctrl+V**.
+2. Choose **Overview**, **Talent points**, **Gear advice**, **Next session**, or **Review plan** and enter your goal.
+3. Click **Generate / refresh**, then **Select all** and **Ctrl+C**. Paste into your AI with **Ctrl+V**.
+4. If the AI returns a plan block, open **Progress plan**, paste that block, click **Preview plan**, and review it before clicking **Accept plan**.
 
-The report already includes a request for prioritized, version-specific advice. `/forevercontext` is an alias; `/pjia` remains available for existing users. `/fcontext help` displays help.
+### Four connected features
 
-**Minimap controls:** left-click to open or close the report; drag to move the button around the minimap. Its position is saved between sessions. Use **`/fcontext minimap`** to hide or show the button. No additional addon libraries are required.
+- **Track a progress plan:** up to 32 tasks saved per character. Current level, skills, equipped slots/items, committed talent ranks, and gold balance can be checked automatically; other tasks have manual checkboxes.
+- **Compare two items:** open **Compare items**, drag in candidates A and B or paste their full game links, then click **Compare with AI**. The report includes both items and your current character context.
+- **Ask a focused question:** purpose buttons select relevant sections and tailor the AI request. The overview keeps the broader export available.
+- **Review previous advice:** exports include accepted goals, current completion checks, and observed changes since the plan's reference snapshot. Replaced/cleared plans are archived, with the two most recent retained.
 
-No AI subscription, API key, or companion application is required by the addon. You choose where to paste the text. WoW requires a manual copy action; the addon does not directly access your system clipboard or send anything to an AI.
+Unknown data is labelled **UNKNOWN** rather than completed or failed. Automatic checks reflect the current state, so removing an item or spending gold may make a task pending again. Previewing a plan never replaces the active plan; acceptance is explicit. Imported text is parsed as data and never executed.
+
+Plans, goals, selected candidates, and snapshots are **per character**. Existing account-level goal/options become initial migration defaults. Your minimap position/visibility remain account-level settings.
+
+Read the [complete workflow guide, task format, and command list](docs/PROGRESS-PLAN.md).
+
+**Commands:** `/fcontext plan`, `/fcontext compare`, `/fcontext talents`, `/fcontext gear`, `/fcontext session`, `/fcontext review`, and `/fcontext overview`. `/forevercontext` and `/pjia` remain aliases.
+
+**Minimap controls:** left-click to open or close the report; drag to move the button. Use **`/fcontext minimap`** to hide/show it. No additional addon libraries are required.
+
+No AI subscription, API key, or companion application is required by the addon. You choose where to paste reports and copy plan blocks back manually. The addon does not access your system clipboard, contact an AI, apply talents, equip items, or spend gold for you.
 
 ## Exported information
 
@@ -60,9 +73,9 @@ No AI subscription, API key, or companion application is required by the addon. 
 
 ## Privacy and limitations
 
-Your character name is excluded by default. The addon does not export your account, BattleTag, chat, friends, or guild data, and does not transmit your report. Your goal, checkbox preferences, and minimap button position/visibility are saved locally in `ForeverContextDB`.
+Your character name is excluded by default. The addon does not export your account, BattleTag, chat, friends, or guild data, and does not transmit your report. Character goals/options, accepted plans, candidate references, and snapshots are saved locally in `ForeverContextCharacterDB`; minimap preferences remain in `ForeverContextDB`. Player-entered goals and accepted task labels are included when you export their context.
 
-This is a snapshot of currently equipped gear and the active build. It does not include bag or bank inventories, alternate sets, stabled pets, historical talent choices, or combat performance. Current stats may include temporary buffs or forms.
+Reports describe currently equipped gear and the active build, with selected comparison candidates and plan context added separately. The addon does not scan entire bag/bank inventories, preserve full old item tooltips, or record combat performance or every historical talent decision. Current stats may include temporary buffs or forms. Snapshot comparisons record level, gold balance, equipped item IDs, readable skills and committed talent ranks; the plan reference is the most recently generated report at acceptance, or a fresh snapshot when none exists.
 
 Unapplied talent changes are not reported as committed talents. Unavailable data is marked explicitly; missing values must not be interpreted as zero or empty slots. Item data is retried briefly. If warnings remain, open Talents/Professions, hover over gear, and generate again. Collapsed groups may limit skill, quest, or reputation coverage.
 
@@ -78,9 +91,9 @@ python -m unittest discover -s tests -v
 python scripts/build_release.py
 ```
 
-The build writes `dist/ForeverContext-1.0.5.zip` with the correct addon folder. Tests use `lupa.lua51` and a simulated client. Some fixtures deliberately use Spanish game data to verify that localized client text is preserved.
+The build writes `dist/ForeverContext-1.1.0.zip` with the correct addon folder. Tests use `lupa.lua51` and a simulated client. Some fixtures deliberately use Spanish game data to verify that localized client text is preserved.
 
-An earlier v1.0.3 build produced a live character export on Forever build 70862 with an esES client. The current precision changes and minimap feature still require live verification.
+An earlier v1.0.3 build produced a live character export on Forever build 70862 with an esES client. The current planner, comparison UI, and focused workflow still require live verification.
 
 The API contracts were checked against [Blizzard's exported Forever UI source](https://github.com/Gethe/wow-ui-source/tree/forever), including the [Camelot talent UI](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_PlayerSpells/Camelot/ClassTalents/Blizzard_ClassTalentsFrame.lua) and [profession UI](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_ProfessionsBook/Camelot/Blizzard_ProfessionsBook.lua).
 

@@ -265,6 +265,8 @@ class AddonTests(unittest.TestCase):
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.lua.execute(MOCK)
         self.load('Core.lua')
+        self.load('Progress.lua')
+        self.load('Workflow.lua')
 
     def load(self, name):
         code = (ADDON / name).read_text(encoding='utf-8')
@@ -385,7 +387,7 @@ class AddonTests(unittest.TestCase):
         self.assertIn('Ctrl+C', frame.status.value)
         self.lua.execute('ForeverContextWindow.goal:SetText("Tanque en mazmorras"); ForeverContextWindow.generate.scripts.OnClick()')
         self.assertIn('Tanque en mazmorras', frame.text.value)
-        self.assertEqual(g.ForeverContextDB.goal, 'Tanque en mazmorras')
+        self.assertEqual(g.ForeverContextCharacterDB.options.goal, 'Tanque en mazmorras')
         self.lua.execute('combat = true; dispatch("PLAYER_REGEN_DISABLED")')
         self.assertFalse(frame.shown)
         self.lua.execute('SlashCmdList.FOREVER_CONTEXT("")')
@@ -440,7 +442,8 @@ class AddonTests(unittest.TestCase):
         self.assertIn('## Interface: 16001', toc)
         self.assertIn('## SavedVariables: ForeverContextDB', toc)
         files = [line for line in toc.splitlines() if line and not line.startswith('#')]
-        self.assertEqual(files, ['Core.lua', 'UI.lua', 'Minimap.lua'])
+        self.assertEqual(files, ['Core.lua', 'Progress.lua', 'Workflow.lua', 'UI.lua', 'PlannerUI.lua', 'Minimap.lua'])
+        self.assertIn('## SavedVariablesPerCharacter: ForeverContextCharacterDB', toc)
         for file in files:
             self.assertTrue((ADDON / file).is_file())
 

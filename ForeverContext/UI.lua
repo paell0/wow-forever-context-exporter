@@ -11,9 +11,7 @@ local function inCombat()
 end
 
 local function settings()
-    if type(ForeverContextDB) ~= "table" then ForeverContextDB = {} end
-    if ForeverContextDB.extended == nil then ForeverContextDB.extended = true end
-    return ForeverContextDB
+    return NS.CharacterSettings()
 end
 
 local function selectReport()
@@ -28,6 +26,7 @@ local function finish()
     window:SetScript("OnUpdate", nil)
     window.generate:Enable()
     window.select:Enable()
+    NS.CommitExport(window.snapshot)
     if lastPending and lastPending > 0 then
         window.status:SetText("Report ready with pending data. Check the warnings and generate again.")
     elseif lastWarnings and lastWarnings > 0 then
@@ -49,7 +48,8 @@ local function collect()
     db.goal = window.goal:GetText()
     db.includeName = window.nameCheck:GetChecked() and true or false
     db.extended = window.extraCheck:GetChecked() and true or false
-    local report, pending, warnings = NS.BuildReport(db)
+    local report, pending, warnings, snapshot = NS.BuildExport(db)
+    window.snapshot = snapshot
     window.report = report
     window.text:SetText(report)
     window.text:SetCursorPosition(0)
@@ -93,7 +93,7 @@ local function createWindow()
     local frame = CreateFrame("Frame", "ForeverContextWindow", UIParent, "BackdropTemplate")
     window = frame
     frame:Hide()
-    frame:SetSize(820, 650)
+    frame:SetSize(820, 720)
     frame:SetPoint("CENTER")
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -138,11 +138,11 @@ local function createWindow()
     frame.extraCheck = CreateFrame("CheckButton", "ForeverContextExtraCheck", frame, "UICheckButtonTemplate")
     frame.extraCheck:SetPoint("TOPLEFT", 310, -100)
     frame.extraCheck:SetChecked(db.extended)
-    frame.extraCheck.Text:SetText("Include skills, spells, quests, and reputations")
+    frame.extraCheck.Text:SetText("Include extra details for this question")
     frame.extraCheck:SetScript("OnClick", function(self) settings().extended = self:GetChecked() and true or false end)
 
     frame.panel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-    frame.panel:SetPoint("TOPLEFT", 18, -141)
+    frame.panel:SetPoint("TOPLEFT", 18, -181)
     frame.panel:SetPoint("BOTTOMRIGHT", -18, 91)
     frame.panel:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
     frame.panel:SetBackdropColor(0.015, 0.02, 0.03, 1)
@@ -175,12 +175,21 @@ local function createWindow()
     end)
     frame.generate = button(frame, "Generate / refresh", 165, "BOTTOMLEFT", frame, "BOTTOMLEFT", 20, 51, generate)
     frame.select = button(frame, "Select all", 150, "LEFT", frame.generate, "RIGHT", 12, 0, selectReport)
+    frame.plan = button(frame, "Progress plan", 135, "BOTTOMRIGHT", frame, "BOTTOMRIGHT", -20, 51, function() NS.OpenPlanWindow() end)
+    frame.compare = button(frame, "Compare items", 135, "RIGHT", frame.plan, "LEFT", -10, 0, function() NS.OpenComparisonWindow() end)
+    frame.modes = {}
+    for index, key in ipairs({"overview", "talents", "gear", "session", "review"}) do
+        local modeKey = key
+        frame.modes[key] = button(frame, NS.ModeLabels[key], 145, "TOPLEFT", frame, "TOPLEFT", 20 + (index - 1) * 155, -142, function()
+            NS.OpenReport(modeKey)
+        end)
+    end
     frame.counter = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    frame.counter:SetPoint("BOTTOMRIGHT", -25, 59)
+    frame.counter:SetPoint("BOTTOMRIGHT", -25, 24)
     frame.counter:SetText("")
     frame.status = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.status:SetPoint("BOTTOMLEFT", 22, 24)
-    frame.status:SetWidth(775)
+    frame.status:SetWidth(590)
     frame.status:SetJustifyH("LEFT")
     frame.status:SetText("")
     frame:SetScript("OnHide", function(self)
@@ -189,7 +198,7 @@ local function createWindow()
         self.text:ClearFocus()
     end)
     frame:SetScript("OnShow", function(self)
-        local scale = math.min(1, (UIParent:GetWidth() - 40) / 820, (UIParent:GetHeight() - 40) / 650)
+        local scale = math.min(1, (UIParent:GetWidth() - 40) / 820, (UIParent:GetHeight() - 40) / 720)
         self:SetScale(math.max(0.4, scale))
     end)
     UISpecialFrames = UISpecialFrames or {}
@@ -199,8 +208,26 @@ end
 local function open()
     if inCombat() then say("Leave combat to export your character."); return end
     if not window then createWindow() end
+    local db = settings()
+    window.goal:SetText(type(db.goal) == "string" and db.goal or "")
+    window.nameCheck:SetChecked(db.includeName == true)
+    window.extraCheck:SetChecked(db.extended ~= false)
+    for key, widget in pairs(window.modes) do
+        widget:SetText((db.mode == key or not db.mode and key == "overview") and "|cffffd46a" .. NS.ModeLabels[key] .. "|r" or NS.ModeLabels[key])
+    end
     window:Show()
     generate()
+end
+
+function NS.OpenReport(mode)
+    if window and window:IsShown() then
+        local db = settings()
+        db.goal = window.goal:GetText()
+        db.includeName = window.nameCheck:GetChecked() == true
+        db.extended = window.extraCheck:GetChecked() == true
+    end
+    if mode and NS.ModeLabels[mode] then settings().mode = mode end
+    open()
 end
 
 function NS.ToggleWindow()
@@ -213,9 +240,15 @@ SLASH_FOREVER_CONTEXT3 = "/pjia"
 SlashCmdList["FOREVER_CONTEXT"] = function(message)
     message = (message or ""):lower():match("^%s*(.-)%s*$")
     if message == "help" then
-        say("/fcontext opens and generates a report. /fcontext minimap hides or shows the minimap button. Press Ctrl+C and paste into your AI.")
+        say("/fcontext opens the report. Use /fcontext plan, compare, talents, gear, session, review, or minimap. Copy reports with Ctrl+C.")
     elseif message == "minimap" then
         NS.ToggleMinimap()
+    elseif message == "plan" then
+        NS.OpenPlanWindow()
+    elseif message == "compare" then
+        NS.OpenComparisonWindow()
+    elseif NS.ModeLabels[message] then
+        NS.OpenReport(message)
     else
         open()
     end

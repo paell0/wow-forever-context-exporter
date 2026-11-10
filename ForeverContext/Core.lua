@@ -1,5 +1,5 @@
 local _, NS = ...
-NS.VERSION = "1.0.5"
+NS.VERSION = "1.1.0"
 
 -- Only public addon APIs. Exporting is disabled in combat by UI.lua.
 local function secret(value)
@@ -685,32 +685,46 @@ local function section(ctx, title, fn)
     end
 end
 
+NS.ModeLabels = {overview="Overview", talents="Talent points", gear="Gear advice", session="Next session", review="Review plan", compare="Compare items"}
+NS.ModeQuestions = {
+    overview="Assess whether my character is on the right track for its level and my goals in WoW Forever, using the data above.",
+    talents="Recommend my next talent points for my level and goals. Explain the order and trade-offs. Use node IDs only when verified; do not invent an unlisted node ID.",
+    gear="Prioritize useful gear upgrades for my current build and budget. Consider existing effects and set bonuses, and explain which upgrades matter most.",
+    session="Plan a practical next play session using my level, active quests, professions, goals, and accepted progress plan. Ask about session length when it matters.",
+    review="Review my accepted plan against the current character and recorded changes. Explain what is complete, pending, or unverified and suggest an updated plan.",
+    compare="Compare candidate A and B for my actual character and goal. Check slot compatibility, weapon restrictions, effects and whole-loadout set changes. Distinguish observed facts from hypothetical equip results.",
+}
+
 function NS.BuildReport(options)
     local ctx = { lines = {}, warnings = {}, pending = {}, options = options or {} }
+    local mode = NS.ModeLabels[ctx.options.mode] and ctx.options.mode or "overview"
     push(ctx, "CHARACTER CONTEXT — ForeverContext " .. NS.VERSION)
     push(ctx, "Exported: " .. clean(call(date, "%Y-%m-%d %H:%M:%S")))
+    push(ctx, "Question: " .. NS.ModeLabels[mode])
     push(ctx, "Player goal and preferences: " .. clean(ctx.options.goal, "Unspecified; ask before assuming PvE, PvP, role, or budget."))
     section(ctx, "CHARACTER", identity)
     section(ctx, "TALENTS", talents)
     section(ctx, "FOREVER LEGACY", legacy)
     section(ctx, "PROFESSIONS", professions)
-    section(ctx, "EQUIPMENT AND ITEM DETAILS", equipment)
+    if mode ~= "talents" then section(ctx, "EQUIPMENT AND ITEM DETAILS", equipment) end
     section(ctx, "CHARACTER STATS", statistics)
     section(ctx, "ACTIVE BUFFS", auras)
     section(ctx, "SUMMONED PET", pet)
     if ctx.options.extended then
         section(ctx, "SKILLS AND PROFICIENCIES", skills)
-        section(ctx, "KNOWN SPELLS", spellbook)
-        section(ctx, "ACTIVE QUESTS", quests)
-        section(ctx, "REPUTATIONS", reputations)
+        if mode == "overview" or mode == "talents" then section(ctx, "KNOWN SPELLS", spellbook) end
+        if mode == "overview" or mode == "review" then section(ctx, "ACTIVE QUESTS", quests) end
+        if mode == "overview" or mode == "session" then section(ctx, "REPUTATIONS", reputations) end
     end
+    if mode == "session" then section(ctx, "ACTIVE QUESTS", quests) end
     section(ctx, "COVERAGE AND WARNINGS", function()
-        push(ctx, "Local out-of-combat snapshot; excludes decision history and combat performance.")
+        push(ctx, "Local out-of-combat game snapshot; excludes a complete gameplay decision history and combat performance. Accepted plans and observed changes are reported separately when available.")
         push(ctx, "Equipment: currently equipped items only; excludes bags, bank, and alternate gear.")
         push(ctx, "Do not add individual item stats to the character stat totals.")
         push(ctx, "Only SET BONUS ACTIVE entries describe enabled set effects. Inactive or unknown entries are not confirmed benefits; repeated bonuses from the same set count once.")
         push(ctx, "Rank tooltips are requested for the current talent rank. REFERENCE ONLY descriptions are not verified rank totals and must not be multiplied automatically.")
         push(ctx, "Repeated talent-currency IDs refer to the same point pool; do not add repeated available balances.")
+        if mode ~= "overview" then push(ctx, "Focused question mode: unrelated sections may be omitted. An omitted section does not indicate missing equipment or abilities.") end
         push(ctx, "Unavailable or pending does not mean zero, unlearned, or empty.")
         push(ctx, "Account, BattleTag, chat, friends, and guild data are not exported.")
         for _, message in ipairs(sortedKeys(ctx.warnings)) do push(ctx, "WARNING: " .. message) end
@@ -719,7 +733,7 @@ function NS.BuildReport(options)
         end
     end)
     section(ctx, "REQUEST TO THE AI", function()
-        push(ctx, "Assess whether my character is on the right track for its level and my goals in WoW Forever, using the data above.")
+        push(ctx, NS.ModeQuestions[mode])
         push(ctx, "Prioritize changes: talents and next points, stats and gear upgrades, professions, and skills I should review.")
         push(ctx, "Distinguish major issues from optional upgrades; explain each recommendation and consider level, money, and solo or group play.")
         push(ctx, "Verify that your sources and advice apply to Forever and this version. Do not automatically extrapolate Retail or Classic guides.")
@@ -728,4 +742,47 @@ function NS.BuildReport(options)
     return table.concat(ctx.lines, "\n"), count(ctx.pending), count(ctx.warnings)
 end
 
+function NS.NormalizeItem(value)
+    if secret(value) or type(value) ~= "string" or #value > 2048 then return nil, "Enter an item link or a numeric item ID." end
+    value = value:match("^%s*(.-)%s*$")
+    local reference = value:match("|H(item:[^|]+)|h") or value
+    if reference:match("^%d+$") then reference = "item:" .. reference end
+    if not reference:match("^item:%d+[%d:%-]*$") then return nil, "Use a game item link or item ID, not a website URL." end
+    for field in reference:sub(6):gmatch("[^:]+") do
+        if not field:match("^%-?%d+$") then return nil, "Invalid item reference field." end
+    end
+    local id = tonumber(reference:match("^item:(%d+)"))
+    if not id or id < 1 or id > 10000000 then return nil, "Invalid item ID." end
+    return reference
+end
+
+function NS.DescribeComparisonItem(value, label)
+    local reference, message = NS.NormalizeItem(value)
+    if not reference then return label .. ": " .. message, 0, 1 end
+    local ctx = {lines={}, pending={}, warnings={}}
+    local id = tonumber(reference:match("^item:(%d+)"))
+    local name, _, quality, level, required, kind, subkind, _, equipLoc = call(namespace("C_Item", "GetItemInfo") or GetItemInfo, reference)
+    if not name then pending(ctx, "item:" .. id); call(namespace("C_Item", "RequestLoadItemDataByID"), id) end
+    push(ctx, label .. ": " .. clean(name, "item " .. id) .. " [ID " .. id .. "]")
+    push(ctx, "Exact reference: " .. reference)
+    push(ctx, "Type: " .. clean(kind) .. " / " .. clean(subkind) .. "; slot type: " .. clean(equipLoc)
+        .. "; quality: " .. clean(number(quality) and _G["ITEM_QUALITY" .. quality .. "_DESC"] or nil)
+        .. "; item level: " .. fmt(call(namespace("C_Item", "GetDetailedItemLevelInfo") or GetDetailedItemLevelInfo, reference) or level)
+        .. "; required level: " .. fmt(required))
+    if reference:match("^item:%d+$") then
+        push(ctx, "BASE ITEM REFERENCE: variant, enchant and gem details were not supplied; use the full game link for an exact comparison.")
+        warn(ctx, "A comparison candidate uses only a base item ID.")
+    end
+    local stats = object(call(namespace("C_Item", "GetItemStats") or GetItemStats, reference))
+    if stats then push(ctx, "Item stats: " .. table.concat(itemStatEntries(ctx, stats), "; ")) end
+    local lines = equipmentTooltip(call(namespace("C_TooltipInfo", "GetHyperlink"), reference))
+    if #lines == 0 then pending(ctx, "tooltip:" .. id); push(ctx, "Candidate effects: pending or unavailable.") end
+    for _, line in ipairs(lines) do push(ctx, line) end
+    for _, warning in ipairs(sortedKeys(ctx.warnings)) do push(ctx, "WARNING: " .. warning) end
+    return table.concat(ctx.lines, "\n"), count(ctx.pending), count(ctx.warnings)
+end
+
 NS.Clean = clean
+NS.SafeCall = call
+NS.ReadNumber = number
+NS.ReadTable = object

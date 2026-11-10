@@ -2,9 +2,13 @@
 ## Title: ForeverContext
 ## Notes: Export your WoW Forever character as plain text for AI advice. /fcontext
 ## Author: paell0
-## Version: 1.0.5
+## Version: 1.1.0
 ## SavedVariables: ForeverContextDB
+## SavedVariablesPerCharacter: ForeverContextCharacterDB
 
 Core.lua
+Progress.lua
+Workflow.lua
 UI.lua
+PlannerUI.lua
 Minimap.lua
