@@ -18,6 +18,8 @@ messages = {}
 requests = 0
 itemReady = true
 staged = false
+descriptionText = "Incrementa el daño un 5%."
+traitRanks = {}
 function issecretvalue(value) return type(value) == "table" and value.secret == true end
 function GetBuildInfo() return "1.60.1", "70790", "Nov 2026", 16001 end
 function GetLocale() return "esES" end
@@ -73,7 +75,7 @@ C_SpecializationInfo = {
 C_ClassTalents = { GetActiveConfigID = function() error("Do not use fallback if Forever group config exists") end }
 C_Spell = {
     GetSpellInfo = function(id) return {name = id == 500 and "Golpe mejorado" or "Talento concedido"} end,
-    GetSpellDescription = function(id) return "Incrementa el daño un 5%." end,
+    GetSpellDescription = function(id) return descriptionText end,
     RequestLoadSpellData = function() end,
 }
 C_Traits = {
@@ -106,6 +108,7 @@ function GetInventoryItemLink(_, slot)
 end
 function GetInventoryItemDurability(slot) if slot == 16 then return 20, 40 end end
 C_Item = {
+    GetItemInfoInstant = function(id) return id, 'Arma', 'Espada', 'INVTYPE_WEAPON', 1, 2, 7 end,
     GetItemInfo = function(query)
         assert(type(query) == "string" and query:find("item:12345:678:901:902:"))
         if not itemReady then return nil end
@@ -122,12 +125,21 @@ C_TooltipInfo = { GetInventoryItem = function(unit, slot, hide)
         {leftText = "Daño 20 - 30", rightText = "Velocidad 2.50"},
         {leftText = "+4 Strength"}, {leftText = "Equipar: mejora especial"},
     }} end
+end,
+GetTraitEntry = function(...)
+    assert(select('#', ...) == 2)
+    local entryID, rank = ...
+    assert((entryID == 100 or entryID == 102) and rank > 0)
+    traitRanks[entryID] = rank
+    return {lines = {{type = 34, leftText = descriptionText}}}
 end }
 C_UnitAuras = { GetAuraDataByIndex = function(unit, index, filter)
     assert(unit == "player" and filter == "HELPFUL")
     if index == 1 then return {name = "Bendición", spellId = 77, applications = 1} end
 end }
-Enum = { SpellBookSpellBank = {Player = 0, Pet = 1} }
+Enum = { SpellBookSpellBank = {Player = 0, Pet = 1}, ItemClass = {Weapon = 2},
+    TooltipDataLineType = {None = 0, SpellName = 13, SpellDescription = 34, DisabledLine = 42} }
+ITEM_SET_BONUS = "Conjunto: %s"
 C_SpellBook = {
     GetNumSpellBookSkillLines = function() return 1 end,
     GetSpellBookSkillLineInfo = function(index) assert(index == 1); return {name = "Armas", itemIndexOffset = 5, numSpellBookItems = 2} end,
@@ -357,7 +369,7 @@ class AddonTests(unittest.TestCase):
         self.assertIn('Legacy: professions (tree 99', report)
 
     def test_large_report_not_truncated(self):
-        self.lua.execute('C_Spell.GetSpellDescription = function() return string.rep("Descripción ", 12000) end')
+        self.lua.execute('descriptionText = string.rep("Descripción ", 12000)')
         report, _, _ = self.report()
         self.assertGreater(len(report), 200000)
         self.assertTrue(report.endswith('Do not invent effects, locations, or rewards.'))
@@ -412,7 +424,7 @@ class AddonTests(unittest.TestCase):
         self.assertIn('Ctrl+C', frame.status.value)
 
     def test_ui_scrolls_and_selects_long_report(self):
-        self.lua.execute('C_Spell.GetSpellDescription = function() return string.rep("Long description ", 12000) end')
+        self.lua.execute('descriptionText = string.rep("Long description ", 12000)')
         self.load('UI.lua')
         self.lua.execute('SlashCmdList.FOREVER_CONTEXT("")')
         frame = self.lua.globals().ForeverContextWindow
@@ -431,6 +443,170 @@ class AddonTests(unittest.TestCase):
         self.assertEqual(files, ['Core.lua', 'UI.lua', 'Minimap.lua'])
         for file in files:
             self.assertTrue((ADDON / file).is_file())
+
+    def test_empty_offhand_omits_phantom_damage_and_speed(self):
+        self.lua.execute('UnitDamage = function() return 118.9, 144.9, 20.8, 20.8 end')
+        report, _, _ = self.report()
+        self.assertIn('Off hand: empty.', report)
+        self.assertIn('Off-hand attacks: not applicable', report)
+        self.assertNotIn('Off-hand damage:', report)
+        self.assertNotIn('Off-hand attack speed:', report)
+
+    def test_shield_is_not_treated_as_an_offhand_weapon(self):
+        self.lua.execute('''
+            local original = GetInventoryItemID
+            GetInventoryItemID = function(unit, slot) return slot == 17 and 12345 or original(unit, slot) end
+            C_Item.GetItemInfoInstant = function(id) return id, 'Armadura', 'Escudo', 'INVTYPE_SHIELD', 1, 4, 6 end
+        ''')
+        report, _, _ = self.report()
+        self.assertIn('Off-hand attacks: not applicable', report)
+        self.assertNotIn('Off-hand damage:', report)
+
+    def test_real_offhand_weapon_preserves_damage_and_speed(self):
+        self.lua.execute('''
+            local original = GetInventoryItemID
+            local originalLink = GetInventoryItemLink
+            GetInventoryItemID = function(unit, slot) return slot == 17 and 12345 or original(unit, slot) end
+            GetInventoryItemLink = function(unit, slot) return originalLink(unit, slot == 17 and 16 or slot) end
+        ''')
+        report, _, _ = self.report()
+        self.assertIn('Off-hand damage: 5.0–8.0', report)
+        self.assertIn('Off-hand attack speed: 1.80 s', report)
+
+    def test_unknown_offhand_metadata_does_not_invent_a_weapon(self):
+        self.lua.execute('''
+            local original = GetInventoryItemID
+            GetInventoryItemID = function(unit, slot) return slot == 17 and 12345 or original(unit, slot) end
+            C_Item.GetItemInfoInstant = nil
+        ''')
+        report, _, warnings = self.report()
+        self.assertIn('weapon data unavailable; damage omitted', report)
+        self.assertNotIn('Off-hand damage:', report)
+        self.assertGreater(warnings, 0)
+
+    def test_talent_description_queries_current_rank_not_base_spell(self):
+        self.lua.execute('''
+            local original = C_Traits.GetNodeInfo
+            C_Traits.GetNodeInfo = function(config, nodeID)
+                local info = original(config, nodeID)
+                if nodeID == 10 then info.activeEntry.rank = 5; info.ranksPurchased = 5 end
+                return info
+            end
+            C_Spell.GetSpellDescription = function() return 'BASE SPELL: critical chance 1%.' end
+            C_TooltipInfo.GetTraitEntry = function(entryID, rank)
+                if entryID == 100 then assert(rank == 5) end
+                return {lines = {{type = 13, leftText = 'Title'}, {type = 34, leftText = 'CURRENT RANK: critical chance 5%.'}}}
+            end
+        ''')
+        report, _, warnings = self.report()
+        self.assertIn('Golpe mejorado: 5/5', report)
+        self.assertIn('[rank 5 tooltip] CURRENT RANK: critical chance 5%.', report)
+        self.assertNotIn('BASE SPELL:', report)
+        self.assertEqual(warnings, 0)
+
+    def test_talent_tooltips_include_client_bonus_ranks(self):
+        self.lua.execute('''
+            local original = C_Traits.GetNodeInfo
+            C_Traits.GetNodeInfo = function(config, nodeID)
+                local info = original(config, nodeID)
+                if nodeID == 10 then info.ranksIncreased = 2 end
+                return info
+            end
+        ''')
+        report, _, _ = self.report()
+        self.assertEqual(self.lua.globals().traitRanks[100], 5)
+        self.assertIn('Golpe mejorado: 5/5', report)
+        self.assertIn('[includes 2 bonus ranks]', report)
+        self.assertIn('Purchased ranks in Armas: 3', report)
+
+    def test_rank_description_fallback_is_explicitly_unverified(self):
+        self.lua.execute('C_TooltipInfo.GetTraitEntry = nil; C_Spell.GetSpellDescription = function() return "Base reference 1%." end')
+        report, pending, warnings = self.report()
+        self.assertIn('[REFERENCE ONLY; current-rank effect unverified] Base reference 1%.', report)
+        self.assertGreater(warnings, 0)
+        self.assertEqual(pending, 0)
+        self.lua.execute('C_TooltipInfo.GetTraitEntry = function() return nil end')
+        report, pending, _ = self.report()
+        self.assertGreater(pending, 0)
+        self.assertIn('REFERENCE ONLY', report)
+
+    def test_rank_tooltip_accepts_untyped_client_description_lines(self):
+        self.lua.execute('C_TooltipInfo.GetTraitEntry = function(entry, rank) return {lines={{type=0, leftText="Untyped current rank " .. rank}}} end')
+        report, _, _ = self.report()
+        self.assertIn('[rank 3 tooltip] Untyped current rank 3', report)
+
+    def test_observed_spanish_set_bonuses_are_marked_active_or_inactive(self):
+        self.lua.execute('''
+            C_TooltipInfo.GetInventoryItem = function(_, slot)
+                if slot ~= 16 then return end
+                return {lines = {
+                    {leftText='Cuero Defias (2/5)'},
+                    {leftText='Conjunto: +5 p. de resistencia Arcana.'},
+                    {leftText='(3) Bonif.: +15 p. de poder de ataque contra humanoides.'},
+                    {leftText='(4) Bonif.: Efecto de sangrado.'},
+                    {leftText='(5) Bonif.: Dagas aumentadas +1.'},
+                    {leftText='Durabilidad 24 / 30'},
+                }}
+            end
+        ''')
+        report, _, _ = self.report()
+        self.assertIn('[SET: 2/5 equipped] Cuero Defias', report)
+        self.assertIn('[SET BONUS ACTIVE (client)] Conjunto: +5', report)
+        for threshold in (3, 4, 5):
+            self.assertIn(f'[SET BONUS INACTIVE: requires {threshold} pieces; equipped 2/5]', report)
+        self.assertIn('  Durabilidad 24 / 30', report)
+
+    def test_client_disabled_set_bonus_is_not_enabled_by_piece_count(self):
+        self.lua.execute('''
+            C_TooltipInfo.GetInventoryItem = function()
+                return {lines={
+                    {leftText='Test set (3/5)'},
+                    {leftText='(2) Bonus: blocked by a requirement', leftColor={r=1,g=0,b=0}},
+                    {leftText='Conjunto: disabled effect', type=42},
+                }}
+            end
+        ''')
+        report, _, _ = self.report()
+        self.assertIn('[SET BONUS INACTIVE: requires 2 pieces; equipped 3/5]', report)
+        self.assertIn('[SET BONUS INACTIVE] Conjunto: disabled effect', report)
+        self.assertNotIn('[SET BONUS ACTIVE', report)
+
+    def test_unknown_set_status_and_fullwidth_localized_punctuation(self):
+        self.lua.execute('C_TooltipInfo.GetInventoryItem = function() return {lines={{leftText="(3) Bonus: uncertain"},{leftText="Conjunto: uncertain"}}} end')
+        report, _, _ = self.report()
+        self.assertIn('[POSSIBLE SET BONUS; STATUS UNKNOWN:', report)
+        self.assertIn('[SET BONUS STATUS UNKNOWN]', report)
+        self.assertNotIn('[SET BONUS ACTIVE', report)
+        self.lua.execute('ITEM_SET_BONUS="套装：%s"; C_TooltipInfo.GetInventoryItem=function() return {lines={{leftText="套装（2／5）"},{leftText="套装：当前效果"},{leftText="（3） 套装：未激活"}}} end')
+        report, _, _ = self.report()
+        self.assertIn('[SET: 2/5 equipped]', report)
+        self.assertIn('[SET BONUS ACTIVE (client)] 套装：当前效果', report)
+        self.assertIn('[SET BONUS INACTIVE: requires 3 pieces;', report)
+
+    def test_duplicate_resistance_aliases_are_not_exported_twice(self):
+        self.lua.execute('RESISTANCE3_NAME="Nature resistance"; C_Item.GetItemStats=function() return {ITEM_MOD_NATURE_RESISTANCE_SHORT=7, RESISTANCE3_NAME=7, ITEM_MOD_STRENGTH_SHORT=7} end')
+        report, _, _ = self.report()
+        stats_line = next(line for line in report.splitlines() if 'Item stats:' in line)
+        self.assertEqual(stats_line.count('Nature resistance=7.00'), 1)
+        self.assertIn('Strength=7.00', stats_line)
+        self.assertNotIn('ITEM_MOD_NATURE_RESISTANCE_SHORT=', stats_line)
+
+    def test_conflicting_stat_aliases_are_preserved_with_warning(self):
+        self.lua.execute('RESISTANCE3_NAME="Nature resistance"; C_Item.GetItemStats=function() return {ITEM_MOD_NATURE_RESISTANCE_SHORT=5, RESISTANCE3_NAME=7} end')
+        report, _, warnings = self.report()
+        self.assertIn('Nature resistance=5.00', report)
+        self.assertIn('differs]=7.00', report)
+        self.assertIn('Conflicting item-stat aliases', report)
+        self.assertGreater(warnings, 0)
+
+    def test_plural_markup_and_armor_resistance_duplication_are_cleaned(self):
+        self.assertEqual(self.lua.globals().NS.Clean('13 |4carga:cargas;'), '13 cargas')
+        self.assertEqual(self.lua.globals().NS.Clean('1 |4carga:cargas;'), '1 carga')
+        self.lua.execute('RESISTANCE0_NAME="armadura"')
+        report, _, _ = self.report()
+        self.assertNotIn('Resistance armadura:', report)
+        self.assertIn('Effective armor: 250', report)
+        self.assertIn('(client stat:', report)
 
     def start_minimap(self):
         self.load('UI.lua')

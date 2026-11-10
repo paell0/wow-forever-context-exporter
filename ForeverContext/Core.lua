@@ -1,5 +1,5 @@
 local _, NS = ...
-NS.VERSION = "1.0.4"
+NS.VERSION = "1.0.5"
 
 -- Only public addon APIs. Exporting is disabled in combat by UI.lua.
 local function secret(value)
@@ -37,6 +37,10 @@ local function clean(value, fallback)
     text = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")
     text = text:gsub("|H.-|h(.-)|h", "%1")
     text = text:gsub("|T.-|t", ""):gsub("|A.-|a", "")
+    text = text:gsub("(%d+)%s*|4([^:;]*):([^;]*);", function(amount, singular, plural)
+        if plural:find(":", 1, true) then return amount .. " |4" .. singular .. ":" .. plural .. ";" end
+        return amount .. " " .. (tonumber(amount) == 1 and singular or plural)
+    end)
     text = text:gsub("[\r\n\t]+", " "):gsub("%s+", " ")
     text = text:match("^%s*(.-)%s*$")
     return text ~= "" and text or fallback
@@ -82,17 +86,125 @@ local function spellName(spellID)
     return info and clean(info.name, "") or clean(call(GetSpellInfo, spellID), "")
 end
 
-local function tooltipLines(data)
-    local result = {}
+local function lineType(name)
+    return Enum and Enum.TooltipDataLineType and Enum.TooltipDataLineType[name]
+end
+
+local function talentDescription(ctx, entryID, rank, definition)
+    local fn = namespace("C_TooltipInfo", "GetTraitEntry")
+    local data = object(call(fn, entryID, rank))
+    local descriptions = {}
+    for _, line in ipairs(data and object(data.lines) or {}) do
+        local kind = number(line.type)
+        -- GetTraitEntry is already scoped to the requested rank. Older builds can
+        -- return untyped description lines; preserve those, excluding titles.
+        if kind == lineType("SpellDescription") or kind == nil or kind == lineType("None") then
+            local text = clean(line.leftText, "")
+            if text ~= "" then descriptions[#descriptions + 1] = text end
+        end
+    end
+    if #descriptions > 0 then
+        return "[rank " .. fmt(rank) .. " tooltip] " .. table.concat(descriptions, " ")
+    end
+    if fn and not data then
+        pending(ctx, "talent-tooltip:" .. entryID .. ":" .. rank)
+        if definition and number(definition.spellID) then call(namespace("C_Spell", "RequestLoadSpellData"), definition.spellID) end
+    end
+    local reference = definition and clean(definition.overrideDescription, "") or ""
+    if reference == "" and definition and number(definition.spellID) then
+        reference = clean(call(namespace("C_Spell", "GetSpellDescription"), definition.spellID), "")
+    end
+    warn(ctx, "Some talent effects could not be verified for their current rank. Reference descriptions must not be treated as rank-scaled totals.")
+    return reference ~= "" and "[REFERENCE ONLY; current-rank effect unverified] " .. reference
+        or "[Current-rank description unavailable]"
+end
+
+local function offhandWeapon()
+    local ok, id = pcall(GetInventoryItemID, "player", 17)
+    if not ok or secret(id) then return nil end
+    id = number(id)
+    if not id then return false end
+    local _, _, _, _, _, classID = call(namespace("C_Item", "GetItemInfoInstant") or GetItemInfoInstant, id)
+    classID = number(classID)
+    if not classID then return nil end
+    return classID == (Enum and Enum.ItemClass and Enum.ItemClass.Weapon or 2)
+end
+
+local function normalizedPunctuation(text)
+    return text:gsub("（", "("):gsub("）", ")"):gsub("／", "/")
+end
+
+local function setBonusPrefix(text)
+    local format = clean(ITEM_SET_BONUS, "")
+    local position = format:find("%s", 1, true)
+    local prefix = position and format:sub(1, position - 1):match("^%s*(.-)%s*$") or ""
+    return prefix ~= "" and text:sub(1, #prefix) == prefix
+end
+
+local function disabledTooltipLine(line)
+    if lineType("DisabledLine") and number(line.type) == lineType("DisabledLine") then return true end
+    local color = object(line.leftColor)
+    if not color then return false end
+    local r, g, b = number(color.r), number(color.g), number(color.b)
+    if not r or not g or not b then return false end
+    local gray = math.abs(r - g) < 0.04 and math.abs(g - b) < 0.04 and r < 0.65
+    local red = r > 0.7 and g < 0.25 and b < 0.25
+    return gray or red
+end
+
+local function equipmentTooltip(data)
+    local result, equipped, total = {}, nil, nil
     data = object(data)
-    if not data or not object(data.lines) then return result end
-    for _, line in ipairs(data.lines) do
+    for _, line in ipairs(data and object(data.lines) or {}) do
         local left, right = clean(line.leftText, ""), clean(line.rightText, "")
-        local text = left
-        if right ~= "" then text = text .. (text ~= "" and " | " or "") .. right end
+        local text = left .. (right ~= "" and (left ~= "" and " | " or "") .. right or "")
+        local normalized = normalizedPunctuation(left)
+        local name, have, maximum = normalized:match("^(.-)%s*%((%d+)%s*/%s*(%d+)%)%s*$")
+        local threshold = tonumber(normalized:match("^%((%d+)%)%s*"))
+        if name and name ~= "" and tonumber(have) <= tonumber(maximum) then
+            equipped, total = tonumber(have), tonumber(maximum)
+            text = "[SET: " .. equipped .. "/" .. total .. " equipped] " .. text
+        elseif threshold and equipped then
+            local state = equipped >= threshold and not disabledTooltipLine(line) and "ACTIVE" or "INACTIVE"
+            text = "[SET BONUS " .. state .. ": requires " .. threshold .. " pieces; equipped " .. equipped .. "/" .. total .. "] " .. text
+        elseif setBonusPrefix(normalized) then
+            -- The client omits the threshold on active Set: lines. Do not guess
+            -- it from a different spell or multiply a set bonus per item.
+            local state = disabledTooltipLine(line) and "INACTIVE" or equipped and "ACTIVE (client)" or "STATUS UNKNOWN"
+            text = "[SET BONUS " .. state .. "] " .. text
+        elseif threshold then
+            text = "[POSSIBLE SET BONUS; STATUS UNKNOWN: requires " .. threshold .. " pieces] " .. text
+        end
         if text ~= "" then result[#result + 1] = text end
     end
     return result
+end
+
+local resistanceAliases = {
+    ITEM_MOD_HOLY_RESISTANCE_SHORT = "RESISTANCE1_NAME",
+    ITEM_MOD_FIRE_RESISTANCE_SHORT = "RESISTANCE2_NAME",
+    ITEM_MOD_NATURE_RESISTANCE_SHORT = "RESISTANCE3_NAME",
+    ITEM_MOD_FROST_RESISTANCE_SHORT = "RESISTANCE4_NAME",
+    ITEM_MOD_SHADOW_RESISTANCE_SHORT = "RESISTANCE5_NAME",
+    ITEM_MOD_ARCANE_RESISTANCE_SHORT = "RESISTANCE6_NAME",
+}
+
+local function itemStatEntries(ctx, stats)
+    local entries, seen = {}, {}
+    for _, key in ipairs(sortedKeys(stats)) do
+        local canonical = resistanceAliases[key] or key
+        local value = number(stats[key])
+        if not seen[canonical] or seen[canonical].value ~= value then
+            local label = clean(_G[canonical] or _G[key], canonical)
+            if seen[canonical] then
+                label = label .. " [alias " .. key .. "; differs]"
+                warn(ctx, "Conflicting item-stat aliases were preserved separately; do not sum alias values.")
+            end
+            entries[#entries + 1] = label .. "=" .. fmt(stats[key], 2)
+            seen[canonical] = { value = value }
+        end
+    end
+    return entries
 end
 
 local function identity(ctx)
@@ -126,8 +238,8 @@ local function identity(ctx)
     end
     local specIndex = number(call(namespace("C_SpecializationInfo", "GetSpecialization") or GetSpecialization))
     if specIndex then
-        local _, name, _, _, rolee = call(namespace("C_SpecializationInfo", "GetSpecializationInfo") or GetSpecializationInfo, specIndex)
-        push(ctx, "Client-reported specialization: " .. clean(name) .. "; role: " .. clean(rolee))
+        local _, name, _, _, role = call(namespace("C_SpecializationInfo", "GetSpecializationInfo") or GetSpecializationInfo, specIndex)
+        push(ctx, "Client-reported specialization: " .. clean(name) .. "; role: " .. clean(role))
     end
     local form = number(call(GetShapeshiftForm))
     if form and form > 0 then push(ctx, "Active form/stance index " .. form) end
@@ -146,7 +258,7 @@ local function statistics(ctx)
     local names = { "Strength", "Agility", "Stamina", "Intellect", "Spirit" }
     for index, name in ipairs(names) do
         local base, effective = call(UnitStat, "player", index)
-        push(ctx, name .. ": " .. fmt(effective) .. " (base: " .. fmt(base) .. ")")
+        push(ctx, name .. ": " .. fmt(effective) .. " (client stat: " .. fmt(base) .. ")")
     end
     local _, armor = call(UnitArmor, "player")
     push(ctx, "Effective armor: " .. fmt(armor))
@@ -160,10 +272,18 @@ local function statistics(ctx)
     end
     local minDamage, maxDamage, offMin, offMax = call(UnitDamage, "player")
     push(ctx, "Main-hand damage: " .. fmt(minDamage, 1) .. "–" .. fmt(maxDamage, 1))
-    if number(offMax) and offMax > 0 then push(ctx, "Off-hand damage: " .. fmt(offMin, 1) .. "–" .. fmt(offMax, 1)) end
+    local offhand = offhandWeapon()
+    if offhand == true then
+        push(ctx, "Off-hand damage: " .. fmt(offMin, 1) .. "–" .. fmt(offMax, 1))
+    elseif offhand == false then
+        push(ctx, "Off-hand attacks: not applicable (no off-hand weapon).")
+    else
+        push(ctx, "Off-hand attacks: weapon data unavailable; damage omitted.")
+        warn(ctx, "Off-hand weapon metadata was unavailable; off-hand attack values were omitted.")
+    end
     local mainSpeed, offSpeed = call(UnitAttackSpeed, "player")
     push(ctx, "Main-hand attack speed: " .. fmt(mainSpeed, 2) .. " s")
-    if number(offSpeed) then push(ctx, "Off-hand attack speed: " .. fmt(offSpeed, 2) .. " s") end
+    if offhand == true then push(ctx, "Off-hand attack speed: " .. fmt(offSpeed, 2) .. " s") end
     local rangedSpeed, rangedMin, rangedMax = call(UnitRangedDamage, "player")
     if number(rangedSpeed) and rangedSpeed > 0 then
         push(ctx, "Ranged attack: " .. fmt(rangedMin, 1) .. "–" .. fmt(rangedMax, 1) .. "; speed " .. fmt(rangedSpeed, 2) .. " s")
@@ -201,7 +321,7 @@ local function statistics(ctx)
             push(ctx, "Rating " .. row[1] .. ": " .. fmt(rating) .. "; API-reported rating bonus: " .. fmt(call(GetCombatRatingBonus, ratingID), 2))
         end
     end
-    for school = 0, 6 do
+    for school = 1, 6 do
         local _, resistance = call(UnitResistance, "player", school)
         if number(resistance) then push(ctx, "Resistance " .. clean(_G["RESISTANCE" .. school .. "_NAME"], "school " .. school) .. ": " .. fmt(resistance)) end
     end
@@ -246,6 +366,8 @@ local function exportTree(ctx, configID, treeID, label)
         else
             local active = object(node.activeEntry)
             local rank = active and number(active.rank) or number(node.currentRank)
+            local bonusRanks = number(node.ranksIncreased) or 0
+            if rank then rank = rank + bonusRanks end
             if rank and rank > 0 and active and number(active.entryID) then
                 local entry = object(call(namespace("C_Traits", "GetEntryInfo"), configID, active.entryID))
                 local definition = entry and number(entry.definitionID) and object(call(namespace("C_Traits", "GetDefinitionInfo"), entry.definitionID))
@@ -269,9 +391,8 @@ local function exportTree(ctx, configID, treeID, label)
                 local text = "- [" .. groupName .. "] " .. name .. ": " .. fmt(rank) .. "/" .. fmt(entry and entry.maxRanks or node.maxRanks)
                 text = text .. " (node " .. nodeID .. ", entry " .. active.entryID .. (id and ", spell " .. id or "") .. ")"
                 if number(node.ranksPurchased) == 0 then text = text .. " [granted, no purchased points]" end
-                local description = definition and clean(definition.overrideDescription, "") or ""
-                if description == "" and id then description = clean(call(namespace("C_Spell", "GetSpellDescription"), id), "") end
-                if description ~= "" then text = text .. " — " .. description end
+                if bonusRanks > 0 then text = text .. " [includes " .. bonusRanks .. " bonus ranks]" end
+                if definition then text = text .. " — " .. talentDescription(ctx, active.entryID, rank, definition) end
                 selected[#selected + 1] = { y = number(node.posY) or 0, x = number(node.posX) or 0, id = nodeID, text = text }
             end
         end
@@ -292,7 +413,7 @@ local function exportTree(ctx, configID, treeID, label)
         if a.x ~= b.x then return a.x < b.x end
         return a.id < b.id
     end)
-    if #selected == 0 then push(ctx, "No talents with active ranks observed; check pending-data warnings.") end
+    if #selected == 0 then push(ctx, "No active selections observed in this tree.") end
     for _, talent in ipairs(selected) do push(ctx, talent.text) end
 end
 
@@ -419,15 +540,12 @@ local function equipment(ctx)
             end
             local stats = object(call(namespace("C_Item", "GetItemStats") or GetItemStats, query))
             if stats then
-                local entries = {}
-                for _, key in ipairs(sortedKeys(stats)) do
-                    entries[#entries + 1] = clean(_G[key], key) .. "=" .. fmt(stats[key], 2)
-                end
+                local entries = itemStatEntries(ctx, stats)
                 if #entries > 0 then push(ctx, "  Item stats: " .. table.concat(entries, "; ")) end
             end
             local current, maximum = call(GetInventoryItemDurability, slotID)
             if number(maximum) and maximum > 0 then push(ctx, "  Durability: " .. fmt(current) .. "/" .. fmt(maximum)) end
-            local lines = tooltipLines(call(namespace("C_TooltipInfo", "GetInventoryItem"), "player", slotID, false))
+            local lines = equipmentTooltip(call(namespace("C_TooltipInfo", "GetInventoryItem"), "player", slotID, false))
             if #lines > 0 then
                 for _, text in ipairs(lines) do push(ctx, "  " .. text) end
             else
@@ -590,6 +708,9 @@ function NS.BuildReport(options)
         push(ctx, "Local out-of-combat snapshot; excludes decision history and combat performance.")
         push(ctx, "Equipment: currently equipped items only; excludes bags, bank, and alternate gear.")
         push(ctx, "Do not add individual item stats to the character stat totals.")
+        push(ctx, "Only SET BONUS ACTIVE entries describe enabled set effects. Inactive or unknown entries are not confirmed benefits; repeated bonuses from the same set count once.")
+        push(ctx, "Rank tooltips are requested for the current talent rank. REFERENCE ONLY descriptions are not verified rank totals and must not be multiplied automatically.")
+        push(ctx, "Repeated talent-currency IDs refer to the same point pool; do not add repeated available balances.")
         push(ctx, "Unavailable or pending does not mean zero, unlearned, or empty.")
         push(ctx, "Account, BattleTag, chat, friends, and guild data are not exported.")
         for _, message in ipairs(sortedKeys(ctx.warnings)) do push(ctx, "WARNING: " .. message) end

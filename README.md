@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.0.4](https://img.shields.io/static/v1?label=version&message=1.0.4&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.4) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](LICENSE) [![23 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=23+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.0.5](https://img.shields.io/static/v1?label=version&message=1.0.5&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.5) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](LICENSE) [![37 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=37+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -14,13 +14,13 @@
 
 Export your WoW Forever character's talents, professions, gear, and stats as plain text for AI advice.
 
-**Status: public preview.** Targets Forever interface **16001**. The addon passes 23 simulated Lua 5.1 tests, but has **not been tested in a live WoW Forever session**. Please report client-specific issues with your build number.
+**Status: public preview.** Targets Forever interface **16001**. The addon passes 37 simulated Lua 5.1 tests, but has **not been tested in a live WoW Forever session**. Please report client-specific issues with your build number.
 
 [Changelog](CHANGELOG.md)
 
 ## Install
 
-1. Download `ForeverContext-1.0.4.zip` from [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
+1. Download `ForeverContext-1.0.5.zip` from [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
 2. Close the game and extract the archive into `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Check that the final path is `AddOns/ForeverContext/ForeverContext.toc`.
 4. Start Forever and enable **ForeverContext** in the AddOns list.
@@ -49,7 +49,9 @@ No AI subscription, API key, or companion application is required by the addon. 
 - Queryable Forever Legacy trees.
 - Primary and secondary professions, current ranks, caps, and bonuses.
 - Every equipped slot: item name, ID, type, quality, item level, requirements, durability, and stats.
-- Client-provided item tooltips, including readable equip/use effects, set text, enchants, and gem IDs.
+- Client-provided item tooltips, including readable equip/use effects, enchants, and gem IDs.
+- Set bonuses explicitly marked active, inactive, or unknown, with piece requirements when available.
+- Off-hand attack values only when an off-hand weapon is confirmed; duplicate resistance aliases are collapsed when their values agree.
 - Current character stats, readable buffs, and the currently summoned pet.
 - Optional extended context: skills, weapon proficiencies, known spells, quests, and queryable reputations.
 - Your goal, coverage warnings, and a ready-to-use request to the AI.
@@ -76,7 +78,9 @@ python -m unittest discover -s tests -v
 python scripts/build_release.py
 ```
 
-The build writes `dist/ForeverContext-1.0.4.zip` with the correct addon folder. Tests use `lupa.lua51` and a simulated client. Some fixtures deliberately use Spanish game data to verify that localized client text is preserved.
+The build writes `dist/ForeverContext-1.0.5.zip` with the correct addon folder. Tests use `lupa.lua51` and a simulated client. Some fixtures deliberately use Spanish game data to verify that localized client text is preserved.
+
+An earlier v1.0.3 build produced a live character export on Forever build 70862 with an esES client. The current precision changes and minimap feature still require live verification.
 
 The API contracts were checked against [Blizzard's exported Forever UI source](https://github.com/Gethe/wow-ui-source/tree/forever), including the [Camelot talent UI](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_PlayerSpells/Camelot/ClassTalents/Blizzard_ClassTalentsFrame.lua) and [profession UI](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_ProfessionsBook/Camelot/Blizzard_ProfessionsBook.lua).
 
@@ -91,3 +95,5 @@ Bug reports, client verification, and translation improvements are welcome. Incl
 **Previously published MIT material remains MIT-licensed.** The v1.0.1 release and its code were already made available under MIT; this change does not retract those permissions, even when that code appears in a later version. The original notice is preserved in [LICENSE-MIT-v1.0.1.txt](LICENSE-MIT-v1.0.1.txt). This licensing change cannot make that existing code exclusive retroactively. GitHub's platform permissions for viewing and forking public repositories also remain unaffected.
 
 For CurseForge, select **All Rights Reserved** and include the custom license file. This is a source-available community project, not an open-source project under the new terms, and is not affiliated with Blizzard Entertainment.
+
+Current-rank descriptions use the client’s [GetTraitEntry API](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/TooltipInfoDocumentation.lua), following the rank selection used by Blizzard’s talent UI. Generic fallback descriptions are labelled **REFERENCE ONLY**; the addon never multiplies their numbers to guess a higher-rank effect.

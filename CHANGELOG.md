@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.5 — 2026-11-10
+
+- Fixed phantom off-hand damage and attack speed when no off-hand weapon is equipped. Shields are not treated as weapons; missing metadata is marked unavailable.
+- Read talent descriptions with the current-rank trait tooltip, including client-reported bonus ranks. Generic descriptions are explicitly marked unverified instead of being presented as current-rank effects.
+- Marked set bonuses as active, inactive, or unknown, using equipped-piece counts, localized client set text, and client disabled-line information. Inactive thresholds such as 3/5, 4/5, and 5/5 are no longer left unlabelled when only two pieces are equipped.
+- Collapsed equal resistance-stat aliases and retained conflicting values with a warning.
+- Cleaned two-form plural markup, removed armor duplicated as a resistance, clarified the raw client-stat label, and added guidance against adding repeated shared talent-currency balances.
+- Added 14 precision regression tests and updated documentation in all 13 languages. The minimap button is retained.
+
+Validation: 37 simulated Lua 5.1 tests passed. The corrections use cases identified in a live v1.0.3 export; verification of this new version in game is still pending.
+
 ## v1.0.4 — 2026-11-10
 
 - Added a minimap button to open or close the character export window with a left-click.
