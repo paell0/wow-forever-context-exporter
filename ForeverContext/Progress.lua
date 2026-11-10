@@ -33,6 +33,7 @@ function NS.CharacterState()
 end
 
 function NS.CharacterSettings() return NS.CharacterState().options end
+function NS.ProgressVersion() return number(NS.CharacterState().progressVersion) or 0 end
 
 function NS.CaptureSnapshot(extraTasks)
     local snapshot = {at = clean(call(date, "%Y-%m-%d %H:%M:%S")), level = number(call(UnitLevel, "player")),
@@ -41,10 +42,9 @@ function NS.CaptureSnapshot(extraTasks)
     snapshot.client, snapshot.build = clean(version), clean(build)
     snapshot.equipmentReadable = true
     for slot = 1, 19 do
-        local ok, id = pcall(GetInventoryItemID, "player", slot)
-        local restricted = type(issecretvalue) == "function" and issecretvalue(id)
-        if ok and not restricted and (id == nil or number(id)) then
-            snapshot.slots[slot] = number(id) or 0
+        local id, status = NS.ReadInventorySlot(slot)
+        if status == "known" or status == "empty" then
+            snapshot.slots[slot] = id
         else
             snapshot.equipmentReadable = false
         end
@@ -82,10 +82,7 @@ function NS.CaptureSnapshot(extraTasks)
     local group = number(call(api("C_SpecializationInfo", "GetActiveSpecGroup") or GetActiveSpecGroup)) or 1
     local configID = number(call(api("C_SpecializationInfo", "GetCombatConfigIDForSpecGroup"), group)) or number(call(api("C_ClassTalents", "GetActiveConfigID")))
     local config = configID and object(call(api("C_Traits", "GetConfigInfo"), configID))
-    local stagedFunction = api("C_Traits", "GetStagedChanges")
-    local checked, purchases, refunds, selections = false, nil, nil, nil
-    if configID and type(stagedFunction) == "function" then checked, purchases, refunds, selections = pcall(stagedFunction, configID) end
-    local staged = (object(purchases) and next(purchases)) or (object(refunds) and next(refunds)) or (object(selections) and next(selections))
+    local staged, checked = NS.HasStagedChanges(configID)
     snapshot.talentsReadable = checked and not staged and config and object(config.treeIDs) and true or false
     if snapshot.talentsReadable then
         for _, tree in ipairs(config.treeIDs) do
@@ -193,20 +190,26 @@ function NS.AcceptPlan(plan)
     state.plan.baseline = copy(state.lastExport or NS.CaptureSnapshot())
     state.plan.revision = (state.revision or 0) + 1
     state.revision = state.plan.revision
+    state.progressVersion = NS.ProgressVersion() + 1
     return true
 end
 
 function NS.ClearPlan()
     local state = NS.CharacterState()
+    if not state.plan then return end
     archivePlan(state)
     state.plan = nil
+    state.progressVersion = NS.ProgressVersion() + 1
 end
 
 function NS.MarkManualTask(index, done)
     local plan = NS.CharacterState().plan
     local task = plan and plan.tasks[index]
     if not task or task.kind ~= "MANUAL" then return false end
-    task.manualDone = done == true
+    if task.manualDone ~= (done == true) then
+        task.manualDone = done == true
+        NS.CharacterState().progressVersion = NS.ProgressVersion() + 1
+    end
     return true
 end
 

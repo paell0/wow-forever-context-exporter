@@ -21,8 +21,19 @@ local function saveOptions()
     db.extended = window.extraCheck:GetChecked() and true or false
 end
 
+local function planChanged()
+    return window.progressVersion ~= NS.ProgressVersion()
+end
+
+local function showStaleReportStatus()
+    window.text:ClearFocus()
+    window.select:Disable()
+    window.status:SetText("Plan changed. Click Generate / refresh before copying updated progress.")
+end
+
 local function selectReport()
     if not window or not window.report or window.report == "" then return end
+    if planChanged() then showStaleReportStatus(); return end
     window.text:SetFocus()
     window.text:HighlightText(0, -1)
     window.scroll:SetVerticalScroll(0)
@@ -56,6 +67,7 @@ local function collect()
     saveOptions()
     local db = settings()
     local report, pending, warnings, snapshot = NS.BuildExport(db)
+    window.progressVersion = NS.ProgressVersion()
     window.snapshot = snapshot
     window.report = report
     window.text:SetText(report)
@@ -252,7 +264,10 @@ function NS.SuspendReportWindow()
 end
 
 function NS.RestoreReportWindow()
-    if window and not inCombat() then window:Show() end
+    if window and not inCombat() then
+        window:Show()
+        if planChanged() then showStaleReportStatus() end
+    end
 end
 
 function NS.ToggleWindow()

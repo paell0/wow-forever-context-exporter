@@ -11,6 +11,8 @@
 
 Only one ForeverContext window is visible at a time. Opening **Progress plan** or **Compare items** temporarily hides the report; closing the editor returns to the same report without regenerating it. Switching between editors keeps the report hidden. Background data retries pause so they cannot take focus from your input; if loading was interrupted, click **Generate / refresh** after returning. Editors opened directly while the report is closed do not open it when dismissed. Entering combat closes the windows without restoring the report.
 
+Accepting or archiving a plan, or changing a manual checkbox, marks the restored report as outdated. Click **Generate / refresh** to include those changes; **Select all** stays disabled until the report is refreshed. Draft edits do not change accepted progress.
+
 No network connection or AI model is provided by the addon. Copy reports and plan blocks manually. Importing a plan does not apply talents, equip items, spend gold, or perform gameplay actions.
 
 ## Automatic and manual checks

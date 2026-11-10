@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.1.1](https://img.shields.io/static/v1?label=version&message=1.1.1&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.1.1) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![70 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=70+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.1.2](https://img.shields.io/static/v1?label=version&message=1.1.2&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.1.2) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![78 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=78+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -18,11 +18,11 @@ Du kannst den Bericht auch über die Schaltfläche an der Minikarte öffnen oder
 
 Der Bericht fragt Talentbeschreibungen für den aktuellen Rang ab und kennzeichnet ungeprüfte allgemeine Referenztexte. Setboni werden als aktiv, inaktiv oder unbekannt markiert. Schaden der Nebenhand wird ohne entsprechende Waffe ausgelassen. Doppelte Widerstands-Aliasse mit gleichen Werten werden zusammengeführt.
 
-Version 1.1.1 ergänzt Pläne pro Charakter, den Vergleich zweier Gegenstände, gezielte Berichte und die Überprüfung früherer Ratschläge. Unter **Progress plan** fügst du den Planblock der KI ein, prüfst ihn mit **Preview plan** und bestätigst ihn mit **Accept plan**. Überprüfbare Ziele nutzen Charakterdaten, manuelle Aufgaben haben Kontrollkästchen. Ziehe zwei Gegenstände auf **Compare items**. Wähle **Talent points**, **Gear advice**, **Next session** oder **Review plan** für den Bericht. Bestätigte Ziele und beobachtete Änderungen werden mitexportiert. [Vollständige Anleitung und Planformat auf Englisch](PROGRESS-PLAN.md).
+Version 1.1.2 ergänzt Pläne pro Charakter, den Vergleich zweier Gegenstände, gezielte Berichte und die Überprüfung früherer Ratschläge. Unter **Progress plan** fügst du den Planblock der KI ein, prüfst ihn mit **Preview plan** und bestätigst ihn mit **Accept plan**. Überprüfbare Ziele nutzen Charakterdaten, manuelle Aufgaben haben Kontrollkästchen. Ziehe zwei Gegenstände auf **Compare items**. Wähle **Talent points**, **Gear advice**, **Next session** oder **Review plan** für den Bericht. Bestätigte Ziele und beobachtete Änderungen werden mitexportiert. [Vollständige Anleitung und Planformat auf Englisch](PROGRESS-PLAN.md).
 
 ## Installation und Verwendung
 
-1. Lade `ForeverContext-1.1.1.zip` unter [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) herunter.
+1. Lade `ForeverContext-1.1.2.zip` unter [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) herunter.
 2. Schließe das Spiel und entpacke den Ordner `ForeverContext` nach `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Prüfe den Pfad `AddOns/ForeverContext/ForeverContext.toc` und aktiviere das Addon. Entferne gegebenenfalls den alten ContextoPJ-Ordner.
 4. Gib außerhalb eines Kampfes **`/fcontext`** ein.
@@ -36,7 +36,7 @@ Klasse, Volk, Stufe, Erfahrung, aktive Talente und verfügbare Punkte; Berufe un
 
 ## Status und Grenzen
 
-Öffentliche Vorabversion für Interface **16001**. **70 simulierte Lua-5.1-Tests** bestanden; noch kein Test in einer echten WoW-Forever-Sitzung.
+Öffentliche Vorabversion für Interface **16001**. **78 simulierte Lua-5.1-Tests** bestanden; noch kein Test in einer echten WoW-Forever-Sitzung.
 
 Der Charaktername wird standardmäßig ausgelassen. Das Addon überträgt keine Daten und benötigt keinen API-Schlüssel. Taschen und Bank werden nicht exportiert. Nicht übernommene Talentänderungen werden nicht als aktiv dargestellt. Fehlende Daten werden markiert: Öffne Talente/Berufe und erstelle den Bericht erneut.
 

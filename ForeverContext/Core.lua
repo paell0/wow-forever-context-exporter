@@ -1,5 +1,5 @@
 local _, NS = ...
-NS.VERSION = "1.1.1"
+NS.VERSION = "1.1.2"
 
 -- Only public addon APIs. Exporting is disabled in combat by UI.lua.
 local function secret(value)
@@ -330,10 +330,15 @@ end
 local function hasStagedChanges(configID)
     local fn = namespace("C_Traits", "GetStagedChanges")
     if type(fn) ~= "function" then return nil, false end
-    local ok, purchases, refunds, selections = pcall(fn, configID)
-    if not ok then return nil, false end
-    return (object(purchases) and next(purchases)) or (object(refunds) and next(refunds)) or (object(selections) and next(selections))
-        , true
+    local values = pack(pcall(fn, configID))
+    if not values[1] then return nil, false end
+    local staged = false
+    for index = 2, 4 do
+        local value = values[index]
+        if secret(value) or (value ~= nil and not object(value)) then return nil, false end
+        if value and next(value) then staged = true end
+    end
+    return staged, true
 end
 
 local function exportTree(ctx, configID, treeID, label)
@@ -489,28 +494,34 @@ local slots = {
     { 15, "Back" }, { 16, "Main hand" }, { 17, "Off hand" }, { 18, "Ranged / relic" }, { 19, "Tabard" },
 }
 
+local function readInventorySlot(slotID)
+    local rawLink = call(GetInventoryItemLink, "player", slotID)
+    if secret(rawLink) or type(rawLink) ~= "string" or rawLink == "" then rawLink = nil end
+    local ok, value = pcall(GetInventoryItemID, "player", slotID)
+    if not ok or secret(value) or (value ~= nil and not number(value)) then return nil, "unknown", rawLink end
+    local itemID = number(value) or (rawLink and tonumber(rawLink:match("item:(%d+)")))
+    if itemID and itemID > 0 then return itemID, "known", rawLink end
+    local textureOK, texture = pcall(GetInventoryItemTexture, "player", slotID)
+    if not textureOK or secret(texture) then return nil, "unknown", rawLink end
+    if texture or rawLink then return nil, "pending", rawLink end
+    return 0, "empty", rawLink
+end
+
 local function equipment(ctx)
     push(ctx, "Empty slots can be normal for your level and class. Item text comes from the client.")
     for _, slot in ipairs(slots) do
         local slotID, label = slot[1], slot[2]
         -- Preserve the original link only to query exact item bonuses; never export UI markup.
-        local rawLink = call(GetInventoryItemLink, "player", slotID)
-        if secret(rawLink) then rawLink = nil end
+        local itemID, state, rawLink = readInventorySlot(slotID)
         local link = clean(rawLink, "")
-        local readOK, inventoryID = pcall(GetInventoryItemID, "player", slotID)
-        local itemID = number(inventoryID)
-        if not itemID and rawLink then itemID = tonumber(rawLink:match("item:(%d+)")) end
-        if not readOK or secret(inventoryID) then
+        if state == "unknown" then
             push(ctx, label .. ": read unavailable.")
             warn(ctx, "Unable to read an equipment slot; do not interpret it as empty.")
-        elseif not itemID then
-            local texture = call(GetInventoryItemTexture, "player", slotID)
-            if secret(texture) or texture then
-                push(ctx, label .. ": occupied; data pending.")
-                pending(ctx, "slot:" .. slotID)
-            else
-                push(ctx, label .. ": empty.")
-            end
+        elseif state == "pending" then
+            push(ctx, label .. ": occupied; data pending.")
+            pending(ctx, "slot:" .. slotID)
+        elseif state == "empty" then
+            push(ctx, label .. ": empty.")
         else
             local query = rawLink or itemID
             local name, _, quality, itemLevel, requiredLevel, itemType, subtype = call(namespace("C_Item", "GetItemInfo") or GetItemInfo, query)
@@ -786,3 +797,5 @@ NS.Clean = clean
 NS.SafeCall = call
 NS.ReadNumber = number
 NS.ReadTable = object
+NS.ReadInventorySlot = readInventorySlot
+NS.HasStagedChanges = hasStagedChanges

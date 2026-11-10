@@ -395,6 +395,117 @@ MANUAL|Remember me]])
         self.lua.execute('NS.OpenComparisonWindow(); ForeverContextComparisonWindow.close.scripts.OnClick()')
         self.assertIsNone(self.lua.globals().ForeverContextWindow)
 
+    def test_pending_equipment_is_not_an_empty_slot_or_a_removal(self):
+        self.ns.CommitExport(self.ns.CaptureSnapshot())
+        self.lua.execute('GetInventoryItemID=function() return nil end; GetInventoryItemLink=function() return nil end')
+        snapshot = self.ns.CaptureSnapshot()
+        self.assertIsNone(snapshot.slots[16])
+        self.assertFalse(snapshot.equipmentReadable)
+        task = self.plan('FCPLAN/1\nSLOT|16|Equip a weapon').tasks[1]
+        self.assertEqual(self.ns.EvaluateTask(task, snapshot)[0], 'UNKNOWN')
+        self.assertNotIn('item 12345 -> empty', self.ns.ProgressText(snapshot))
+        report, pending, _, _ = self.ns.BuildExport(self.lua.table_from({'mode':'gear'}))
+        self.assertIn('Main hand: occupied; data pending.', report)
+        self.assertGreater(pending, 0)
+
+    def test_readable_item_link_resolves_snapshot_when_numeric_id_is_pending(self):
+        self.lua.execute('GetInventoryItemID=function() return nil end')
+        snapshot = self.ns.CaptureSnapshot()
+        self.assertEqual(snapshot.slots[16], 12345)
+        task = self.plan('FCPLAN/1\nITEM|12345|Keep sword equipped').tasks[1]
+        self.assertEqual(self.ns.EvaluateTask(task, snapshot)[0], 'DONE')
+
+    def test_unavailable_texture_read_cannot_confirm_empty_equipment(self):
+        self.lua.execute('GetInventoryItemID=function() return nil end; GetInventoryItemLink=function() return nil end; GetInventoryItemTexture=function() error("unavailable") end')
+        snapshot = self.ns.CaptureSnapshot()
+        self.assertIsNone(snapshot.slots[1])
+        report, _, warnings, _ = self.ns.BuildExport(self.lua.table_from({'mode':'gear'}))
+        self.assertIn('Head: read unavailable.', report)
+        self.assertGreater(warnings, 0)
+
+    def test_restricted_or_malformed_staged_lists_are_not_confirmed_talents(self):
+        task = self.plan('FCPLAN/1\nTALENT|10|1|Commit talent').tasks[1]
+        for position in range(3):
+            for value in ('{secret=true}', 'false', '"unavailable"'):
+                with self.subTest(position=position, value=value):
+                    lists = ['nil', 'nil', 'nil']
+                    lists[position] = value
+                    self.lua.execute('C_Traits.GetStagedChanges=function() return ' + ','.join(lists) + ' end')
+                    snapshot = self.ns.CaptureSnapshot()
+                    self.assertFalse(snapshot.talentsReadable)
+                    self.assertEqual(self.ns.EvaluateTask(task, snapshot)[0], 'UNKNOWN')
+                    report, _, _, _ = self.ns.BuildExport(self.lua.table_from({'mode':'talents'}))
+                    self.assertIn('unable to verify whether there are unapplied changes', report)
+                    self.assertNotIn('[Armas] Golpe mejorado', report)
+
+    def test_manual_task_change_marks_restored_report_stale_until_refresh(self):
+        self.ns.AcceptPlan(self.plan('FCPLAN/1\nMANUAL|Visit dungeon'))
+        self.lua.execute('NS.OpenReport(); reportReference=NS.CharacterState().lastExport; baseline=NS.CharacterState().plan.baseline; NS.OpenPlanWindow()')
+        self.assertTrue(self.ns.MarkManualTask(1, True))
+        g = self.lua.globals()
+        g.ForeverContextPlanWindow.close.scripts.OnClick()
+        self.assertIn('Plan changed.', g.ForeverContextWindow.status.value)
+        self.assertFalse(g.ForeverContextWindow.select.enabled)
+        self.assertTrue(self.lua.eval('reportReference == NS.CharacterState().lastExport'))
+        g.ForeverContextWindow.select.scripts.OnClick()
+        self.assertIn('Plan changed.', g.ForeverContextWindow.status.value)
+        g.ForeverContextWindow.generate.scripts.OnClick()
+        self.assertIn('[DONE] Visit dungeon', g.ForeverContextWindow.report)
+        self.assertTrue(g.ForeverContextWindow.select.enabled)
+        self.assertTrue(self.lua.eval('baseline == NS.CharacterState().plan.baseline'))
+        self.lua.execute('NS.OpenPlanWindow(); NS.MarkManualTask(1,true); ForeverContextPlanWindow.close.scripts.OnClick()')
+        self.assertTrue(g.ForeverContextWindow.select.enabled)
+
+    def test_accepting_or_archiving_plan_also_invalidates_the_existing_report(self):
+        self.lua.execute('NS.OpenReport(); NS.OpenPlanWindow()')
+        self.ns.AcceptPlan(self.plan('FCPLAN/1\nMANUAL|A new task'))
+        g = self.lua.globals()
+        g.ForeverContextPlanWindow.close.scripts.OnClick()
+        self.assertFalse(g.ForeverContextWindow.select.enabled)
+        g.ForeverContextWindow.generate.scripts.OnClick()
+        self.lua.execute('NS.OpenPlanWindow(); NS.ClearPlan(); ForeverContextPlanWindow.close.scripts.OnClick()')
+        self.assertIn('Plan changed.', g.ForeverContextWindow.status.value)
+        self.assertFalse(g.ForeverContextWindow.select.enabled)
+        g.ForeverContextWindow.generate.scripts.OnClick()
+        self.assertIn('No plan accepted.', g.ForeverContextWindow.report)
+
+    def test_typing_draft_does_not_rescan_character_on_each_keystroke(self):
+        self.lua.execute('''
+            snapshotCalls=0
+            local capture=NS.CaptureSnapshot
+            NS.CaptureSnapshot=function(...) snapshotCalls=snapshotCalls+1; return capture(...) end
+            NS.OpenPlanWindow()
+            callsBeforeTyping=snapshotCalls
+            for i=1,30 do
+                ForeverContextPlanWindow.input:SetText(string.rep('x',i))
+                ForeverContextPlanWindow.input.scripts.OnTextChanged(ForeverContextPlanWindow.input,true)
+            end
+        ''')
+        g = self.lua.globals()
+        self.assertEqual(g.snapshotCalls, g.callsBeforeTyping)
+        self.assertFalse(g.ForeverContextPlanWindow.accept.enabled)
+        self.assertEqual(self.ns.CharacterState().draftText, 'x' * 30)
+
+    def test_editing_preview_discards_it_once_and_preserves_accepted_plan(self):
+        self.ns.AcceptPlan(self.plan('FCPLAN/1\nMANUAL|Accepted task'))
+        self.lua.execute('''
+            NS.OpenPlanWindow()
+            ForeverContextPlanWindow.example.scripts.OnClick()
+            ForeverContextPlanWindow.previewButton.scripts.OnClick()
+            snapshotCalls=0
+            local capture=NS.CaptureSnapshot
+            NS.CaptureSnapshot=function(...) snapshotCalls=snapshotCalls+1; return capture(...) end
+            for i=1,10 do
+                ForeverContextPlanWindow.input:SetText('invalid draft ' .. i)
+                ForeverContextPlanWindow.input.scripts.OnTextChanged(ForeverContextPlanWindow.input,true)
+            end
+        ''')
+        g = self.lua.globals()
+        self.assertEqual(g.snapshotCalls, 1)
+        self.assertFalse(g.ForeverContextPlanWindow.accept.enabled)
+        self.assertTrue(g.ForeverContextPlanWindow.rows[1].check.enabled)
+        self.assertEqual(self.ns.CharacterState().plan.tasks[1].label, 'Accepted task')
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

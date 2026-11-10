@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.2 — 2026-11-10
+
+- Use the same equipment-slot reader for reports and progress snapshots. A pending item ID no longer records an occupied slot as empty or invents an equipment removal; a readable item link can resolve its ID. Failed texture reads cannot confirm an empty slot.
+- Treat restricted or malformed staged-talent data as unverifiable in both exports and progress checks, instead of assuming there are no unapplied changes.
+- Mark an existing report outdated after accepting/archiving a plan or changing a manual task. Returning preserves the reference snapshot and asks for Generate / refresh; Select all stays disabled until refreshed.
+- Stop scanning equipment, professions and talents on every draft keystroke. Editing a preview invalidates it once while retaining the accepted plan.
+- Added eight regression checks, including background-report consistency and all three staged-talent lists. All eight detect the previous v1.1.1 behavior.
+
+Validation: 78 simulated Lua 5.1 tests passed. Live verification remains pending.
+
 ## v1.1.1 — 2026-11-10
 
 - Fixed Progress plan and Compare items appearing underneath the report's scroll text. Editors now use a higher frame strata and an opaque background.

@@ -148,8 +148,13 @@ local function makePlanWindow()
     frame.input:SetScript("OnTextChanged", function(self, userInput)
         if userInput then
             NS.CharacterState().draftText = self:GetText()
+            local hadPreview = frame.preview ~= nil
             frame.preview = nil
-            renderPlan()
+            -- Only discard rendered preview rows once. Typing must not query
+            -- every equipment slot and talent node on each keystroke.
+            if hadPreview then renderPlan() end
+            frame.accept:Disable()
+            frame.status:SetText("Draft edited. Click Preview plan to validate; the active plan is unchanged.")
         end
     end)
     frame.previewButton = button(frame, "Preview plan", 20, -250, 135, function()
