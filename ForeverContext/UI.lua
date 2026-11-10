@@ -203,13 +203,19 @@ local function open()
     generate()
 end
 
+function NS.ToggleWindow()
+    if window and window:IsShown() then window:Hide() else open() end
+end
+
 SLASH_FOREVER_CONTEXT1 = "/fcontext"
 SLASH_FOREVER_CONTEXT2 = "/forevercontext"
 SLASH_FOREVER_CONTEXT3 = "/pjia"
 SlashCmdList["FOREVER_CONTEXT"] = function(message)
     message = (message or ""):lower():match("^%s*(.-)%s*$")
     if message == "help" then
-        say("/fcontext opens and generates a report. Optionally enter your goal. Press Ctrl+C and paste into your AI. Generate refreshes the data.")
+        say("/fcontext opens and generates a report. /fcontext minimap hides or shows the minimap button. Press Ctrl+C and paste into your AI.")
+    elseif message == "minimap" then
+        NS.ToggleMinimap()
     else
         open()
     end
@@ -221,7 +227,7 @@ events:RegisterEvent("PLAYER_REGEN_DISABLED")
 events:SetScript("OnEvent", function(_, event)
     if event == "PLAYER_LOGIN" then
         settings()
-        say("Ready. Type /fcontext to copy your character context.")
+        say("Ready. Click the minimap button or type /fcontext to export your character.")
     elseif event == "PLAYER_REGEN_DISABLED" and window and window:IsShown() then
         window:Hide()
         say("Window closed on entering combat. Open it again with /fcontext afterward.")

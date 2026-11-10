@@ -168,6 +168,30 @@ local function newWidget(name)
     return w
 end
 function widget:SetScript(name, fn) self.scripts[name] = fn end
+function widget:HookScript(name, fn)
+    local previous = self.scripts[name]
+    self.scripts[name] = function(self, ...)
+        if previous then previous(self, ...) end
+        fn(self, ...)
+    end
+end
+function widget:SetPoint(...) self.point = {...} end
+function widget:ClearAllPoints() self.point = nil end
+function widget:GetCenter() return self.centerX or 500, self.centerY or 500 end
+function widget:GetEffectiveScale() return self.scale or 1 end
+function widget:GetFrameLevel() return self.frameLevel or 0 end
+function widget:SetFrameLevel(value) self.frameLevel = value end
+function widget:RegisterForClicks(...) self.clicks = {...} end
+function widget:SetHighlightTexture(path) assert(self.kind == 'Button'); self.highlight = path end
+function widget:CreateTexture()
+    local texture = newWidget()
+    texture.kind = 'Texture'
+    return texture
+end
+function widget:SetTexture(path) assert(self.kind == 'Texture'); self.texture = path end
+function widget:SetTexCoord(...) assert(self.kind == 'Texture'); self.texcoord = {...} end
+function widget:SetOwner(owner, anchor) self.owner, self.anchor = owner, anchor end
+function widget:AddLine(text) self.lines = self.lines or {}; table.insert(self.lines, text) end
 function widget:RegisterEvent(name) self.events[name] = true end
 function widget:SetSize(w, h) self.width = w; self.height = h end
 function widget:SetWidth(w) self.width = w end
@@ -190,11 +214,17 @@ function widget:HighlightText() self.selected = true end
 function widget:SetVerticalScroll(y) assert(self.kind == "ScrollFrame"); self.scroll = y end
 function widget:GetVerticalScroll() assert(self.kind == "ScrollFrame"); return self.scroll end
 function widget:SetScrollChild(child) assert(self.kind == "ScrollFrame"); self.child = child end
-for _, method in ipairs({"SetPoint", "SetFrameStrata", "SetClampedToScreen", "SetMovable", "EnableMouse", "RegisterForDrag", "StartMoving", "StopMovingOrSizing", "SetBackdrop", "SetBackdropColor", "SetBackdropBorderColor", "SetAutoFocus", "SetMaxLetters", "SetMultiLine", "SetFontObject", "SetTextInsets", "SetCursorPosition", "SetJustifyH", "SetScale"}) do
+for _, method in ipairs({"SetFrameStrata", "SetClampedToScreen", "SetMovable", "EnableMouse", "RegisterForDrag", "StartMoving", "StopMovingOrSizing", "SetBackdrop", "SetBackdropColor", "SetBackdropBorderColor", "SetAutoFocus", "SetMaxLetters", "SetMultiLine", "SetFontObject", "SetTextInsets", "SetCursorPosition", "SetJustifyH", "SetScale"}) do
     widget[method] = function() end
 end
 UIParent = newWidget("UIParent")
 UIParent:SetSize(1920, 1080)
+Minimap = newWidget('Minimap')
+Minimap.kind = 'Minimap'
+Minimap:SetSize(198, 198)
+GameTooltip = newWidget('GameTooltip')
+cursorX, cursorY = 600, 500
+function GetCursorPosition() return cursorX, cursorY end
 function CreateFrame(kind, name, parent, template)
     -- Independent client contracts: reject invented types/templates rather than
     -- silently accepting them, as the original permissive mock did.
@@ -398,9 +428,83 @@ class AddonTests(unittest.TestCase):
         self.assertIn('## Interface: 16001', toc)
         self.assertIn('## SavedVariables: ForeverContextDB', toc)
         files = [line for line in toc.splitlines() if line and not line.startswith('#')]
-        self.assertEqual(files, ['Core.lua', 'UI.lua'])
+        self.assertEqual(files, ['Core.lua', 'UI.lua', 'Minimap.lua'])
         for file in files:
             self.assertTrue((ADDON / file).is_file())
+
+    def start_minimap(self):
+        self.load('UI.lua')
+        self.load('Minimap.lua')
+        self.lua.execute('dispatch("PLAYER_LOGIN")')
+
+    def test_minimap_button_opens_closes_and_explains_controls(self):
+        self.start_minimap()
+        g = self.lua.globals()
+        button = g.ForeverContextMinimapButton
+        self.assertTrue(button.shown)
+        self.assertIn('INV_Misc_Note_01', button.icon.texture)
+        self.assertIsNone(button.scripts.OnUpdate)
+        self.lua.execute('ForeverContextMinimapButton.scripts.OnEnter(ForeverContextMinimapButton)')
+        self.assertEqual(g.GameTooltip.value, 'ForeverContext')
+        self.assertIn('/fcontext minimap', g.GameTooltip.lines[3])
+        self.lua.execute('ForeverContextMinimapButton.scripts.OnClick(ForeverContextMinimapButton)')
+        self.assertTrue(g.ForeverContextWindow.shown)
+        self.assertIn('REQUEST TO THE AI', g.ForeverContextWindow.report)
+        self.lua.execute('ForeverContextMinimapButton.scripts.OnClick(ForeverContextMinimapButton)')
+        self.assertFalse(g.ForeverContextWindow.shown)
+        total = len(g.frames)
+        self.lua.execute('dispatch("PLAYER_LOGIN")')
+        self.assertEqual(len(g.frames), total)
+
+    def test_minimap_drag_saves_scaled_cursor_angle_and_tracks_resize(self):
+        self.start_minimap()
+        g = self.lua.globals()
+        self.lua.execute('Minimap.scale = 0.5; cursorX = 250; cursorY = 300; ForeverContextMinimapButton.scripts.OnDragStart(ForeverContextMinimapButton)')
+        self.assertAlmostEqual(g.ForeverContextDB.minimap.angle, 90)
+        self.assertAlmostEqual(g.ForeverContextMinimapButton.point[4], 0)
+        self.assertAlmostEqual(g.ForeverContextMinimapButton.point[5], 107)
+        self.lua.execute('ForeverContextMinimapButton.scripts.OnDragStop(ForeverContextMinimapButton)')
+        self.assertIsNone(g.ForeverContextMinimapButton.scripts.OnUpdate)
+        self.lua.execute('Minimap:SetSize(300, 300); Minimap.scripts.OnSizeChanged(Minimap)')
+        self.assertAlmostEqual(g.ForeverContextMinimapButton.point[5], 158)
+
+    def test_minimap_restores_position_and_visibility_preferences(self):
+        self.lua.execute('ForeverContextDB = {minimap = {angle = 90, hide = true}}')
+        self.start_minimap()
+        g = self.lua.globals()
+        self.assertFalse(g.ForeverContextMinimapButton.shown)
+        self.assertAlmostEqual(g.ForeverContextMinimapButton.point[5], 107)
+        self.lua.execute('SlashCmdList.FOREVER_CONTEXT("minimap")')
+        self.assertTrue(g.ForeverContextMinimapButton.shown)
+        self.assertFalse(g.ForeverContextDB.minimap.hide)
+        self.lua.execute('SlashCmdList.FOREVER_CONTEXT("minimap")')
+        self.assertFalse(g.ForeverContextMinimapButton.shown)
+        self.assertTrue(g.ForeverContextDB.minimap.hide)
+
+    def test_minimap_combat_stops_drag_and_blocks_export(self):
+        self.start_minimap()
+        g = self.lua.globals()
+        self.lua.execute('ForeverContextMinimapButton.scripts.OnDragStart(ForeverContextMinimapButton); combat = true; dispatch("PLAYER_REGEN_DISABLED")')
+        self.assertFalse(g.ForeverContextMinimapButton.dragging)
+        self.assertIsNone(g.ForeverContextMinimapButton.scripts.OnUpdate)
+        self.lua.execute('ForeverContextMinimapButton.scripts.OnClick(ForeverContextMinimapButton)')
+        self.assertIsNone(g.ForeverContextWindow)
+        self.assertIn('Leave combat', g.messages[len(g.messages)])
+
+    def test_minimap_missing_keeps_slash_export_available(self):
+        self.lua.execute('Minimap = nil')
+        self.start_minimap()
+        self.lua.execute('SlashCmdList.FOREVER_CONTEXT("")')
+        self.assertTrue(self.lua.globals().ForeverContextWindow.shown)
+        self.assertIsNone(self.lua.globals().ForeverContextMinimapButton)
+
+    def test_minimap_handles_square_shape_and_invalid_saved_angle(self):
+        self.lua.execute('ForeverContextDB = {minimap = {angle = 0/0}}; function GetMinimapShape() return "SQUARE" end')
+        self.start_minimap()
+        g = self.lua.globals()
+        self.assertEqual(g.ForeverContextDB.minimap.angle, 225)
+        self.assertAlmostEqual(g.ForeverContextMinimapButton.point[4], -107)
+        self.assertAlmostEqual(g.ForeverContextMinimapButton.point[5], -107)
 
 
 if __name__ == '__main__':

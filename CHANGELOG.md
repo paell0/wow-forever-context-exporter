@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.0.4 — 2026-11-10
+
+- Added a minimap button to open or close the character export window with a left-click.
+- Added dragging around the minimap with a saved position, including support for square minimaps.
+- Added `/fcontext minimap` to hide or show the button; visibility is saved between sessions.
+- Added an English tooltip explaining the controls. No additional addon libraries are required.
+- Updated all 13 READMEs and added six minimap interaction and persistence tests.
+
+Validation: 23 simulated Lua 5.1 tests passed. In-game verification of this version is still pending.
+
 ## v1.0.3 — 2026-11-10
 
 - Fixed an invalid scroll-frame type and template name that stopped the export window from loading completely.
