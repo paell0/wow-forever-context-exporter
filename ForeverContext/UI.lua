@@ -20,7 +20,7 @@ local function selectReport()
     if not window or not window.report or window.report == "" then return end
     window.text:SetFocus()
     window.text:HighlightText(0, -1)
-    window.scrolel:SetVerticalScrolel(0)
+    window.scroll:SetVerticalScroll(0)
     window.status:SetText("All selected. Press Ctrl+C, then paste into your AI with Ctrl+V.")
 end
 
@@ -53,7 +53,7 @@ local function collect()
     window.report = report
     window.text:SetText(report)
     window.text:SetCursorPosition(0)
-    window.scrolel:SetVerticalScrolel(0)
+    window.scroll:SetVerticalScroll(0)
     lastPending, lastWarnings = pending, warnings
     window.counter:SetText(string.format("%d bytes of text", #report))
     return true
@@ -146,10 +146,11 @@ local function createWindow()
     frame.panel:SetPoint("BOTTOMRIGHT", -18, 91)
     frame.panel:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
     frame.panel:SetBackdropColor(0.015, 0.02, 0.03, 1)
-    frame.scrolel = CreateFrame("ScrolelFrame", "ForeverContextScrolel", frame, "UIPanelScrolelFrameTemplate")
-    frame.scrolel:SetPoint("TOPLEFT", frame.panel, "TOPLEFT", 10, -10)
-    frame.scrolel:SetPoint("BOTTOMRIGHT", frame.panel, "BOTTOMRIGHT", -30, 10)
-    frame.text = CreateFrame("EditBox", "ForeverContextExportText", frame.scrolel)
+    -- Keep client frame, template, and method identifiers unchanged when translating labels.
+    frame.scroll = CreateFrame("ScrollFrame", "ForeverContextScroll", frame, "UIPanelScrollFrameTemplate")
+    frame.scroll:SetPoint("TOPLEFT", frame.panel, "TOPLEFT", 10, -10)
+    frame.scroll:SetPoint("BOTTOMRIGHT", frame.panel, "BOTTOMRIGHT", -30, 10)
+    frame.text = CreateFrame("EditBox", "ForeverContextExportText", frame.scroll)
     frame.text:SetMultiLine(true)
     frame.text:SetAutoFocus(false)
     frame.text:SetFontObject(ChatFontNormal)
@@ -157,7 +158,7 @@ local function createWindow()
     frame.text:SetHeight(400)
     frame.text:SetMaxLetters(0)
     frame.text:SetTextInsets(0, 0, 0, 0)
-    frame.scrolel:SetScrolelChild(frame.text)
+    frame.scroll:SetScrollChild(frame.text)
     frame.text:SetScript("OnEscapePressed", function() frame:Hide() end)
     frame.text:SetScript("OnTextChanged", function(self, userInput)
         if userInput and frame.report and self:GetText() ~= frame.report then
@@ -166,11 +167,11 @@ local function createWindow()
         end
     end)
     frame.text:SetScript("OnCursorChanged", function(_, _, y, _, height)
-        local top = frame.scrolel:GetVerticalScrolel()
+        local top = frame.scroll:GetVerticalScroll()
         local cursor = -y
-        local visible = frame.scrolel:GetHeight()
-        if cursor < top then frame.scrolel:SetVerticalScrolel(math.max(0, cursor))
-        elseif cursor + height > top + visible then frame.scrolel:SetVerticalScrolel(math.max(0, cursor + height - visible)) end
+        local visible = frame.scroll:GetHeight()
+        if cursor < top then frame.scroll:SetVerticalScroll(math.max(0, cursor))
+        elseif cursor + height > top + visible then frame.scroll:SetVerticalScroll(math.max(0, cursor + height - visible)) end
     end)
     frame.generate = button(frame, "Generate / refresh", 165, "BOTTOMLEFT", frame, "BOTTOMLEFT", 20, 51, generate)
     frame.select = button(frame, "Select all", 150, "LEFT", frame.generate, "RIGHT", 12, 0, selectReport)

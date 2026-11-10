@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.0.2](https://img.shields.io/static/v1?label=version&message=1.0.2&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.2) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![15 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=15+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.0.3](https://img.shields.io/static/v1?label=version&message=1.0.3&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.3) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![17 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=17+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -16,7 +16,7 @@ Esporta talenti, professioni, equipaggiamento e statistiche del tuo personaggio 
 
 ## Installazione e utilizzo
 
-1. Scarica `ForeverContext-1.0.2.zip` da [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
+1. Scarica `ForeverContext-1.0.3.zip` da [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
 2. Chiudi il gioco ed estrai la cartella `ForeverContext` in `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Verifica il percorso `AddOns/ForeverContext/ForeverContext.toc` e attiva l’addon. Se hai installato il vecchio ContextoPJ, rimuovi prima la sua cartella.
 4. Fuori dal combattimento, digita **`/fcontext`**.
@@ -30,7 +30,7 @@ Classe, razza, livello, esperienza, talenti attivi e punti disponibili; professi
 
 ## Stato e limiti
 
-Anteprima pubblica per l’interfaccia **16001**. Superati **15 test simulati con Lua 5.1**; l’addon non è ancora stato provato in una sessione reale di WoW Forever.
+Anteprima pubblica per l’interfaccia **16001**. Superati **17 test simulati con Lua 5.1**; l’addon non è ancora stato provato in una sessione reale di WoW Forever.
 
 Il nome del personaggio è escluso per impostazione predefinita. L’addon non trasmette dati e non richiede chiavi API. Borse e banca non sono incluse. Le modifiche ai talenti non applicate non vengono presentate come attive. I dati mancanti sono segnalati: apri Talenti/Professioni e genera di nuovo il rapporto.
 

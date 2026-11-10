@@ -161,7 +161,7 @@ DEFAULT_CHAT_FRAME = {AddMessage = function(_, message) messages[#messages + 1] 
 frames = {}
 local widget = {}
 local function newWidget(name)
-    local w = {scripts = {}, events = {}, shown = true, enabled = true, value = "", width = 800, height = 600, scrolel = 0}
+    local w = {scripts = {}, events = {}, shown = true, enabled = true, value = "", width = 800, height = 600, scroll = 0}
     setmetatable(w, {__index = widget})
     if name then _G[name] = w end
     frames[#frames + 1] = w
@@ -187,16 +187,25 @@ function widget:Disable() self.enabled = false end
 function widget:SetFocus() self.focus = true end
 function widget:ClearFocus() self.focus = false; if self.scripts.OnEditFocusLost then self.scripts.OnEditFocusLost(self) end end
 function widget:HighlightText() self.selected = true end
-function widget:SetVerticalScrolel(y) self.scrolel = y end
-function widget:GetVerticalScrolel() return self.scrolel end
-function widget:SetScrolelChild(child) self.child = child end
+function widget:SetVerticalScroll(y) assert(self.kind == "ScrollFrame"); self.scroll = y end
+function widget:GetVerticalScroll() assert(self.kind == "ScrollFrame"); return self.scroll end
+function widget:SetScrollChild(child) assert(self.kind == "ScrollFrame"); self.child = child end
 for _, method in ipairs({"SetPoint", "SetFrameStrata", "SetClampedToScreen", "SetMovable", "EnableMouse", "RegisterForDrag", "StartMoving", "StopMovingOrSizing", "SetBackdrop", "SetBackdropColor", "SetBackdropBorderColor", "SetAutoFocus", "SetMaxLetters", "SetMultiLine", "SetFontObject", "SetTextInsets", "SetCursorPosition", "SetJustifyH", "SetScale"}) do
     widget[method] = function() end
 end
 UIParent = newWidget("UIParent")
 UIParent:SetSize(1920, 1080)
 function CreateFrame(kind, name, parent, template)
+    -- Independent client contracts: reject invented types/templates rather than
+    -- silently accepting them, as the original permissive mock did.
+    local kinds = {Frame=true, Button=true, CheckButton=true, ScrollFrame=true, EditBox=true}
+    local templates = {BackdropTemplate=true, UIPanelButtonTemplate=true,
+        UIPanelCloseButton=true, InputBoxTemplate=true, UICheckButtonTemplate=true,
+        UIPanelScrollFrameTemplate=true}
+    assert(kinds[kind], "Unknown frame type: " .. tostring(kind))
+    assert(not template or templates[template], "Unknown frame template: " .. tostring(template))
     local w = newWidget(name)
+    w.kind, w.template = kind, template
     if kind == "CheckButton" then w.Text = newWidget() end
     return w
 end
@@ -357,6 +366,32 @@ class AddonTests(unittest.TestCase):
         self.assertIsNone(frame.scripts.OnUpdate)
         self.assertTrue(frame.select.enabled)
         self.assertIn('pending data', frame.status.value)
+
+    def test_ui_builds_scrollable_report_and_footer_controls(self):
+        self.load('UI.lua')
+        self.lua.execute('SlashCmdList.FOREVER_CONTEXT("")')
+        frame = self.lua.globals().ForeverContextWindow
+        self.assertEqual(frame.scroll.kind, 'ScrollFrame')
+        self.assertEqual(frame.scroll.template, 'UIPanelScrollFrameTemplate')
+        self.assertEqual(frame.scroll.child.value, frame.report)
+        self.assertIn('REQUEST TO THE AI', frame.report)
+        self.assertEqual(frame.generate.value, 'Generate / refresh')
+        self.assertEqual(frame.select.value, 'Select all')
+        self.assertTrue(frame.generate.enabled)
+        self.assertTrue(frame.select.enabled)
+        self.assertIn('Ctrl+C', frame.status.value)
+
+    def test_ui_scrolls_and_selects_long_report(self):
+        self.lua.execute('C_Spell.GetSpellDescription = function() return string.rep("Long description ", 12000) end')
+        self.load('UI.lua')
+        self.lua.execute('SlashCmdList.FOREVER_CONTEXT("")')
+        frame = self.lua.globals().ForeverContextWindow
+        self.assertGreater(len(frame.text.value), 200000)
+        self.lua.execute('ForeverContextWindow.text.scripts.OnCursorChanged(nil, 0, -1200, 1, 16)')
+        self.assertGreater(frame.scroll.scroll, 0)
+        self.lua.execute('ForeverContextWindow.select.scripts.OnClick()')
+        self.assertEqual(frame.scroll.scroll, 0)
+        self.assertTrue(frame.text.selected)
 
     def test_toc_load_order_and_saved_variables(self):
         toc = (ADDON / 'ForeverContext.toc').read_text(encoding='utf-8')
