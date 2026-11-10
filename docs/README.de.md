@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.0.1](https://img.shields.io/static/v1?label=version&message=1.0.1&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.1) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![MIT license](https://img.shields.io/static/v1?label=license&message=MIT&color=2EA66F&labelColor=162033&style=for-the-badge)](../LICENSE) [![15 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=15+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.0.2](https://img.shields.io/static/v1?label=version&message=1.0.2&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.2) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![15 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=15+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -16,7 +16,7 @@ Exportiere Talente, Berufe, Ausrüstung und Werte deines WoW-Forever-Charakters 
 
 ## Installation und Verwendung
 
-1. Lade `ForeverContext-1.0.1.zip` unter [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) herunter.
+1. Lade `ForeverContext-1.0.2.zip` unter [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) herunter.
 2. Schließe das Spiel und entpacke den Ordner `ForeverContext` nach `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Prüfe den Pfad `AddOns/ForeverContext/ForeverContext.toc` und aktiviere das Addon. Entferne gegebenenfalls den alten ContextoPJ-Ordner.
 4. Gib außerhalb eines Kampfes **`/fcontext`** ein.
@@ -34,4 +34,6 @@ Klasse, Volk, Stufe, Erfahrung, aktive Talente und verfügbare Punkte; Berufe un
 
 Der Charaktername wird standardmäßig ausgelassen. Das Addon überträgt keine Daten und benötigt keinen API-Schlüssel. Taschen und Bank werden nicht exportiert. Nicht übernommene Talentänderungen werden nicht als aktiv dargestellt. Fehlende Daten werden markiert: Öffne Talente/Berufe und erstelle den Bericht erneut.
 
-Bedienelemente und Berichtsbeschriftungen sind englisch; Spieltexte behalten die Sprache des Clients. Dies ist eine Übersetzung der Dokumentation. Entwicklung und vollständige Grenzen stehen im [Haupt-README](../README.md). Lizenz: [MIT](../LICENSE).
+Bedienelemente und Berichtsbeschriftungen sind englisch; Spieltexte behalten die Sprache des Clients. Dies ist eine Übersetzung der Dokumentation. Entwicklung und vollständige Grenzen stehen im [Haupt-README](../README.md). Lizenz: [All Rights Reserved](../LICENSE).
+
+Alle Rechte an neuem Material ab v1.0.2 vorbehalten. Erlaubt sind die persönliche Nutzung unveränderter offizieller Versionen und Änderungen ausschließlich zur Einreichung eines PR im offiziellen Repository; über die Annahme entscheidet der Maintainer. Kommerzielle Verwertung und die Veröffentlichung eigener Varianten sind nicht gestattet. Bereits unter MIT veröffentlichtes Material behält diese Rechte; die Änderung widerruft sie nicht. Vollständige englische Bedingungen: [LICENSE](../LICENSE).

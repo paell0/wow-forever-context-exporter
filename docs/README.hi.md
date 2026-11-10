@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.0.1](https://img.shields.io/static/v1?label=version&message=1.0.1&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.1) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![MIT license](https://img.shields.io/static/v1?label=license&message=MIT&color=2EA66F&labelColor=162033&style=for-the-badge)](../LICENSE) [![15 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=15+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.0.2](https://img.shields.io/static/v1?label=version&message=1.0.2&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.2) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![15 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=15+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -16,7 +16,7 @@
 
 ## इंस्टॉल करना और उपयोग
 
-1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) से `ForeverContext-1.0.1.zip` डाउनलोड करें।
+1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) से `ForeverContext-1.0.2.zip` डाउनलोड करें।
 2. गेम बंद करें और `ForeverContext` फ़ोल्डर को `World of Warcraft/_forever_/Interface/AddOns/` में निकालें।
 3. सुनिश्चित करें कि पथ `AddOns/ForeverContext/ForeverContext.toc` है और ऐडऑन चालू करें। पुराना ContextoPJ इंस्टॉल हो तो उसका फ़ोल्डर पहले हटा दें।
 4. युद्ध के बाहर **`/fcontext`** लिखें।
@@ -34,4 +34,6 @@
 
 पात्र का नाम डिफ़ॉल्ट रूप से शामिल नहीं होता। ऐडऑन डेटा नहीं भेजता और API कुंजी नहीं माँगता। बैग और बैंक शामिल नहीं हैं। लागू न किए गए प्रतिभा बदलाव सक्रिय नहीं माने जाते। अधूरे डेटा के लिए चेतावनी मिलती है; प्रतिभा या पेशे की विंडो खोलकर रिपोर्ट फिर बनाएँ।
 
-ऐडऑन के नियंत्रण और रिपोर्ट लेबल अंग्रेज़ी में हैं। गेम के नाम और विवरण क्लाइंट की भाषा में रहते हैं। यह केवल दस्तावेज़ का अनुवाद है, हिन्दी गेम क्लाइंट समर्थन का दावा नहीं। विकास और पूरी सीमाओं के लिए [अंग्रेज़ी README](../README.md) देखें। लाइसेंस: [MIT](../LICENSE)।
+ऐडऑन के नियंत्रण और रिपोर्ट लेबल अंग्रेज़ी में हैं। गेम के नाम और विवरण क्लाइंट की भाषा में रहते हैं। यह केवल दस्तावेज़ का अनुवाद है, हिन्दी गेम क्लाइंट समर्थन का दावा नहीं। विकास और पूरी सीमाओं के लिए [अंग्रेज़ी README](../README.md) देखें। लाइसेंस: [All Rights Reserved](../LICENSE)।
+
+v1.0.2 से नई मौलिक सामग्री के सभी अधिकार सुरक्षित हैं। आधिकारिक अपरिवर्तित संस्करणों का व्यक्तिगत उपयोग और केवल आधिकारिक रिपॉज़िटरी में PR भेजने के लिए बदलाव व परीक्षण की अनुमति है; स्वीकृति रखरखावकर्ता तय करता है। व्यावसायीकरण या अलग संशोधित संस्करण प्रकाशित करने की अनुमति नहीं है। पहले MIT के तहत प्रकाशित सामग्री के अधिकार बने रहते हैं; यह बदलाव उन्हें रद्द नहीं करता। पूर्ण अंग्रेज़ी शर्तें [LICENSE](../LICENSE) में हैं।

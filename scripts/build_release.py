@@ -22,6 +22,7 @@ with ZipFile(target, 'w', ZIP_DEFLATED) as archive:
             archive.write(path, f'ForeverContext/{path.name}')
     archive.write(ROOT / 'README.md', 'ForeverContext/README.md')
     archive.write(ROOT / 'LICENSE', 'ForeverContext/LICENSE')
+    archive.write(ROOT / 'LICENSE-MIT-v1.0.1.txt', 'ForeverContext/LICENSE-MIT-v1.0.1.txt')
     for path in sorted((ROOT / 'docs').glob('*.md')):
         archive.write(path, f'ForeverContext/docs/{path.name}')
     archive.write(ROOT / 'CONTRIBUTING.md', 'ForeverContext/CONTRIBUTING.md')

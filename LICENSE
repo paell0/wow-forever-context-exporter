@@ -1,21 +1,62 @@
-MIT License
+ForeverContext Restricted Use and Contribution License
+Copyright (c) 2026 paell0. All rights reserved except as expressly granted below.
 
-Copyright (c) 2026 paell0
+Effective for new original material first published under these terms from
+version 1.0.2 onward. This is a custom, source-available license, not an
+open-source license.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. Personal use
+You may download, install, run, and make necessary personal backup copies of
+official, unmodified releases for your own gameplay without charge. Recording
+or streaming your gameplay, including monetized gameplay videos or streams,
+does not by itself constitute selling or commercially exploiting the addon.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. Contributions by pull request
+You may inspect the source and make changes solely to develop, test, and submit
+a pull request to the official repository:
+https://github.com/paell0/wow-forever-context-exporter
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+You may keep a contribution fork on GitHub and share the changes there to the
+extent needed for that contribution workflow. You must preserve copyright and
+license notices and must not present the fork as an official release. The
+maintainer alone decides whether to accept and publish proposed changes.
+Acceptance of a pull request does not grant permission to publish, sell, or
+distribute a separate modified edition of the addon.
+
+By intentionally submitting your original contribution for inclusion, you grant
+the maintainer a non-exclusive, worldwide, perpetual, royalty-free permission
+to use, reproduce, modify, and distribute that contribution as part of the
+official project under these terms. You retain ownership of your contribution
+and must have the rights necessary to submit it. If you do not agree, do not
+submit the contribution for inclusion.
+
+3. Other uses require permission
+Except for the permissions above, rights already granted under another license,
+and uses permitted by applicable law, you may not sell, sublicense, place behind
+a paywall, commercially redistribute, or include this material in another
+commercial product or service. You may not modify it for other purposes or
+publish, rehost, redistribute, or release modified or unmodified copies outside
+the contribution workflow without the copyright holder's prior written
+permission. The copyright holder and distribution services authorized by the
+copyright holder may distribute official releases. Linking to official releases
+is permitted.
+
+4. Existing licenses and platform rights
+Version 1.0.1 and earlier material were published under the MIT License. The
+original notice is retained in LICENSE-MIT-v1.0.1.txt. Rights validly granted
+under that license remain available for the material covered by it. These terms
+do not withdraw or narrow those prior grants, including where previously
+licensed material is reused in a later release. A new version number does not
+make previously MIT-licensed code exclusive or restricted retroactively.
+
+Nothing here overrides permissions granted through GitHub's Terms of Service,
+including viewing and forking a public repository within GitHub, or applicable
+copyright exceptions. No ownership of third-party game names, brands, or
+materials is claimed.
+
+5. Warranty
+The material is supplied as available, without warranties of any kind, to the
+extent permitted by law. The copyright holder is not liable for claims or losses
+arising from its use to the extent such liability can lawfully be excluded.
+
+For permission beyond these terms, contact paell0 through the official project.

@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.0.1](https://img.shields.io/static/v1?label=version&message=1.0.1&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.1) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![MIT license](https://img.shields.io/static/v1?label=license&message=MIT&color=2EA66F&labelColor=162033&style=for-the-badge)](../LICENSE) [![15 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=15+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.0.2](https://img.shields.io/static/v1?label=version&message=1.0.2&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.0.2) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![15 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=15+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -16,7 +16,7 @@
 
 ## Установка и использование
 
-1. Скачайте `ForeverContext-1.0.1.zip` из раздела [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
+1. Скачайте `ForeverContext-1.0.2.zip` из раздела [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
 2. Закройте игру и распакуйте папку `ForeverContext` в `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Проверьте путь `AddOns/ForeverContext/ForeverContext.toc` и включите аддон. Если установлен старый ContextoPJ, сначала удалите его папку.
 4. Вне боя введите **`/fcontext`**.
@@ -34,4 +34,6 @@
 
 Имя персонажа по умолчанию скрыто. Аддон не передаёт данные и не требует ключа API. Сумки и банк не экспортируются. Неприменённые изменения талантов не выдаются за активные. Недоступные данные отмечаются предупреждениями: откройте таланты или профессии и создайте отчёт заново.
 
-Кнопки и подписи отчёта — на английском; названия и описания из игры сохраняют язык клиента. Это перевод документации, а не добавление языковой поддержки клиента. Разработка и полные ограничения описаны в [основном README](../README.md). Лицензия: [MIT](../LICENSE).
+Кнопки и подписи отчёта — на английском; названия и описания из игры сохраняют язык клиента. Это перевод документации, а не добавление языковой поддержки клиента. Разработка и полные ограничения описаны в [основном README](../README.md). Лицензия: [All Rights Reserved](../LICENSE).
+
+Все права на новые оригинальные материалы начиная с v1.0.2 сохраняются за правообладателем. Разрешены личное использование неизменённых официальных версий и изменения только для подготовки PR в официальный репозиторий; решение о принятии принимает сопровождающий. Коммерциализация и публикация самостоятельных изменённых версий не разрешены. Ранее опубликованные под MIT материалы сохраняют прежние разрешения; это изменение их не отзывает. Полные условия на английском: [LICENSE](../LICENSE).
