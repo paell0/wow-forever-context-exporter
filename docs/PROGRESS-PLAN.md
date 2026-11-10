@@ -9,6 +9,8 @@
 3. Click **Progress plan** in the addon. Paste only that plan block, click **Preview plan**, review the tasks, and click **Accept plan** if you want to follow it.
 4. Play, then use **Review plan** or **Review with AI**. The next report contains the accepted tasks, current checks, and observed changes since the reference snapshot.
 
+Only one ForeverContext window is visible at a time. Opening **Progress plan** or **Compare items** temporarily hides the report; closing the editor returns to the same report without regenerating it. Switching between editors keeps the report hidden. Background data retries pause so they cannot take focus from your input; if loading was interrupted, click **Generate / refresh** after returning. Editors opened directly while the report is closed do not open it when dismissed. Entering combat closes the windows without restoring the report.
+
 No network connection or AI model is provided by the addon. Copy reports and plan blocks manually. Importing a plan does not apply talents, equip items, spend gold, or perform gameplay actions.
 
 ## Automatic and manual checks

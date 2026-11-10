@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.1 — 2026-11-10
+
+- Fixed Progress plan and Compare items appearing underneath the report's scroll text. Editors now use a higher frame strata and an opaque background.
+- Show only one addon window at a time. Editors temporarily hide the report, close each other when switching, and restore the same report/options when dismissed.
+- Pause report cache retries while editing so background loading cannot steal keyboard focus. Interrupted reports can be refreshed after returning; closing an editor does not advance the snapshot reference.
+- Keep focused-report navigation and combat closure from reopening an unwanted window.
+- Added six window-navigation checks and improved the simulated client to account for inherited visibility, frame strata and native close-button behavior. Five targeted regressions also fail against v1.1.0.
+
+Validation: 70 simulated Lua 5.1 tests passed. Live confirmation of the window fix is pending.
+
 ## v1.1.0 — 2026-11-10
 
 - Added a per-character progress planner with preview-before-acceptance, automatic checks for level, skill, equipment, committed talent ranks and gold balance, plus player-controlled manual tasks.

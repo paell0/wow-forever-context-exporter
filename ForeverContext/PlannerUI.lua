@@ -1,5 +1,6 @@
 local _, NS = ...
 local planWindow, comparisonWindow
+local returnToReport, switchingWindow = false, false
 local PAGE_SIZE = 6
 
 local function allowed()
@@ -8,6 +9,29 @@ local function allowed()
         return false
     end
     return true
+end
+
+function NS.CloseAuxiliaryWindows()
+    returnToReport = false
+    if planWindow and planWindow:IsShown() then planWindow:Hide() end
+    if comparisonWindow and comparisonWindow:IsShown() then comparisonWindow:Hide() end
+end
+
+local function showPopup(frame)
+    returnToReport = NS.SuspendReportWindow() or returnToReport
+    switchingWindow = true
+    local other
+    if frame == planWindow then other = comparisonWindow else other = planWindow end
+    if other and other:IsShown() then other:Hide() end
+    switchingWindow = false
+    frame:Show()
+end
+
+local function popupHidden()
+    if returnToReport and not switchingWindow then
+        returnToReport = false
+        NS.RestoreReportWindow()
+    end
 end
 
 local function label(parent, text, x, y, width)
@@ -33,7 +57,9 @@ local function popup(name, title, subtitle, height)
     frame:Hide()
     frame:SetSize(760, height)
     frame:SetPoint("CENTER")
-    frame:SetFrameStrata("DIALOG")
+    -- A report's scroll child has its own frame level. Keep tools above that
+    -- entire strata as well as hiding the report while an editor is active.
+    frame:SetFrameStrata("FULLSCREEN_DIALOG")
     frame:SetClampedToScreen(true)
     frame:SetMovable(true)
     frame:EnableMouse(true)
@@ -42,7 +68,7 @@ local function popup(name, title, subtitle, height)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     frame:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8", edgeFile="Interface\\Tooltips\\UI-Tooltip-Border", edgeSize=16,
         insets={left=4,right=4,top=4,bottom=4}})
-    frame:SetBackdropColor(0.035, 0.05, 0.075, 0.99)
+    frame:SetBackdropColor(0.035, 0.05, 0.075, 1)
     frame:SetBackdropBorderColor(0.3, 0.65, 0.8, 1)
     frame.title = label(frame, "|cffffd46a" .. title .. "|r", 20, -20)
     frame.subtitle = label(frame, subtitle, 20, -45)
@@ -51,6 +77,7 @@ local function popup(name, title, subtitle, height)
     frame:SetScript("OnShow", function(self)
         self:SetScale(math.min(1, (UIParent:GetWidth()-40)/760, (UIParent:GetHeight()-40)/height))
     end)
+    frame:SetScript("OnHide", popupHidden)
     UISpecialFrames = UISpecialFrames or {}
     table.insert(UISpecialFrames, name)
     return frame
@@ -169,9 +196,9 @@ local function makePlanWindow()
     frame.previous = button(frame, "Previous", 20, -600, 100, function() frame.page = math.max(1, frame.page-1); renderPlan() end)
     frame.next = button(frame, "Next", 130, -600, 100, function() frame.page = frame.page+1; renderPlan() end)
     frame.refresh = button(frame, "Refresh", 240, -600, 110, renderPlan)
-    frame.review = button(frame, "Review with AI", 560, -600, 175, function() frame:Hide(); NS.OpenReport("review") end)
+    frame.review = button(frame, "Review with AI", 560, -600, 175, function() NS.OpenReport("review") end)
     frame.pages = label(frame, "", 370, -609, 165)
-    frame:SetScript("OnHide", function(self) self:SetScript("OnUpdate", nil); self.input:ClearFocus() end)
+    frame:HookScript("OnHide", function(self) self:SetScript("OnUpdate", nil); self.input:ClearFocus() end)
 end
 
 function NS.OpenPlanWindow()
@@ -179,7 +206,7 @@ function NS.OpenPlanWindow()
     if not planWindow then makePlanWindow() end
     planWindow.preview, planWindow.page = nil, 1
     planWindow.input:SetText(NS.CharacterState().draftText or "")
-    planWindow:Show()
+    showPopup(planWindow)
     renderPlan()
 end
 
@@ -232,7 +259,6 @@ local function makeComparisonWindow()
         local b, messageB = NS.NormalizeItem(frame.inputs.B:GetText())
         if not a or not b then frame.status:SetText("Add both candidates. " .. (messageA or messageB or "")); return end
         NS.SetCandidate("A", a); NS.SetCandidate("B", b)
-        frame:Hide()
         NS.OpenReport("compare")
     end)
     frame.clear = button(frame, "Clear candidates", 210, -325, 150, function()
@@ -241,7 +267,7 @@ local function makeComparisonWindow()
         for _, key in ipairs({"A", "B"}) do frame.inputs[key]:SetText(""); frame.names[key]:SetText("") end
         frame.status:SetText("Candidates cleared.")
     end)
-    frame:SetScript("OnHide", function(self) self.inputs.A:ClearFocus(); self.inputs.B:ClearFocus() end)
+    frame:HookScript("OnHide", function(self) self.inputs.A:ClearFocus(); self.inputs.B:ClearFocus() end)
 end
 
 function NS.OpenComparisonWindow()
@@ -253,15 +279,14 @@ function NS.OpenComparisonWindow()
         comparisonWindow.names[key]:SetText(candidates[key] and candidateName(candidates[key]) or "No item selected.")
     end
     comparisonWindow.status:SetText("Drop an item on each button, or paste a game link and press Enter. Full links preserve item variants.")
-    comparisonWindow:Show()
+    showPopup(comparisonWindow)
 end
 
 local events = CreateFrame("Frame")
 for _, event in ipairs({"PLAYER_REGEN_DISABLED", "SKILL_LINES_CHANGED", "PLAYER_LEVEL_UP", "PLAYER_EQUIPMENT_CHANGED", "PLAYER_MONEY", "TRAIT_CONFIG_UPDATED"}) do events:RegisterEvent(event) end
 events:SetScript("OnEvent", function(_, event)
     if event == "PLAYER_REGEN_DISABLED" then
-        if planWindow then planWindow:Hide() end
-        if comparisonWindow then comparisonWindow:Hide() end
+        NS.CloseAuxiliaryWindows()
     elseif planWindow and planWindow:IsShown() and not planWindow.preview then
         planWindow:SetScript("OnUpdate", function(self) self:SetScript("OnUpdate", nil); renderPlan() end)
     end

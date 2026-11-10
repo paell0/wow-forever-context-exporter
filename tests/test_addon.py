@@ -193,6 +193,12 @@ function widget:GetCenter() return self.centerX or 500, self.centerY or 500 end
 function widget:GetEffectiveScale() return self.scale or 1 end
 function widget:GetFrameLevel() return self.frameLevel or 0 end
 function widget:SetFrameLevel(value) self.frameLevel = value end
+function widget:GetFrameStrata() return self.strata or (self.parent and self.parent:GetFrameStrata()) or 'MEDIUM' end
+function widget:SetFrameStrata(value)
+    local strata = {BACKGROUND=true, LOW=true, MEDIUM=true, HIGH=true, DIALOG=true, FULLSCREEN=true, FULLSCREEN_DIALOG=true, TOOLTIP=true}
+    assert(strata[value], 'Unknown frame strata: ' .. tostring(value))
+    self.strata = value
+end
 function widget:RegisterForClicks(...) self.clicks = {...} end
 function widget:SetHighlightTexture(path) assert(self.kind == 'Button'); self.highlight = path end
 function widget:CreateTexture()
@@ -213,6 +219,7 @@ function widget:GetHeight() return self.height end
 function widget:Hide() self.shown = false; if self.scripts.OnHide then self.scripts.OnHide(self) end end
 function widget:Show() self.shown = true; if self.scripts.OnShow then self.scripts.OnShow(self) end end
 function widget:IsShown() return self.shown end
+function widget:IsVisible() return self.shown and (not self.parent or self.parent:IsVisible()) end
 function widget:CreateFontString() return newWidget() end
 function widget:SetText(value) self.value = value; if self.scripts.OnTextChanged then self.scripts.OnTextChanged(self, false) end end
 function widget:GetText() return self.value end
@@ -226,7 +233,7 @@ function widget:HighlightText() self.selected = true end
 function widget:SetVerticalScroll(y) assert(self.kind == "ScrollFrame"); self.scroll = y end
 function widget:GetVerticalScroll() assert(self.kind == "ScrollFrame"); return self.scroll end
 function widget:SetScrollChild(child) assert(self.kind == "ScrollFrame"); self.child = child end
-for _, method in ipairs({"SetFrameStrata", "SetClampedToScreen", "SetMovable", "EnableMouse", "RegisterForDrag", "StartMoving", "StopMovingOrSizing", "SetBackdrop", "SetBackdropColor", "SetBackdropBorderColor", "SetAutoFocus", "SetMaxLetters", "SetMultiLine", "SetFontObject", "SetTextInsets", "SetCursorPosition", "SetJustifyH", "SetScale"}) do
+for _, method in ipairs({"SetClampedToScreen", "SetMovable", "EnableMouse", "RegisterForDrag", "StartMoving", "StopMovingOrSizing", "SetBackdrop", "SetBackdropColor", "SetBackdropBorderColor", "SetAutoFocus", "SetMaxLetters", "SetMultiLine", "SetFontObject", "SetTextInsets", "SetCursorPosition", "SetJustifyH", "SetScale"}) do
     widget[method] = function() end
 end
 UIParent = newWidget("UIParent")
@@ -247,12 +254,14 @@ function CreateFrame(kind, name, parent, template)
     assert(kinds[kind], "Unknown frame type: " .. tostring(kind))
     assert(not template or templates[template], "Unknown frame template: " .. tostring(template))
     local w = newWidget(name)
-    w.kind, w.template = kind, template
+    w.kind, w.template, w.parent = kind, template, parent
+    w.frameLevel = parent and parent:GetFrameLevel() + 1 or 0
     if kind == "CheckButton" then w.Text = newWidget() end
+    if template == "UIPanelCloseButton" then w:SetScript('OnClick', function() parent:Hide() end) end
     return w
 end
 function tick(delta)
-    for _, frame in ipairs(frames) do if frame.shown and frame.scripts.OnUpdate then frame.scripts.OnUpdate(frame, delta) end end
+    for _, frame in ipairs(frames) do if frame:IsVisible() and frame.scripts.OnUpdate then frame.scripts.OnUpdate(frame, delta) end end
 end
 function dispatch(event)
     for _, frame in ipairs(frames) do if frame.events[event] and frame.scripts.OnEvent then frame.scripts.OnEvent(frame, event) end end

@@ -14,6 +14,13 @@ local function settings()
     return NS.CharacterSettings()
 end
 
+local function saveOptions()
+    local db = settings()
+    db.goal = window.goal:GetText()
+    db.includeName = window.nameCheck:GetChecked() and true or false
+    db.extended = window.extraCheck:GetChecked() and true or false
+end
+
 local function selectReport()
     if not window or not window.report or window.report == "" then return end
     window.text:SetFocus()
@@ -23,6 +30,7 @@ local function selectReport()
 end
 
 local function finish()
+    window.loading = false
     window:SetScript("OnUpdate", nil)
     window.generate:Enable()
     window.select:Enable()
@@ -38,16 +46,15 @@ end
 
 local function collect()
     if inCombat() then
+        window.loading = false
         window.status:SetText("Leave combat, then click Generate.")
         window:SetScript("OnUpdate", nil)
         window.generate:Enable()
         window.select:Enable()
         return false
     end
+    saveOptions()
     local db = settings()
-    db.goal = window.goal:GetText()
-    db.includeName = window.nameCheck:GetChecked() and true or false
-    db.extended = window.extraCheck:GetChecked() and true or false
     local report, pending, warnings, snapshot = NS.BuildExport(db)
     window.snapshot = snapshot
     window.report = report
@@ -65,6 +72,7 @@ local function generate()
     window.text:ClearFocus()
     window.generate:Disable()
     window.select:Disable()
+    window.loading = true
     tries, elapsed = 1, 0
     if not collect() then return end
     if lastPending == 0 then finish(); return end
@@ -194,6 +202,12 @@ local function createWindow()
     frame.status:SetText("")
     frame:SetScript("OnHide", function(self)
         self:SetScript("OnUpdate", nil)
+        if self.loading then
+            self.loading = false
+            self.generate:Enable()
+            self.select:Enable()
+            self.status:SetText("Loading paused. Click Generate / refresh to finish loading missing data.")
+        end
         self.goal:ClearFocus()
         self.text:ClearFocus()
     end)
@@ -207,6 +221,7 @@ end
 
 local function open()
     if inCombat() then say("Leave combat to export your character."); return end
+    if NS.CloseAuxiliaryWindows then NS.CloseAuxiliaryWindows() end
     if not window then createWindow() end
     local db = settings()
     window.goal:SetText(type(db.goal) == "string" and db.goal or "")
@@ -221,13 +236,23 @@ end
 
 function NS.OpenReport(mode)
     if window and window:IsShown() then
-        local db = settings()
-        db.goal = window.goal:GetText()
-        db.includeName = window.nameCheck:GetChecked() == true
-        db.extended = window.extraCheck:GetChecked() == true
+        saveOptions()
     end
     if mode and NS.ModeLabels[mode] then settings().mode = mode end
     open()
+end
+
+-- Auxiliary windows temporarily replace the report. Returning must not generate
+-- a new snapshot or let an item-cache retry steal focus from the active editor.
+function NS.SuspendReportWindow()
+    if not window or not window:IsShown() then return false end
+    saveOptions()
+    window:Hide()
+    return true
+end
+
+function NS.RestoreReportWindow()
+    if window and not inCombat() then window:Show() end
 end
 
 function NS.ToggleWindow()

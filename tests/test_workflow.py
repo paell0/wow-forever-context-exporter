@@ -318,6 +318,83 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(self.ns.EvaluateTask(plan.tasks[2], snapshot)[0], 'UNKNOWN')
         self.assertIn('Client build changed:', self.ns.ProgressText(snapshot))
 
+    def test_comparison_replaces_report_and_close_restores_exact_context(self):
+        self.lua.execute('NS.OpenReport(); ForeverContextWindow.goal:SetText("Keep this goal"); ForeverContextWindow.nameCheck:SetChecked(true)')
+        g = self.lua.globals()
+        report = g.ForeverContextWindow.report
+        self.lua.execute('reference=NS.CharacterState().lastExport; ForeverContextWindow.compare.scripts.OnClick()')
+        self.assertFalse(g.ForeverContextWindow.IsShown(g.ForeverContextWindow))
+        self.assertFalse(g.ForeverContextExportText.IsVisible(g.ForeverContextExportText))
+        self.assertTrue(g.ForeverContextComparisonWindow.IsVisible(g.ForeverContextComparisonWindow))
+        self.assertFalse(g.ForeverContextExportText.focus)
+        self.assertEqual(g.ForeverContextComparisonWindow.GetFrameStrata(g.ForeverContextComparisonWindow), 'FULLSCREEN_DIALOG')
+        g.ForeverContextComparisonWindow.close.scripts.OnClick()
+        self.assertTrue(g.ForeverContextWindow.IsShown(g.ForeverContextWindow))
+        self.assertEqual(g.ForeverContextWindow.report, report)
+        self.assertEqual(g.ForeverContextWindow.goal.value, 'Keep this goal')
+        self.assertTrue(self.ns.CharacterSettings().includeName)
+        self.assertTrue(self.lua.eval('reference == NS.CharacterState().lastExport'))
+
+    def test_planner_replaces_report_and_retains_draft_on_return(self):
+        self.lua.execute('NS.OpenReport(); ForeverContextWindow.plan.scripts.OnClick()')
+        g = self.lua.globals()
+        self.assertFalse(g.ForeverContextWindow.shown)
+        self.assertTrue(g.ForeverContextPlanWindow.IsVisible(g.ForeverContextPlanWindow))
+        self.lua.execute('''
+            ForeverContextPlanWindow.input:SetText([[FCPLAN/1
+MANUAL|Remember me]])
+            ForeverContextPlanWindow.input.scripts.OnTextChanged(ForeverContextPlanWindow.input, true)
+            ForeverContextPlanWindow.close.scripts.OnClick()
+        ''')
+        self.assertTrue(g.ForeverContextWindow.shown)
+        self.ns.OpenPlanWindow()
+        self.assertFalse(g.ForeverContextWindow.shown)
+        self.assertIn('Remember me', g.ForeverContextPlanWindow.input.value)
+
+    def test_switching_tools_never_exposes_report_until_final_close(self):
+        self.lua.execute('NS.OpenReport(); NS.OpenComparisonWindow(); NS.OpenPlanWindow()')
+        g = self.lua.globals()
+        self.assertFalse(g.ForeverContextWindow.shown)
+        self.assertFalse(g.ForeverContextComparisonWindow.shown)
+        self.assertTrue(g.ForeverContextPlanWindow.shown)
+        self.lua.execute('NS.OpenComparisonWindow()')
+        self.assertFalse(g.ForeverContextWindow.shown)
+        self.assertFalse(g.ForeverContextPlanWindow.shown)
+        g.ForeverContextComparisonWindow.close.scripts.OnClick()
+        self.assertTrue(g.ForeverContextWindow.shown)
+
+    def test_tool_open_cancels_background_retry_and_return_can_refresh(self):
+        self.lua.execute('itemReady=false; NS.OpenReport(); reportReference=NS.CharacterState().lastExport')
+        g = self.lua.globals()
+        report = g.ForeverContextWindow.report
+        self.assertFalse(g.ForeverContextWindow.generate.enabled)
+        self.lua.execute('NS.OpenPlanWindow(); ForeverContextPlanWindow.input:SetFocus(); itemReady=true; tick(5)')
+        self.assertTrue(g.ForeverContextPlanWindow.input.focus)
+        self.assertFalse(g.ForeverContextExportText.focus)
+        self.assertEqual(g.ForeverContextWindow.report, report)
+        self.assertTrue(self.lua.eval('reportReference == NS.CharacterState().lastExport'))
+        g.ForeverContextPlanWindow.close.scripts.OnClick()
+        self.assertTrue(g.ForeverContextWindow.generate.enabled)
+        self.assertIn('Loading paused', g.ForeverContextWindow.status.value)
+        g.ForeverContextWindow.generate.scripts.OnClick()
+        self.assertFalse(g.ForeverContextWindow.loading)
+        self.assertIsNotNone(self.ns.CharacterState().lastExport)
+
+    def test_report_navigation_closes_tools_and_combat_cannot_restore_report(self):
+        self.lua.execute('NS.OpenReport(); NS.OpenPlanWindow(); NS.OpenReport("gear")')
+        g = self.lua.globals()
+        self.assertFalse(g.ForeverContextPlanWindow.shown)
+        self.assertTrue(g.ForeverContextWindow.shown)
+        self.lua.execute('NS.OpenComparisonWindow(); combat=true; dispatch("PLAYER_REGEN_DISABLED")')
+        self.assertFalse(g.ForeverContextComparisonWindow.shown)
+        self.assertFalse(g.ForeverContextWindow.shown)
+        self.lua.execute('combat=false; NS.OpenPlanWindow(); ForeverContextPlanWindow.close.scripts.OnClick()')
+        self.assertFalse(g.ForeverContextWindow.shown)
+
+    def test_tool_opened_standalone_does_not_open_report_on_close(self):
+        self.lua.execute('NS.OpenComparisonWindow(); ForeverContextComparisonWindow.close.scripts.OnClick()')
+        self.assertIsNone(self.lua.globals().ForeverContextWindow)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

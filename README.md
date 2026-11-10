@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.1.0](https://img.shields.io/static/v1?label=version&message=1.1.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.1.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](LICENSE) [![64 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=64+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.1.1](https://img.shields.io/static/v1?label=version&message=1.1.1&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.1.1) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](LICENSE) [![70 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=70+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -14,13 +14,13 @@
 
 Export your WoW Forever character's talents, professions, gear, and stats as plain text for AI advice.
 
-**Status: public preview.** Targets Forever interface **16001**. The addon passes 64 simulated Lua 5.1 tests, but has **not been tested in a live WoW Forever session**. Please report client-specific issues with your build number.
+**Status: public preview.** Targets Forever interface **16001**. The addon passes 70 simulated Lua 5.1 tests, but has **not been tested in a live WoW Forever session**. Please report client-specific issues with your build number.
 
 [Changelog](CHANGELOG.md)
 
 ## Install
 
-1. Download `ForeverContext-1.1.0.zip` from [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
+1. Download `ForeverContext-1.1.1.zip` from [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
 2. Close the game and extract the archive into `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Check that the final path is `AddOns/ForeverContext/ForeverContext.toc`.
 4. Start Forever and enable **ForeverContext** in the AddOns list.
@@ -46,6 +46,8 @@ If you installed the previous `ContextoPJ` version, remove that addon folder fir
 Unknown data is labelled **UNKNOWN** rather than completed or failed. Automatic checks reflect the current state, so removing an item or spending gold may make a task pending again. Previewing a plan never replaces the active plan; acceptance is explicit. Imported text is parsed as data and never executed.
 
 Plans, goals, selected candidates, and snapshots are **per character**. Existing account-level goal/options become initial migration defaults. Your minimap position/visibility remain account-level settings.
+
+Opening **Progress plan** or **Compare items** temporarily hides the report and closes the other editor. Close the editor to return to the same report and options. Returning does not generate a new reference snapshot; interrupted data loading can be resumed with **Generate / refresh**.
 
 Read the [complete workflow guide, task format, and command list](docs/PROGRESS-PLAN.md).
 
@@ -91,7 +93,7 @@ python -m unittest discover -s tests -v
 python scripts/build_release.py
 ```
 
-The build writes `dist/ForeverContext-1.1.0.zip` with the correct addon folder. Tests use `lupa.lua51` and a simulated client. Some fixtures deliberately use Spanish game data to verify that localized client text is preserved.
+The build writes `dist/ForeverContext-1.1.1.zip` with the correct addon folder. Tests use `lupa.lua51` and a simulated client. Some fixtures deliberately use Spanish game data to verify that localized client text is preserved.
 
 An earlier v1.0.3 build produced a live character export on Forever build 70862 with an esES client. The current planner, comparison UI, and focused workflow still require live verification.
 
