@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.3.0](https://img.shields.io/static/v1?label=version&message=1.3.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.3.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![132 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=132+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.4.0](https://img.shields.io/static/v1?label=version&message=1.4.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.4.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![144 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=144+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -23,13 +23,16 @@ WoW Forever 캐릭터의 특성, 전문 기술, 장비, 능력치를 일반 텍�
 
 1.2.0은 참고 자료와 확인 상태가 있는 아이템 획득처, 활동별 특성 프로필, 버전 변경 경고, 선택적 가방 내보내기, 보관 아이템 목록, 스포일러 방지 모드, 내보내기 분류 선택의 일곱 기능을 추가합니다. **Item sources**, **Talent profiles**, **Browse bags**, **Keep items**, **Export options**에서 이용하세요. 게임에서 관찰한 정보, 플레이어 확인, 미확인 메모를 구분하며 전체 전리품 데이터베이스는 제공하지 않습니다. [일곱 도구 영문 가이드](COMMUNITY-TOOLS.md).
 
+
+1.4에서는 사용법이 간단해졌습니다. **1. 텍스트 준비 → 2. 텍스트 선택 → Ctrl+C** 후 AI에서 **Ctrl+V**로 붙여넣으세요. **추가 도구**에서 선택 기능을 설명합니다. 설정은 기본 옵션부터 표시하며 아이템 비교와 계획에는 번호가 있는 안내가 있습니다. [영문 시작 안내](QUICKSTART.md).
+
 ## 설치 및 사용
 
-1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases)에서 `ForeverContext-1.3.0.zip`을 다운로드합니다.
+1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases)에서 `ForeverContext-1.4.0.zip`을 다운로드합니다.
 2. 게임을 종료하고 `ForeverContext` 폴더를 `World of Warcraft/_forever_/Interface/AddOns/`에 압축 해제합니다.
 3. 경로가 `AddOns/ForeverContext/ForeverContext.toc`인지 확인하고 애드온을 활성화합니다. 이전 ContextoPJ가 있다면 해당 폴더를 먼저 제거하세요.
 4. 전투 중이 아닐 때 **`/fcontext`**를 입력합니다.
-5. 필요하면 목표를 입력한 뒤 **Generate / refresh**, **Select all**을 클릭합니다. **Ctrl+C**로 복사하고 **Ctrl+V**로 AI에 붙여 넣습니다.
+5. 필요하면 목표를 입력한 뒤 **1. Prepare text**, **2. Select text**을 클릭합니다. **Ctrl+C**로 복사하고 **Ctrl+V**로 AI에 붙여 넣습니다.
 
 별칭 명령어: `/forevercontext`, `/pjia`. 도움말: `/fcontext help`.
 
@@ -39,7 +42,7 @@ WoW Forever 캐릭터의 특성, 전문 기술, 장비, 능력치를 일반 텍�
 
 ## 상태 및 제한
 
-인터페이스 **16001**용 공개 미리 보기 버전입니다. **Lua 5.1 모의 테스트 132개**를 통과했지만 실제 WoW Forever 게임 세션에서는 아직 검증하지 않았습니다.
+인터페이스 **16001**용 공개 미리 보기 버전입니다. **Lua 5.1 모의 테스트 144개**를 통과했지만 실제 WoW Forever 게임 세션에서는 아직 검증하지 않았습니다.
 
 캐릭터 이름은 기본적으로 제외합니다. 데이터를 전송하지 않으며 API 키도 필요하지 않습니다. 가방은 설정을 켠 경우에만 내보내고 은행, 우편, 다른 캐릭터는 제외합니다. 프로필, 획득처, 설정은 캐릭터별로 저장합니다. 스포일러 방지 모드는 보고서를 걸러내고 AI에 요청하지만 답변이나 직접 작성한 글까지 통제하지 않습니다. 읽을 수 없는 정보는 알 수 없음으로 표시합니다. 이 버전은 게임 내 확인이 필요합니다.
 

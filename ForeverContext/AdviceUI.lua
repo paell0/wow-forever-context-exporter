@@ -1,6 +1,6 @@
 local _, NS = ...
 local label, button, edit, check = NS.ToolLabel, NS.ToolButton, NS.ToolEdit, NS.ToolCheck
-local preferences, bags, keep, sources, loadouts
+local preferences, detailedPreferences, bags, keep, sources, loadouts
 local languageWindow
 
 local function dropInto(input, status)
@@ -13,40 +13,60 @@ local function dropInto(input, status)
 end
 
 local function makePreferences()
-    local frame=NS.CreateToolWindow("ForeverContextOptionsWindow", "ForeverContext — Export options", "Choose your report categories. Identity/client basics stay included. Settings are per character.", 670)
+    local frame=NS.CreateToolWindow("ForeverContextOptionsWindow", "ForeverContext — Settings",
+        "The defaults already include your level, talents, professions and gear. You can leave everything as it is.", 470)
     preferences=frame
+    frame.languageLabel=label(frame,"Language",20,-105,170)
+    frame.language=button(frame,"",210,-100,510,function() NS.OpenLanguageWindow() end)
+    NS.BindText(frame.language,function() return NS.LanguageLabel() end)
+    frame.bags=check(frame,"Also include the items in my bags",20,-165,false,function(value) NS.SetModule("bags",value) end)
+    frame.bagHelp=label(frame,"Optional. Only carried bags are read; bank, mail and other characters are excluded.",58,-205,655)
+    frame.spoilers=check(frame,"Avoid spoilers in AI advice",20,-265,false,function(value) NS.SetSpoilerFree(value) end)
+    frame.spoilerHelp=label(frame,"Hides quests and item origins from the report and asks the AI to avoid spoilers. Its replies are not controlled by the addon.",58,-305,655)
+    frame.details=button(frame,"Choose report details",20,-365,260,function() NS.OpenDetailedPreferencesWindow() end)
+    frame.defaults=button(frame,"Restore defaults",20,-415,240,function()
+        local options=NS.AdviceState().options
+        options.modules={}; options.spoilerFree=false; options.observeSources=true
+        NS.TouchAdvice(); NS.OpenPreferencesWindow()
+    end)
+    frame.report=button(frame,"Prepare text",480,-415,250,function() NS.OpenReport() end)
+end
+
+local function makeDetailedPreferences()
+    local frame=NS.CreateToolWindow("ForeverContextDetailsWindow", "ForeverContext — Report details",
+        "Advanced: turn individual report sections on or off. Your existing choices are kept until you change them.", 610)
+    detailedPreferences=frame
     frame.checks={}
     for i,row in ipairs(NS.ModuleDefinitions) do
         local key=row[1]
         frame.checks[key]=check(frame,row[2],20+math.floor((i-1)/8)*370,-85-((i-1)%8)*33,false,function(value) NS.SetModule(key,value) end)
         frame.checks[key].Text:SetWidth(310)
     end
-    frame.spoilers=check(frame,"Spoiler-free advice (hides quests and item origins)",20,-365,false,function(value) NS.SetSpoilerFree(value) end)
-    frame.observe=check(frame,"Record sources from visited merchants / displayed quest rewards",20,-403,true,function(value)
+    frame.observe=check(frame,"Record sources from visited merchants / displayed quest rewards",20,-365,true,function(value)
         NS.AdviceState().options.observeSources=value; NS.TouchAdvice()
     end)
-    label(frame,"Skills, spells, quests and reputations also follow the report's extra-details switch and purpose.\nThe AI is asked to honor spoiler preferences; its replies cannot be controlled by the addon.",20,-450,710)
-    frame.status=label(frame,"",20,-515,710)
-    frame.languageLabel=label(frame,"Language",20,-555,140)
-    frame.language=button(frame,"",170,-550,360,function() NS.OpenLanguageWindow() end)
-    NS.BindText(frame.language,function() return NS.LanguageLabel() end)
-    frame.defaults=button(frame,"Restore defaults",20,-610,155,function()
-        local options=NS.AdviceState().options
-        options.modules={}; options.spoilerFree=false; options.observeSources=true
-        NS.TouchAdvice(); NS.OpenPreferencesWindow()
-    end)
-    frame.report=button(frame,"Generate report",555,-610,175,function() NS.OpenReport() end)
+    label(frame,"Skills, spells, quests and reputations also follow the report's extra-details switch and purpose.\nThe AI is asked to honor spoiler preferences; its replies cannot be controlled by the addon.",20,-420,710)
+    frame.status=label(frame,"",20,-485,710)
+    frame.back=button(frame,"Back to settings",20,-555,240,function() NS.OpenPreferencesWindow() end)
 end
 
 function NS.OpenPreferencesWindow()
     if not NS.ToolsAllowed() then return end
     if not preferences then makePreferences() end
     local options=NS.AdviceState().options
-    for key,widget in pairs(preferences.checks) do widget:SetChecked(NS.ModuleEnabled(options,key)) end
+    preferences.bags:SetChecked(NS.ModuleEnabled(options,"bags"))
     preferences.spoilers:SetChecked(options.spoilerFree==true)
-    preferences.observe:SetChecked(options.observeSources~=false)
-    NS.SetText(preferences.status,"Client build {1}; addon {2}. No automatic internet rule updates.",NS.ClientStamp().build,NS.VERSION)
     NS.ShowToolWindow(preferences)
+end
+
+function NS.OpenDetailedPreferencesWindow()
+    if not NS.ToolsAllowed() then return end
+    if not detailedPreferences then makeDetailedPreferences() end
+    local options=NS.AdviceState().options
+    for key,widget in pairs(detailedPreferences.checks) do widget:SetChecked(NS.ModuleEnabled(options,key)) end
+    detailedPreferences.observe:SetChecked(options.observeSources~=false)
+    NS.SetText(detailedPreferences.status,"Client build {1}; addon {2}. No automatic internet rule updates.",NS.ClientStamp().build,NS.VERSION)
+    NS.ShowToolWindow(detailedPreferences)
 end
 
 function NS.OpenLanguageWindow()
@@ -99,7 +119,7 @@ local function renderBags(refresh)
 end
 
 local function makeBags()
-    local frame=NS.CreateToolWindow("ForeverContextBagsWindow","ForeverContext — Carried bags","Browse carried items, record keep preferences, or select two comparison candidates.",640)
+    local frame=NS.CreateToolWindow("ForeverContextBagsWindow","ForeverContext — Carried bags","Use Previous and Next to browse. Keep an item for AI advice, or choose Use as A / Use as B to compare two items.",640)
     bags=frame
     frame.gearOnly=check(frame,"Equipment only",20,-78,false,function() frame.index=1; renderBags() end)
     frame.unprotected=check(frame,"Hide kept items / show alternatives",330,-78,false,function() frame.index=1; renderBags() end)
@@ -152,9 +172,9 @@ local function renderKeep()
 end
 
 local function makeKeep()
-    local frame=NS.CreateToolWindow("ForeverContextKeepWindow","ForeverContext — Items to keep","Protect every copy/variant of an item ID in AI advice. This does not lock items in the game.",620)
+    local frame=NS.CreateToolWindow("ForeverContextKeepWindow","ForeverContext — Items to keep","Drag an item from your bags onto Drop item. Add a reason and save. Your AI will be asked to keep it; nothing is locked in game.",620)
     keep=frame
-    label(frame,"Item link / ID",20,-85,140)
+    label(frame,"Choose an item",20,-85,140)
     frame.item=edit(frame,"ForeverContextKeepItem",170,-80,420,2048)
     frame.drop=button(frame,"Drop item",610,-80,120,function() dropInto(frame.item,frame.status) end)
     frame.drop:SetScript("OnReceiveDrag",function() dropInto(frame.item,frame.status) end)
@@ -203,9 +223,9 @@ local function renderSources()
 end
 
 local function makeSources()
-    local frame=NS.CreateToolWindow("ForeverContextSourcesWindow","ForeverContext — Item sources","Record references for upgrades. Player confirmation and direct observations remain distinguishable.",660)
+    local frame=NS.CreateToolWindow("ForeverContextSourcesWindow","ForeverContext — Item sources","This is your notebook, not a loot search. Choose an item, click its source type to change it, add a place and save.",660)
     sources=frame
-    label(frame,"Item link / ID",20,-85,140)
+    label(frame,"Choose an item",20,-85,140)
     frame.item=edit(frame,"ForeverContextSourceItem",170,-80,420,2048)
     frame.drop=button(frame,"Drop item",610,-80,120,function() dropInto(frame.item,frame.status); renderSources() end)
     frame.drop:SetScript("OnReceiveDrag",function() dropInto(frame.item,frame.status); renderSources() end)
@@ -216,7 +236,7 @@ local function makeSources()
     end)
     label(frame,"Place / boss / recipe",330,-130,200)
     frame.location=edit(frame,"ForeverContextSourceLocation",480,-125,240,160)
-    label(frame,"Reference URL",20,-175,140)
+    label(frame,"Reference link (optional)",20,-175,140)
     frame.reference=edit(frame,"ForeverContextSourceReference",170,-170,550,500)
     frame.confirmed=check(frame,"I checked this source in Forever on this client build",20,-210,false,function() end)
     frame.save=button(frame,"Save source",20,-255,150,function()
@@ -275,7 +295,7 @@ local function selectProfile(index)
 end
 
 local function makeLoadouts()
-    local frame=NS.CreateToolWindow("ForeverContextLoadoutsWindow","ForeverContext — Activity talent profiles","Save profiles per dungeon/activity. Copy codes manually; no talents are applied by the addon.",740)
+    local frame=NS.CreateToolWindow("ForeverContextLoadoutsWindow","ForeverContext — Saved talent builds","Give your current talents a name and an activity, then save. Select a saved build to copy it or ask the AI to compare.",740)
     loadouts=frame
     label(frame,"Profile name",20,-85,140)
     frame.name=edit(frame,"ForeverContextProfileName",170,-80,550,80)
@@ -307,7 +327,7 @@ local function makeLoadouts()
         if frame.preview then NS.SetText(frame.status,"Import this preview to select it before comparing. The saved profile has not been replaced."); return end
         if not NS.AdviceState().selectedTalentProfile then NS.SetText(frame.status,"Select a saved profile with Previous / Next, or save/import one first."); return end
         if not NS.ModuleEnabled(NS.CharacterSettings(),"talents") or not NS.ModuleEnabled(NS.CharacterSettings(),"loadouts") then
-            NS.SetText(frame.status,"Enable Current talents and Selected talent profile in Export options to compare."); return
+            NS.SetText(frame.status,"Enable Current talents and Selected talent profile under Settings > Choose report details to compare."); return
         end
         NS.OpenReport("talents")
     end)

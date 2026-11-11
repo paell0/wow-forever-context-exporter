@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.3.0](https://img.shields.io/static/v1?label=version&message=1.3.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.3.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![132 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=132+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.4.0](https://img.shields.io/static/v1?label=version&message=1.4.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.4.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![144 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=144+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -23,13 +23,16 @@ La versione 1.1.0 aggiunge piani per personaggio, confronto tra due oggetti, rap
 
 La versione 1.2.0 aggiunge sette funzioni: fonti degli oggetti con riferimenti e conferma, profili talenti per attività, avvisi di versione, esportazione facoltativa delle borse, elenco degli oggetti da conservare, modalità senza spoiler e categorie configurabili. Apri **Item sources**, **Talent profiles**, **Browse bags**, **Keep items** e **Export options**. Osservazioni del gioco, conferme del giocatore e note non confermate sono distinte; non è incluso un database completo del bottino. [Guida dei sette strumenti in inglese](COMMUNITY-TOOLS.md).
 
+
+La versione 1.4 semplifica l’uso: **1. Prepara il testo → 2. Seleziona il testo → Ctrl+C**, poi incolla nella tua IA con **Ctrl+V**. **Altri strumenti** spiega le funzioni facoltative. Le impostazioni mostrano prima le opzioni semplici. Confronti e piani hanno passaggi numerati. [Guida iniziale in inglese](QUICKSTART.md).
+
 ## Installazione e utilizzo
 
-1. Scarica `ForeverContext-1.3.0.zip` da [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
+1. Scarica `ForeverContext-1.4.0.zip` da [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
 2. Chiudi il gioco ed estrai la cartella `ForeverContext` in `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Verifica il percorso `AddOns/ForeverContext/ForeverContext.toc` e attiva l’addon. Se hai installato il vecchio ContextoPJ, rimuovi prima la sua cartella.
 4. Fuori dal combattimento, digita **`/fcontext`**.
-5. Se vuoi, indica il tuo obiettivo. Premi **Generate / refresh**, poi **Select all** e **Ctrl+C**. Incolla il testo nell’IA con **Ctrl+V**.
+5. Se vuoi, indica il tuo obiettivo. Premi **1. Prepare text**, poi **2. Select text** e **Ctrl+C**. Incolla il testo nell’IA con **Ctrl+V**.
 
 Alias: `/forevercontext` e `/pjia`. Aiuto: `/fcontext help`.
 
@@ -39,7 +42,7 @@ Classe, razza, livello, esperienza, talenti attivi e punti disponibili; professi
 
 ## Stato e limiti
 
-Anteprima pubblica per l’interfaccia **16001**. Superati **132 test simulati con Lua 5.1**; l’addon non è ancora stato provato in una sessione reale di WoW Forever.
+Anteprima pubblica per l’interfaccia **16001**. Superati **144 test simulati con Lua 5.1**; l’addon non è ancora stato provato in una sessione reale di WoW Forever.
 
 Il nome del personaggio è nascosto per impostazione predefinita. Non vengono trasmessi dati e non serve una chiave API. Le borse sono esportate solo se abilitate; banca, posta e altri personaggi sono esclusi. Profili, fonti e preferenze sono salvati per personaggio. La modalità senza spoiler filtra il rapporto e istruisce l’IA, ma non controlla la risposta né elimina i tuoi testi. I dati mancanti restano sconosciuti. Questa versione richiede ancora verifica nel gioco.
 

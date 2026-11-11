@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.4.0 — 2026-11-11
+
+- Replaced the nine-button footer with two numbered copy steps, More tools and Settings. Always-visible instructions explain Ctrl+C and Ctrl+V; clipboard copying and AI interaction remain manual.
+- Added an optional-tools menu with a plain-language purpose for each feature. Existing direct commands remain available, with `/fcontext tools` added for the menu.
+- Simplified Settings to language, opt-in carried bags and spoiler preferences. Individual report categories and source observations are behind Choose report details. Opening either view preserves existing saved choices; bag switches stay synchronized.
+- Guided item comparison with numbered slots, live next-step instructions and a prepare action enabled only when both references are valid. Pasted links work without pressing Enter, and exact variants are preserved.
+- Guided AI-plan import with Paste, Check and Use steps, a compact empty view, visible paste area, optional example and task controls shown only when relevant. Plans are never accepted automatically.
+- Added bounded extraction of one FCPLAN/1 block from a full Markdown-fenced AI reply. Plain plan blocks still work; multiple plans, incomplete fences, invalid fields and oversized input are rejected by the existing strict parser. Player text is never executed.
+- Added simpler guidance inside bag, keep, source and saved-talent tools. Bundled 301 UI strings in all 10 languages; report labels/protocols remain English and player/game text is preserved.
+- Added a beginner guide and updated all 13 README languages. Added 12 behavior checks covering the new navigation, settings, comparison and AI-reply workflows.
+
+Validation: 144 simulated Lua 5.1 tests passed. Approximate layouts were reviewed from addon anchors in Spanish and German; actual client rendering, wrapping, fonts and interactions still require in-game verification.
+
 ## v1.3.0 — 2026-11-11
 
 - Added automatic interface-language detection and an immediate manual selector in Export options → Language, also available through `/fcontext language`, `/fcontext language <locale>` and `/fcontext language auto`.

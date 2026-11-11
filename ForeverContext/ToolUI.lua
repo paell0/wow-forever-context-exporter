@@ -56,6 +56,7 @@ function NS.ToolCheck(parent, text, x, y, checked, action)
     local check = CreateFrame("CheckButton", nil, parent, "UICheckButtonTemplate")
     check:SetPoint("TOPLEFT", x, y)
     check:SetChecked(checked == true)
+    check.Text:SetWidth(math.max(80,parent:GetWidth()-x-65))
     NS.SetText(check.Text,text)
     check:SetScript("OnClick", function(self) action(self:GetChecked() and true or false) end)
     return check
@@ -88,6 +89,15 @@ function NS.ToolTextArea(parent, name, x, y, width, height, maxLetters)
     return edit, scroll
 end
 
+function NS.ScaleToolWindow(frame)
+    frame:SetScale(math.min(1,(UIParent:GetWidth()-40)/frame:GetWidth(),(UIParent:GetHeight()-40)/frame:GetHeight()))
+end
+
+function NS.ResizeToolWindow(frame,height)
+    frame:SetHeight(height)
+    if frame:IsShown() then NS.ScaleToolWindow(frame) end
+end
+
 function NS.CreateToolWindow(name, title, subtitle, height)
     local frame = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
     frame:Hide()
@@ -108,9 +118,7 @@ function NS.CreateToolWindow(name, title, subtitle, height)
     frame.subtitle=NS.ToolLabel(frame, subtitle, 20,-45)
     frame.close=CreateFrame("Button",nil,frame,"UIPanelCloseButton")
     frame.close:SetPoint("TOPRIGHT",-5,-5)
-    frame:SetScript("OnShow",function(self)
-        self:SetScale(math.min(1,(UIParent:GetWidth()-40)/760,(UIParent:GetHeight()-40)/height))
-    end)
+    frame:SetScript("OnShow",NS.ScaleToolWindow)
     frame:SetScript("OnHide",function(self)
         self:SetScript("OnUpdate",nil)
         if returnToReport and not switching then returnToReport=false; NS.RestoreReportWindow() end
@@ -119,6 +127,33 @@ function NS.CreateToolWindow(name, title, subtitle, height)
     UISpecialFrames=UISpecialFrames or {}
     table.insert(UISpecialFrames,name)
     return frame
+end
+
+local toolsWindow
+function NS.OpenToolsWindow()
+    if not NS.ToolsAllowed() then return end
+    if not toolsWindow then
+        local frame=NS.CreateToolWindow("ForeverContextToolsWindow", "ForeverContext — More tools",
+            "These tools are optional. To ask for advice, you only need to prepare and copy your report.", 640)
+        toolsWindow=frame
+        frame.actions,frame.descriptions={},{}
+        local choices={
+            {"compare", "Compare two items", "Drag in two items. Prepare a report so your AI can help you choose one.", "OpenComparisonWindow"},
+            {"plan", "Use an AI plan", "Paste a plan from your AI, check its tasks and track them as you play.", "OpenPlanWindow"},
+            {"bags", "See items in my bags", "Look through your carried items. Choose items to compare or tell the AI which ones to keep.", "OpenBagWindow"},
+            {"keep", "Tell the AI what to keep", "List items you want to keep and why. This guides the AI; it does not lock items in game.", "OpenKeepWindow"},
+            {"sources", "Note an item's origin", "Optional notes: record where an item comes from. This is not a search for all possible drops.", "OpenSourcesWindow"},
+            {"loadouts", "Save a talent build", "Save your current talents for an activity and ask the AI to compare builds. Nothing is applied automatically.", "OpenLoadoutsWindow"},
+        }
+        for index,row in ipairs(choices) do
+            local action=row[4]
+            local y=-95-(index-1)*76
+            frame.actions[row[1]]=NS.ToolButton(frame,row[2],20,y,245,function() NS[action]() end)
+            frame.descriptions[row[1]]=NS.ToolLabel(frame,row[3],285,y,440)
+        end
+        frame.done=NS.ToolButton(frame,"Back",20,-580,200,function() frame:Hide() end)
+    end
+    NS.ShowToolWindow(toolsWindow)
 end
 
 local events=CreateFrame("Frame")

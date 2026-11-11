@@ -313,8 +313,8 @@ class CommunityTests(unittest.TestCase):
         self.lua.execute('NS.OpenReport(); ForeverContextWindow.options.scripts.OnClick()')
         g = self.lua.globals()
         frame = g.ForeverContextOptionsWindow
-        frame.checks.bags.SetChecked(frame.checks.bags, True)
-        frame.checks.bags.scripts.OnClick(frame.checks.bags)
+        frame.bags.SetChecked(frame.bags, True)
+        frame.bags.scripts.OnClick(frame.bags)
         self.assertTrue(self.ns.ModuleEnabled(self.ns.CharacterSettings(), 'bags'))
         frame.close.scripts.OnClick()
         self.assertFalse(g.ForeverContextWindow.select.enabled)

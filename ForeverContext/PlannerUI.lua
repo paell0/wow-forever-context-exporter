@@ -33,26 +33,41 @@ local function renderPlan()
         end
     end
     if planWindow.preview then
-        NS.SetText(planWindow.status,"DRAFT: {1} — {2} tasks. Click Accept plan to replace the active plan.",plan.title,#tasks)
+        NS.SetText(planWindow.status,"DRAFT: {1} tasks to check. Click Use this plan only after reviewing them.",#tasks)
         planWindow.accept:Enable()
     elseif plan then
-        NS.SetText(planWindow.status,"ACTIVE: {1} — {2}/{3} done; {4} unknown. Checks reflect current state.",plan.title,completed,#tasks,unknown)
+        NS.SetText(planWindow.status,"ACTIVE: {1}/{2} tasks done; {3} unknown. Only manual tasks need a checkbox.",completed,#tasks,unknown)
         planWindow.accept:Disable()
     else
-        NS.SetText(planWindow.status,"No active plan. Paste an FCPLAN/1 block, preview it, and accept the tasks you want to follow.")
+        NS.SetText(planWindow.status,"No plan yet. Paste an AI reply above, or click Try an example.")
         planWindow.accept:Disable()
     end
     NS.SetText(planWindow.pages,"Page {1}/{2}",planWindow.page,pages)
+    if #tasks>PAGE_SIZE then planWindow.previous:Show(); planWindow.next:Show(); planWindow.pages:Show()
+    else planWindow.previous:Hide(); planWindow.next:Hide(); planWindow.pages:Hide() end
+    if #tasks>0 then planWindow.refresh:Show() else planWindow.refresh:Hide() end
+    if state.plan and not planWindow.preview then planWindow.clear:Show(); planWindow.review:Show()
+    else planWindow.clear:Hide(); planWindow.review:Hide() end
+    local reference=state.plan and (state.plan.reviewedBuild or (state.plan.baseline and state.plan.baseline.build))
+    if state.plan and not planWindow.preview and reference~=NS.ClientStamp().build then planWindow.reviewBuild:Show()
+    else planWindow.reviewBuild:Hide() end
+    NS.ResizeToolWindow(planWindow,#tasks>0 and 730 or 380)
 end
 
 local function makePlanWindow()
-    local frame = popup("ForeverContextPlanWindow", "ForeverContext — Progress plan", "Preview an AI plan before accepting it. Only manual tasks have editable checkboxes.", 650)
+    local frame = popup("ForeverContextPlanWindow", "ForeverContext — Use an AI plan", "Ask your AI for a plan using your report. Paste its reply, check the tasks, then choose whether to use them.", 730)
     planWindow = frame
-    label(frame, "Paste the plan block from your AI reply. Example shows a valid starting format.", 20, -78)
+    frame.instructions=label(frame, "1. Paste the AI reply here (or just its plan block).", 20, -78)
+    frame.inputPanel=CreateFrame("Frame",nil,frame,"BackdropTemplate")
+    frame.inputPanel:SetPoint("TOPLEFT",18,-98)
+    frame.inputPanel:SetSize(720,144)
+    frame.inputPanel:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8"})
+    frame.inputPanel:SetBackdropColor(0.015,0.02,0.03,1)
     frame.scroll = CreateFrame("ScrollFrame", "ForeverContextPlanScroll", frame, "UIPanelScrollFrameTemplate")
     frame.scroll:SetPoint("TOPLEFT", 20, -100)
     frame.scroll:SetSize(690, 140)
     frame.input = CreateFrame("EditBox", "ForeverContextPlanInput", frame.scroll, "InputBoxTemplate")
+    frame.input:SetPoint("TOPLEFT",0,0)
     frame.input:SetMultiLine(true)
     frame.input:SetAutoFocus(false)
     frame.input:SetFontObject(ChatFontNormal)
@@ -75,24 +90,24 @@ local function makePlanWindow()
             -- every equipment slot and talent node on each keystroke.
             if hadPreview then renderPlan() end
             frame.accept:Disable()
-            NS.SetText(frame.status,"Draft edited. Click Preview plan to validate; the active plan is unchanged.")
+            NS.SetText(frame.status,"Text changed. Click 2. Check the plan again. Your saved plan has not changed.")
         end
     end)
-    frame.previewButton = button(frame, "Preview plan", 20, -250, 135, function()
+    frame.previewButton = button(frame, "2. Check the plan", 20, -250, 190, function()
         frame.input:ClearFocus()
-        local plan, errorMessage = NS.ParsePlan(frame.input:GetText())
+        local plan, errorMessage = NS.ParsePlanReply(frame.input:GetText())
         frame.preview, frame.page = plan, 1
         renderPlan()
         if not plan then NS.SetText(frame.status,errorMessage) end
     end)
-    frame.accept = button(frame, "Accept plan", 165, -250, 135, function()
+    frame.accept = button(frame, "3. Use this plan", 220, -250, 190, function()
         if not allowed() then return end
         local ok, message = NS.AcceptPlan(frame.preview)
         if not ok then NS.SetText(frame.status,message); return end
         frame.preview = nil
         renderPlan()
     end)
-    frame.example = button(frame, "Example", 310, -250, 135, function()
+    frame.example = button(frame, "Try an example", 420, -250, 210, function()
         local level = NS.ReadNumber(NS.SafeCall(UnitLevel, "player")) or 1
         local text = "FCPLAN/1\nTITLE|My next session\nLEVEL|" .. (level + 1) .. "|Gain one level\nMANUAL|Review my next talent point"
         frame.input:SetText(text)
@@ -100,7 +115,7 @@ local function makePlanWindow()
         frame.preview = nil
         renderPlan()
     end)
-    frame.clear = button(frame, "Archive / clear", 455, -250, 135, function()
+    frame.clear = button(frame, "Remove this plan", 20, -650, 220, function()
         if not allowed() then return end
         NS.ClearPlan()
         frame.preview = nil
@@ -123,14 +138,14 @@ local function makePlanWindow()
     frame.next = button(frame, "Next", 130, -600, 100, function() frame.page = frame.page+1; renderPlan() end)
     frame.refresh = button(frame, "Refresh", 240, -600, 110, renderPlan)
     frame.review = button(frame, "Review with AI", 560, -600, 175, function() NS.OpenReport("review") end)
-    frame.reviewBuild = button(frame, "Mark build reviewed", 455, -250, 160, function()
+    frame.reviewBuild = button(frame, "Mark build reviewed", 255, -650, 260, function()
         if not allowed() then return end
         local ok, message = NS.ReviewPlanForBuild()
         NS.SetText(frame.status,ok and "Plan marked reviewed for this client build. Original reference preserved." or message)
     end)
-    frame.clear:ClearAllPoints()
-    frame.clear:SetPoint("TOPLEFT", 620, -250)
-    frame.clear:SetWidth(115)
+    frame.help=label(frame,"Automatic tasks update as you play. Tick manual tasks yourself. No talents or items are changed by a plan.",20,0,710)
+    frame.help:ClearAllPoints()
+    frame.help:SetPoint("BOTTOMLEFT",20,22)
     frame.pages = label(frame, "", 370, -609, 165)
     frame:HookScript("OnHide", function(self) self:SetScript("OnUpdate", nil); self.input:ClearFocus() end)
 end
@@ -151,13 +166,28 @@ local function showCandidateName(widget, reference)
     else NS.SetText(widget,"Item data loads when generating the comparison report.") end
 end
 
+local function refreshComparison()
+    local frame=comparisonWindow
+    if not frame or not frame.compare then return end
+    local a=NS.NormalizeItem(frame.inputs.A:GetText())
+    local b=NS.NormalizeItem(frame.inputs.B:GetText())
+    if a and b then
+        frame.compare:Enable()
+        NS.SetText(frame.guide,"Ready. Prepare the comparison, then copy the report to your AI.")
+    else
+        frame.compare:Disable()
+        NS.SetText(frame.guide,not a and "Start with the first item. Open your bags and drag it onto 1. First item." or "Now add the second item. Drag it onto 2. Second item.")
+    end
+end
+
 local function makeComparisonWindow()
-    local frame = popup("ForeverContextComparisonWindow", "ForeverContext — Compare items", "Drop two items or paste their full game links. The report includes your current build and equipment.", 380)
+    local frame = popup("ForeverContextComparisonWindow", "ForeverContext — Compare two items", "Which item should you use? Add two items and prepare a report to ask your AI.", 470)
     comparisonWindow = frame
+    frame.instructions=label(frame,"Open your bags. Drag an item onto each numbered button, or paste an item link in each field. Nothing is equipped.",20,-85,710)
     frame.inputs, frame.names = {}, {}
     for index, key in ipairs({"A", "B"}) do
         local slot = key
-        local y = -90 - (index-1)*100
+        local y = -145 - (index-1)*100
         local input = CreateFrame("EditBox", "ForeverContextCandidate" .. slot, frame, "InputBoxTemplate")
         input:SetPoint("TOPLEFT", 170, y)
         input:SetSize(540, 26)
@@ -172,7 +202,7 @@ local function makeComparisonWindow()
                 input:SetText(reference)
                 input:ClearFocus()
                 showCandidateName(frame.names[slot],reference)
-                NS.SetText(frame.status,"Candidate {1} saved. Add both items, then click Compare with AI.",slot)
+                NS.SetText(frame.status,"")
             else NS.SetText(frame.status,message) end
             return reference
         end
@@ -184,12 +214,20 @@ local function makeComparisonWindow()
         end
         input:SetScript("OnEnterPressed", function(self) save(self:GetText()) end)
         input:SetScript("OnReceiveDrag", receive)
-        local drop = button(frame, "Drop item " .. slot, 20, y, 130, receive)
+        input:SetScript("OnTextChanged",function(self)
+            local reference,message=NS.NormalizeItem(self:GetText())
+            if not reference and self:GetText()~="" then NS.SetText(frame.names[slot],message)
+            else showCandidateName(frame.names[slot],reference) end
+            if frame.status then NS.SetText(frame.status,"") end
+            refreshComparison()
+        end)
+        local drop = button(frame, index==1 and "1. First item" or "2. Second item", 20, y, 140, receive)
         drop:SetScript("OnReceiveDrag", receive)
         frame["drop" .. slot] = drop
     end
-    frame.status = label(frame, "", 20, -285, 710)
-    frame.compare = button(frame, "Compare with AI", 20, -325, 175, function()
+    frame.guide=label(frame,"",20,-325,710)
+    frame.status = label(frame, "", 20, -365, 710)
+    frame.compare = button(frame, "3. Prepare comparison", 20, -415, 270, function()
         if not allowed() then return end
         local a, messageA = NS.NormalizeItem(frame.inputs.A:GetText())
         local b, messageB = NS.NormalizeItem(frame.inputs.B:GetText())
@@ -200,7 +238,7 @@ local function makeComparisonWindow()
         NS.SetCandidate("A", a); NS.SetCandidate("B", b)
         NS.OpenReport("compare")
     end)
-    frame.clear = button(frame, "Clear candidates", 210, -325, 150, function()
+    frame.clear = button(frame, "Start again", 305, -415, 200, function()
         local state = NS.CharacterState()
         state.candidates = {}
         NS.TouchAdvice()
@@ -218,7 +256,8 @@ function NS.OpenComparisonWindow()
         comparisonWindow.inputs[key]:SetText(candidates[key] or "")
         showCandidateName(comparisonWindow.names[key],candidates[key])
     end
-    NS.SetText(comparisonWindow.status,"Drop an item on each button, or paste a game link and press Enter. Full links preserve item variants.")
+    NS.SetText(comparisonWindow.status,"")
+    refreshComparison()
     showPopup(comparisonWindow)
 end
 

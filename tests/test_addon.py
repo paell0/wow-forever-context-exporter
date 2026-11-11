@@ -228,7 +228,11 @@ function widget:Hide() self.shown = false; if self.scripts.OnHide then self.scri
 function widget:Show() self.shown = true; if self.scripts.OnShow then self.scripts.OnShow(self) end end
 function widget:IsShown() return self.shown end
 function widget:IsVisible() return self.shown and (not self.parent or self.parent:IsVisible()) end
-function widget:CreateFontString() return newWidget() end
+function widget:CreateFontString(name, layer, template)
+    local font = newWidget(name)
+    font.kind, font.parent, font.fontTemplate = 'FontString', self, template
+    return font
+end
 function widget:SetText(value) self.value = value; if self.scripts.OnTextChanged then self.scripts.OnTextChanged(self, false) end end
 function widget:GetText() return self.value end
 function widget:SetChecked(value) self.checked = value end
@@ -441,8 +445,8 @@ class AddonTests(unittest.TestCase):
         self.assertEqual(frame.scroll.template, 'UIPanelScrollFrameTemplate')
         self.assertEqual(frame.scroll.child.value, frame.report)
         self.assertIn('REQUEST TO THE AI', frame.report)
-        self.assertEqual(frame.generate.value, 'Generate / refresh')
-        self.assertEqual(frame.select.value, 'Select all')
+        self.assertEqual(frame.generate.value, '1. Prepare text')
+        self.assertEqual(frame.select.value, '2. Select text')
         self.assertTrue(frame.generate.enabled)
         self.assertTrue(frame.select.enabled)
         self.assertIn('Ctrl+C', frame.status.value)

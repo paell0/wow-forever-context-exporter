@@ -322,7 +322,7 @@ class WorkflowTests(unittest.TestCase):
         self.lua.execute('NS.OpenReport(); ForeverContextWindow.goal:SetText("Keep this goal"); ForeverContextWindow.nameCheck:SetChecked(true)')
         g = self.lua.globals()
         report = g.ForeverContextWindow.report
-        self.lua.execute('reference=NS.CharacterState().lastExport; ForeverContextWindow.compare.scripts.OnClick()')
+        self.lua.execute('reference=NS.CharacterState().lastExport; ForeverContextWindow.tools.scripts.OnClick(); ForeverContextToolsWindow.actions.compare.scripts.OnClick()')
         self.assertFalse(g.ForeverContextWindow.IsShown(g.ForeverContextWindow))
         self.assertFalse(g.ForeverContextExportText.IsVisible(g.ForeverContextExportText))
         self.assertTrue(g.ForeverContextComparisonWindow.IsVisible(g.ForeverContextComparisonWindow))
@@ -336,7 +336,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertTrue(self.lua.eval('reference == NS.CharacterState().lastExport'))
 
     def test_planner_replaces_report_and_retains_draft_on_return(self):
-        self.lua.execute('NS.OpenReport(); ForeverContextWindow.plan.scripts.OnClick()')
+        self.lua.execute('NS.OpenReport(); ForeverContextWindow.tools.scripts.OnClick(); ForeverContextToolsWindow.actions.plan.scripts.OnClick()')
         g = self.lua.globals()
         self.assertFalse(g.ForeverContextWindow.shown)
         self.assertTrue(g.ForeverContextPlanWindow.IsVisible(g.ForeverContextPlanWindow))

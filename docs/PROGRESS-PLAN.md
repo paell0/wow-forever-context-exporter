@@ -7,13 +7,13 @@ Controls follow your selected interface language; this guide uses their English 
 ## Follow the four-step loop
 
 1. Open ForeverContext and select **Overview**, **Talent points**, **Gear advice**, or **Next session**. Enter your goal and generate a report.
-2. Copy the text into your preferred AI. The report asks for an optional `FCPLAN/1` plan block at the end of the reply.
-3. Click **Progress plan** in the addon. Paste only that plan block, click **Preview plan**, review the tasks, and click **Accept plan** if you want to follow it.
+2. Use **1. Prepare text**, **2. Select text** and Ctrl+C, then paste into your preferred AI. The report asks for an optional `FCPLAN/1` plan block at the end of the reply.
+3. Choose **More tools → Use an AI plan**. Paste the reply containing one fenced plan, or just the plan block. Click **2. Check the plan**, review the tasks, and click **3. Use this plan** if you want to follow it.
 4. Play, then use **Review plan** or **Review with AI**. The next report contains the accepted tasks, current checks, and observed changes since the reference snapshot.
 
-Only one ForeverContext window is visible at a time. Opening **Progress plan** or **Compare items** temporarily hides the report; closing the editor returns to the same report without regenerating it. Switching between editors keeps the report hidden. Background data retries pause so they cannot take focus from your input; if loading was interrupted, click **Generate / refresh** after returning. Editors opened directly while the report is closed do not open it when dismissed. Entering combat closes the windows without restoring the report.
+Only one ForeverContext window is visible at a time. Opening **Use an AI plan** or **Compare two items** temporarily hides the report; closing the editor returns to the same report without regenerating it. Switching between editors keeps the report hidden. Background data retries pause so they cannot take focus from your input; if loading was interrupted, click **1. Prepare text** after returning. Editors opened directly while the report is closed do not open it when dismissed. Entering combat closes the windows without restoring the report.
 
-Accepting or archiving a plan, or changing a manual checkbox, marks the restored report as outdated. Click **Generate / refresh** to include those changes; **Select all** stays disabled until the report is refreshed. Draft edits do not change accepted progress.
+Accepting or archiving a plan, or changing a manual checkbox, marks the restored report as outdated. Click **1. Prepare text** to include those changes; **2. Select text** stays disabled until the report is refreshed. Draft edits do not change accepted progress.
 
 No network connection or AI model is provided by the addon. Copy reports and plan blocks manually. Importing a plan does not apply talents, equip items, spend gold, or perform gameplay actions.
 
@@ -67,7 +67,7 @@ Snapshots record level, gold balance, equipped item IDs, readable skill ranks, a
 
 ## Compare two items
 
-1. Click **Compare items** or type `/fcontext compare`.
+1. Click **Compare two items** or type `/fcontext compare`.
 2. Drag an item onto **Drop item A** and another onto **Drop item B**. Alternatively, paste a game item link into each field and press Enter.
 3. Click **Compare with AI**. Copy the resulting report into your AI.
 
@@ -87,8 +87,9 @@ The report contains both candidates and your current gear, talents, stats, goals
 | `/fcontext review` | Review accepted and previous advice. |
 | `/fcontext plan` | Preview, accept, and track a plan. |
 | `/fcontext compare` | Choose two item candidates. |
+| `/fcontext tools` | Open the explained optional-tools menu. |
 | `/fcontext minimap` | Hide/show the minimap button. |
 
-Plans, goals, candidate references, snapshots, source records, keep preferences and talent profiles are stored per character in `ForeverContextCharacterDB`. Existing account-level goal/options are used as initial defaults when migrating; future changes are separate per character. Minimap position/visibility remain in the account-level `ForeverContextDB`.
+Plans, goals, candidate references, snapshots, source records, keep preferences and talent profiles are stored per character in `ForeverContextCharacterDB`. Existing account-level goal/options are used as initial defaults when migrating; future changes are separate per character. Minimap position/visibility and interface language remain in the account-level `ForeverContextDB`.
 
 Player-entered goals, accepted task labels, and selected comparison references are included in the reports you choose to export. No account identifier is added to snapshots. AI advice and imported labels are player-supplied context, not verified game rules.

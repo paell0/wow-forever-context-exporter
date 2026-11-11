@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.3.0](https://img.shields.io/static/v1?label=version&message=1.3.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.3.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![132 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=132+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.4.0](https://img.shields.io/static/v1?label=version&message=1.4.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.4.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![144 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=144+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -23,13 +23,16 @@ La versión 1.1.0 añade un plan de progreso por personaje, comparación de dos 
 
 La versión 1.2.0 añade siete mejoras: fuentes de objetos con referencias y estado de confirmación; perfiles de talentos por actividad; avisos por cambio de versión; exportación opcional de bolsas; lista de objetos que conservar; modo sin spoilers; y categorías configurables. Abre **Item sources**, **Talent profiles**, **Browse bags**, **Keep items** y **Export options**. Las fuentes observadas, confirmadas por el jugador y sin confirmar se distinguen; no se incluye una base completa de botín. [Guía de las siete herramientas, en inglés](COMMUNITY-TOOLS.md).
 
+
+La versión 1.4 simplifica el uso: **1. Preparar texto → 2. Seleccionar texto → Ctrl+C**; después abre tu IA y pega con **Ctrl+V**. **Herramientas** explica las funciones opcionales. **Ajustes** muestra primero las opciones básicas. La comparación y los planes tienen pasos numerados. [Guía para empezar, en inglés](QUICKSTART.md).
+
 ## Instalación y uso
 
-1. Descarga `ForeverContext-1.3.0.zip` desde [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
+1. Descarga `ForeverContext-1.4.0.zip` desde [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
 2. Con el juego cerrado, descomprime la carpeta `ForeverContext` en `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Comprueba que exista `AddOns/ForeverContext/ForeverContext.toc` y activa el addon.
 4. Fuera de combate, escribe **`/fcontext`**. Si instalaste ContextoPJ anteriormente, elimina su carpeta para evitar duplicados.
-5. Escribe tu objetivo si quieres, pulsa **Generate / refresh**, después **Select all** y **Ctrl+C**. Pega el texto en la IA con **Ctrl+V**.
+5. Escribe tu objetivo si quieres, pulsa **1. Preparar texto**, después **2. Seleccionar texto** y **Ctrl+C**. Pega el texto en la IA con **Ctrl+V**.
 
 También puedes usar `/forevercontext` o `/pjia`. La ayuda se muestra con `/fcontext help`.
 
@@ -39,10 +42,10 @@ Clase, raza, nivel, experiencia, talentos activos y puntos disponibles; profesio
 
 ## Estado y límites
 
-Vista previa pública para la interfaz **16001**. Han pasado **132 pruebas simuladas con Lua 5.1**; esta versión todavía necesita verificación dentro del juego. Versiones anteriores ya han generado informes reales y han permitido detectar fallos de interfaz.
+Vista previa pública para la interfaz **16001**. Han pasado **144 pruebas simuladas con Lua 5.1**; esta versión todavía necesita verificación dentro del juego. Versiones anteriores ya han generado informes reales y han permitido detectar fallos de interfaz.
 
 El nombre del personaje se omite por defecto. El addon no transmite información ni requiere clave de API. Las bolsas se exportan solo si lo activas; banco, correo y otros personajes quedan fuera. Perfiles, fuentes y preferencias se guardan por personaje. El modo sin spoilers filtra el informe y solicita ese estilo a la IA, pero no controla su respuesta ni borra tus propios textos. Los datos pendientes o restringidos se indican como desconocidos. Esta versión necesita verificación dentro del juego.
 
-La interfaz detecta el idioma del juego y permite cambiarlo desde **Opciones de exportación → Idioma** o `/fcontext language`. Hay 10 idiomas disponibles; el informe sigue en inglés y los nombres del juego mantienen el idioma del cliente. La elección se guarda para toda la cuenta y se aplica sin recargar. [Guía de idiomas](LOCALIZATION.md). [README](../README.md) · [All Rights Reserved](../LICENSE).
+La interfaz detecta el idioma del juego y permite cambiarlo desde **Ajustes → Idioma** o `/fcontext language`. Hay 10 idiomas disponibles; el informe sigue en inglés y los nombres del juego mantienen el idioma del cliente. La elección se guarda para toda la cuenta y se aplica sin recargar. [Guía de idiomas](LOCALIZATION.md). [README](../README.md) · [All Rights Reserved](../LICENSE).
 
 Todos los derechos reservados para el material nuevo desde v1.0.2. Se permite el uso personal de versiones oficiales sin modificar y preparar cambios únicamente para una PR al repositorio oficial; su aceptación depende del mantenedor. No se autoriza la comercialización ni la publicación de versiones alternativas. El material previamente publicado bajo MIT conserva esos permisos: este cambio no los revoca. Consulta los términos completos en inglés en [LICENSE](../LICENSE).

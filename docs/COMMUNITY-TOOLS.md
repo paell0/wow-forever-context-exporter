@@ -6,17 +6,19 @@ Version 1.2.0 implements seven community-requested improvements. Since v1.3.0, c
 
 ## Open the tools
 
-Open `/fcontext` or click the minimap button. The second button row contains:
+Open `/fcontext` or click the minimap button. **More tools** opens the explained optional-tools menu; **Settings** opens the simple preferences:
 
 | Button / command | Purpose |
 | --- | --- |
-| **Export options** / `/fcontext options` | Select report categories and spoiler preferences. |
+| **Settings** / `/fcontext options` | Language, optional bags and spoiler preferences; Choose report details opens the individual categories. |
 | **Browse bags** / `/fcontext bags` | Inspect carried items and choose A/B comparison candidates. |
 | **Keep items** / `/fcontext keep` | Protect item IDs and record why you want to keep them. |
 | **Item sources** / `/fcontext sources` | Manage equipment-origin references and review the notebook with AI. |
 | **Talent profiles** / `/fcontext loadouts` | Save/copy activity-specific talent targets and compare them with your current build. |
 
-Only one addon window is visible at a time. Closing a tool returns to the existing report if it was open. Changing export preferences, candidates or recorded advice context marks that report outdated; click **Generate / refresh** before copying updated advice. Entering combat closes all tools without reopening the report.
+Only one addon window is visible at a time. Closing a tool returns to the existing report if it was open. Changing export preferences, candidates or recorded advice context marks that report outdated; click **1. Prepare text** before copying updated advice. Entering combat closes all tools without reopening the report.
+
+Since v1.4.0, the main footer has two copy steps, **More tools** and **Settings**. Optional features live in the explained **More tools** menu. **Settings → Choose report details** contains the advanced category/source-helper switches; basic Settings has language, bag inclusion and spoiler preferences. The feature names below also identify the existing direct commands. [Beginner guide](QUICKSTART.md).
 
 ## 1. Record where equipment comes from
 
@@ -30,7 +32,7 @@ In **Item sources**:
 
 Multiple origins can be recorded for one item. **Review sources with AI** exports the notebook with your selected character categories, so you can discuss future upgrades whose sources you have recorded. Regular reports include sources matching the equipped items, optional bag contents or A/B candidates that are actually exported.
 
-The addon also observes readable merchant offers when you visit a merchant and reward/choice items displayed during quest interactions. **Observe current offers** refreshes an open merchant or quest-reward window. The observation records an offer/reward, not ownership, purchase, quest completion, boss loot or a guaranteed drop rate. You can disable this helper in **Export options**.
+The addon also observes readable merchant offers when you visit a merchant and reward/choice items displayed during quest interactions. **Observe current offers** refreshes an open merchant or quest-reward window. The observation records an offer/reward, not ownership, purchase, quest completion, boss loot or a guaranteed drop rate. You can disable this helper in **Settings → Choose report details**.
 
 Statuses distinguish provenance:
 
@@ -83,7 +85,7 @@ There is no background internet rule-update service. Build matches and timestamp
 
 ## 4. Include and browse carried bags
 
-Carried-bag export is **off by default**. Enable **Carried bags (opt-in)** in **Export options**, then generate a report. Only equipped carried bags are read: no bank, mail or other-character inventories.
+Carried-bag export is **off by default**. Enable **Also include the items in my bags** in **Settings**, then generate a report. Only equipped carried bags are read: no bank, mail or other-character inventories.
 
 Reports include item references/variants, stack quantities, item type, equipment slot, known reagent status and available vendor price. Vendor price is not auction value or usefulness; missing prices and data remain unknown. Equipment effects/stats are detailed for the first 80 carried equipment entries; remaining references and quantities are still included. The scan has a 400-item safety limit and reports incomplete data explicitly.
 
@@ -97,13 +99,13 @@ The keep list is an instruction to the AI, not an in-game item lock. There is no
 
 ## 6. Request spoiler-free advice
 
-Enable **Spoiler-free advice** in **Export options**. The export suppresses active quest details and source-notebook contents, including the notebook-review report. It asks the AI to avoid future rewards, plot, boss names, undiscovered locations and routes, and to ask before revealing specifics. Freshness instructions do not request source-location spoilers in this mode.
+Enable **Avoid spoilers in AI advice** in **Settings**. The export suppresses active quest details and source-notebook contents, including the notebook-review report. It asks the AI to avoid future rewards, plot, boss names, undiscovered locations and routes, and to ask before revealing specifics. Freshness instructions do not request source-location spoilers in this mode.
 
 This filters exported discovery information and sets the requested reply style. It does not control third-party AI replies, remove every hint from already-owned item names/tooltips, or redact text you wrote yourself in goals, tasks, keep reasons or profile activity names. Opening the source-management window deliberately lets you review your saved notes. Use the report preview before sharing it.
 
 ## 7. Select report categories and helpers
 
-Export options contains independent switches for Current talents, Legacy trees, Professions, Equipped items, Character stats, Buffs, Summoned pet, Skills/proficiencies, Known spells, Active quests, Reputations, Carried bags, Item source notebook, Accepted plan/changes, Selected talent profile and Keep-list preferences.
+**Settings → Choose report details** contains independent switches for Current talents, Legacy trees, Professions, Equipped items, Character stats, Buffs, Summoned pet, Skills/proficiencies, Known spells, Active quests, Reputations, Carried bags, Item source notebook, Accepted plan/changes, Selected talent profile and Keep-list preferences.
 
 Identity/client basics remain included. The purpose buttons and **Include extra details for this question** still determine which enabled optional categories are relevant. Disabled categories are omitted rather than assumed absent. Profession ranks do not reappear through skill fallback queries when Professions is disabled, and plan details/deltas respect the related category choices. Player-authored text may mention any topic and is not automatically rewritten.
 
@@ -111,6 +113,6 @@ Identity/client basics remain included. The purpose buttons and **Include extra 
 
 ## Storage, limits and validation
 
-All new settings, source records, keep preferences and profiles are local and per character in `ForeverContextCharacterDB`. Minimap and language preferences remain account-level. Choose **Export options → Language** or use `/fcontext language`; changes take effect immediately. Restoring export defaults preserves this account-wide choice. Plans retain the two-archive limit. No API key, desktop helper, clipboard-access permission or AI account is required by the addon; you manually choose which AI receives the copied text.
+All new settings, source records, keep preferences and profiles are local and per character in `ForeverContextCharacterDB`. Minimap and language preferences remain account-level. Choose **Settings → Language** or use `/fcontext language`; changes take effect immediately. Restoring export defaults preserves this account-wide choice. Plans retain the two-archive limit. No API key, desktop helper, clipboard-access permission or AI account is required by the addon; you manually choose which AI receives the copied text.
 
 Validation uses strict Lua 5.1 simulation, including the documented Forever [Container API](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/ContainerDocumentation.lua), [item metadata](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/ItemDocumentation.lua), [native talent export API](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/SharedTraitsDocumentation.lua), and the client's [merchant](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_UIPanels_Game/Mainline/MerchantFrame.lua) and [quest-reward UI](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_UIPanels_Game/Mainline/QuestInfo.lua). Live client verification is still pending for this release.

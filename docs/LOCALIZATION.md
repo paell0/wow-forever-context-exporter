@@ -2,7 +2,7 @@
 
 [Main README](../README.md) · [Community tools](COMMUNITY-TOOLS.md)
 
-ForeverContext 1.3.0 follows the game language by default. Choose another language in **Export options → Language**, or open the selector directly with `/fcontext language`. The choice takes effect immediately, without reloading the UI.
+ForeverContext follows the game language by default. Choose another language in **Settings → Language**, or open the selector directly with `/fcontext language`. The choice takes effect immediately, without reloading the UI.
 
 ## Available languages
 

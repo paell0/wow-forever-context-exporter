@@ -14,9 +14,9 @@ class LocalizationTests(unittest.TestCase):
         self.lua.execute('ForeverContextDB={}; NS.OpenReport()')
         g = self.lua.globals()
         self.assertEqual(self.ns.GetLanguage(), 'esES')
-        self.assertEqual(g.ForeverContextWindow.generate.value, 'Generar / actualizar')
-        self.assertEqual(g.ForeverContextWindow.select.value, 'Seleccionar todo')
-        self.assertEqual(g.ForeverContextWindow.options.value, 'Opciones de exportación')
+        self.assertEqual(g.ForeverContextWindow.generate.value, '1. Preparar texto')
+        self.assertEqual(g.ForeverContextWindow.select.value, '2. Seleccionar texto')
+        self.assertEqual(g.ForeverContextWindow.options.value, 'Ajustes')
         self.assertIn('Resumen', g.ForeverContextWindow.modes.overview.value)
         self.assertIn('CHARACTER CONTEXT', g.ForeverContextWindow.report)
         self.assertIn('Language: esES', g.ForeverContextWindow.report)
@@ -55,7 +55,7 @@ class LocalizationTests(unittest.TestCase):
         version = self.ns.ProgressVersion()
         self.ns.SetLanguage('esES')
         g = self.lua.globals()
-        self.assertEqual(g.ForeverContextWindow.plan.value, 'Plan de progreso')
+        self.assertEqual(g.ForeverContextWindow.tools.value, 'Herramientas')
         self.assertEqual(g.ForeverContextOptionsWindow.languageLabel.value, 'Idioma')
         self.assertEqual(self.ns.ProgressVersion(), version)
         g.ForeverContextOptionsWindow.close.scripts.OnClick()
@@ -75,7 +75,7 @@ class LocalizationTests(unittest.TestCase):
         self.assertFalse(picker.shown)
         self.assertTrue(g.ForeverContextOptionsWindow.shown)
         self.assertIn('Español', g.ForeverContextOptionsWindow.language.value)
-        self.assertEqual(g.ForeverContextWindow.select.value, 'Seleccionar todo')
+        self.assertEqual(g.ForeverContextWindow.select.value, '2. Seleccionar texto')
 
     def test_user_text_and_import_buffers_are_never_translated(self):
         text = 'FCPLAN/1\nTITLE|Next\nMANUAL|Generate / refresh'
@@ -100,7 +100,7 @@ class LocalizationTests(unittest.TestCase):
         frame = self.lua.globals().ForeverContextComparisonWindow
         self.assertEqual(frame.names.A.value, 'Next')
         self.assertIn('item:12345:678:901:902:', frame.inputs.A.value)
-        self.assertEqual(frame.dropA.value, 'Arrastrar objeto A')
+        self.assertEqual(frame.dropA.value, '1. Primer objeto')
         self.ns.SetLanguage('frFR')
         self.assertEqual(frame.names.A.value, 'Next')
 
@@ -184,7 +184,7 @@ class LocalizationTests(unittest.TestCase):
                 self.assertNotIn('FCNEWLINE', value)
 
     def test_every_locale_builds_all_windows_using_original_client_api_names(self):
-        openers = ('OpenReport','OpenPlanWindow','OpenComparisonWindow','OpenPreferencesWindow','OpenBagWindow','OpenKeepWindow','OpenSourcesWindow','OpenLoadoutsWindow','OpenLanguageWindow')
+        openers = ('OpenReport','OpenPlanWindow','OpenComparisonWindow','OpenPreferencesWindow','OpenDetailedPreferencesWindow','OpenToolsWindow','OpenBagWindow','OpenKeepWindow','OpenSourcesWindow','OpenLoadoutsWindow','OpenLanguageWindow')
         for row in self.ns.LocaleOptions.values():
             if row[1] == 'auto':
                 continue

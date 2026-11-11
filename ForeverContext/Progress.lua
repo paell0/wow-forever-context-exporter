@@ -155,6 +155,34 @@ function NS.ParsePlan(text)
     return plan
 end
 
+-- Accept a full AI reply containing one fenced plan, then use the same strict
+-- parser. Surrounding prose is never executed or silently treated as a task.
+function NS.ParsePlanReply(text)
+    if type(text)~="string" or #text>24000 then return NS.ParsePlan(text) end
+    text=text:gsub("\r\n","\n"):gsub("\r","\n"):gsub("^\239\187\191","")
+    local lines,inside,start,ending,planFence,count={},nil,nil,nil,nil,0
+    for line in (text .. "\n"):gmatch("(.-)\n") do
+        lines[#lines+1]=line
+        local trimmed=line:match("^%s*(.-)%s*$")
+        if inside then
+            if trimmed==inside then
+                if start and planFence==inside and not ending then ending=#lines-1 end
+                inside=nil
+            end
+        else
+            inside=trimmed:match("^(```+)[%w_-]*%s*$") or trimmed:match("^(~~~+)[%w_-]*%s*$")
+        end
+        if trimmed=="FCPLAN/1" then
+            count=count+1
+            start,planFence=#lines,inside
+        end
+    end
+    if count==0 then return nil,"No plan found. Ask your AI for a ForeverContext plan (FCPLAN/1), then paste it here." end
+    if count>1 then return nil,"More than one plan found. Paste only the one you want to use." end
+    if planFence and not ending then return nil,"The plan block is incomplete. Copy the whole block and try again." end
+    return NS.ParsePlan(table.concat(lines,"\n",start,ending or #lines))
+end
+
 function NS.EvaluateTask(task, snapshot)
     local observed, target = nil, task.target
     if task.kind == "MANUAL" then return task.manualDone and "DONE" or "PENDING", "manual check" end

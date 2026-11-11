@@ -28,7 +28,7 @@ end
 local function showStaleReportStatus()
     window.text:ClearFocus()
     window.select:Disable()
-    NS.SetText(window.status,"Context changed. Click Generate / refresh before copying updated advice.")
+    NS.SetText(window.status,"Context changed. Click 1. Prepare text to update the report before copying.")
 end
 
 local function selectReport()
@@ -47,9 +47,9 @@ local function finish()
     window.select:Enable()
     NS.CommitExport(window.snapshot)
     if lastPending and lastPending > 0 then
-        NS.SetText(window.status,"Report ready with pending data. Check the warnings and generate again.")
+        NS.SetText(window.status,"Report ready with pending data. Read its warnings; click 1. Prepare text to try again.")
     elseif lastWarnings and lastWarnings > 0 then
-        NS.SetText(window.status,"Report ready with warnings. Click Select all, then Ctrl+C.")
+        NS.SetText(window.status,"Report ready with warnings. Read them, then click 2. Select text and press Ctrl+C.")
     else
         selectReport()
     end
@@ -163,7 +163,7 @@ local function createWindow()
 
     frame.panel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     frame.panel:SetPoint("TOPLEFT", 18, -181)
-    frame.panel:SetPoint("BOTTOMRIGHT", -18, 128)
+    frame.panel:SetPoint("BOTTOMRIGHT", -18, 150)
     frame.panel:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
     frame.panel:SetBackdropColor(0.015, 0.02, 0.03, 1)
     -- Keep client frame, template, and method identifiers unchanged when translating labels.
@@ -193,15 +193,15 @@ local function createWindow()
         if cursor < top then frame.scroll:SetVerticalScroll(math.max(0, cursor))
         elseif cursor + height > top + visible then frame.scroll:SetVerticalScroll(math.max(0, cursor + height - visible)) end
     end)
-    frame.generate = button(frame, "Generate / refresh", 165, "BOTTOMLEFT", frame, "BOTTOMLEFT", 20, 51, generate)
-    frame.select = button(frame, "Select all", 150, "LEFT", frame.generate, "RIGHT", 12, 0, selectReport)
-    frame.plan = button(frame, "Progress plan", 135, "BOTTOMRIGHT", frame, "BOTTOMRIGHT", -20, 51, function() NS.OpenPlanWindow() end)
-    frame.compare = button(frame, "Compare items", 135, "RIGHT", frame.plan, "LEFT", -10, 0, function() NS.OpenComparisonWindow() end)
-    frame.options = button(frame, "Export options", 145, "BOTTOMLEFT", frame, "BOTTOMLEFT", 20, 91, function() NS.OpenPreferencesWindow() end)
-    frame.bags = button(frame, "Browse bags", 145, "LEFT", frame.options, "RIGHT", 10, 0, function() NS.OpenBagWindow() end)
-    frame.keep = button(frame, "Keep items", 145, "LEFT", frame.bags, "RIGHT", 10, 0, function() NS.OpenKeepWindow() end)
-    frame.sources = button(frame, "Item sources", 145, "LEFT", frame.keep, "RIGHT", 10, 0, function() NS.OpenSourcesWindow() end)
-    frame.loadouts = button(frame, "Talent profiles", 145, "LEFT", frame.sources, "RIGHT", 10, 0, function() NS.OpenLoadoutsWindow() end)
+    frame.copyHelp = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    frame.copyHelp:SetPoint("BOTTOMLEFT", 22, 108)
+    frame.copyHelp:SetWidth(770)
+    frame.copyHelp:SetJustifyH("LEFT")
+    NS.SetText(frame.copyHelp,"Prepare the text, select it, then press Ctrl+C. Open your AI and press Ctrl+V to ask for advice.")
+    frame.generate = button(frame, "1. Prepare text", 188, "BOTTOMLEFT", frame, "BOTTOMLEFT", 20, 60, generate)
+    frame.select = button(frame, "2. Select text", 188, "LEFT", frame.generate, "RIGHT", 10, 0, selectReport)
+    frame.tools = button(frame, "More tools", 180, "BOTTOMLEFT", frame, "BOTTOMLEFT", 435, 60, function() NS.OpenToolsWindow() end)
+    frame.options = button(frame, "Settings", 165, "BOTTOMRIGHT", frame, "BOTTOMRIGHT", -20, 60, function() NS.OpenPreferencesWindow() end)
     frame.modes = {}
     for index, key in ipairs({"overview", "talents", "gear", "session", "review"}) do
         local modeKey = key
@@ -223,7 +223,7 @@ local function createWindow()
             self.loading = false
             self.generate:Enable()
             self.select:Enable()
-            NS.SetText(self.status,"Loading paused. Click Generate / refresh to finish loading missing data.")
+            NS.SetText(self.status,"Loading paused. Click 1. Prepare text to finish loading missing data.")
         end
         self.goal:ClearFocus()
         self.text:ClearFocus()
@@ -297,6 +297,7 @@ SlashCmdList["FOREVER_CONTEXT"] = function(message)
     elseif message == "compare" then
         NS.OpenComparisonWindow()
     elseif message == "options" then NS.OpenPreferencesWindow()
+    elseif message == "tools" then NS.OpenToolsWindow()
     elseif message == "language" then NS.OpenLanguageWindow()
     elseif message:match("^language%s+") then
         local ok,errorMessage=NS.SetLanguage(message:match("^language%s+(.+)$"))
