@@ -1,10 +1,12 @@
 """Build the installable addon and verify local Markdown links."""
 import re
+import runpy
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 
 ROOT = Path(__file__).resolve().parents[1]
 ADDON = ROOT / 'ForeverContext'
+runpy.run_path(str(ROOT / 'scripts/build_locales.py'), run_name='__main__')
 version = re.search(r'^## Version:\s*(\S+)', (ADDON / 'ForeverContext.toc').read_text(encoding='utf-8'), re.M)[1]
 
 for doc in [ROOT / 'README.md', ROOT / 'CONTRIBUTING.md', *sorted((ROOT / 'docs').glob('*.md'))]:

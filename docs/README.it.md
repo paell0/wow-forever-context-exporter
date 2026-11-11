@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.2.0](https://img.shields.io/static/v1?label=version&message=1.2.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.2.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![114 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=114+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.3.0](https://img.shields.io/static/v1?label=version&message=1.3.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.3.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![132 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=132+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -25,7 +25,7 @@ La versione 1.2.0 aggiunge sette funzioni: fonti degli oggetti con riferimenti e
 
 ## Installazione e utilizzo
 
-1. Scarica `ForeverContext-1.2.0.zip` da [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
+1. Scarica `ForeverContext-1.3.0.zip` da [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
 2. Chiudi il gioco ed estrai la cartella `ForeverContext` in `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Verifica il percorso `AddOns/ForeverContext/ForeverContext.toc` e attiva l’addon. Se hai installato il vecchio ContextoPJ, rimuovi prima la sua cartella.
 4. Fuori dal combattimento, digita **`/fcontext`**.
@@ -39,10 +39,10 @@ Classe, razza, livello, esperienza, talenti attivi e punti disponibili; professi
 
 ## Stato e limiti
 
-Anteprima pubblica per l’interfaccia **16001**. Superati **114 test simulati con Lua 5.1**; l’addon non è ancora stato provato in una sessione reale di WoW Forever.
+Anteprima pubblica per l’interfaccia **16001**. Superati **132 test simulati con Lua 5.1**; l’addon non è ancora stato provato in una sessione reale di WoW Forever.
 
 Il nome del personaggio è nascosto per impostazione predefinita. Non vengono trasmessi dati e non serve una chiave API. Le borse sono esportate solo se abilitate; banca, posta e altri personaggi sono esclusi. Profili, fonti e preferenze sono salvati per personaggio. La modalità senza spoiler filtra il rapporto e istruisce l’IA, ma non controlla la risposta né elimina i tuoi testi. I dati mancanti restano sconosciuti. Questa versione richiede ancora verifica nel gioco.
 
-Pulsanti ed etichette del rapporto sono in inglese; nomi e descrizioni del gioco mantengono la lingua del client. Questa è una traduzione della documentazione. Consulta il [README principale](../README.md) per sviluppo e limiti completi. Licenza [All Rights Reserved](../LICENSE).
+L’interfaccia segue la lingua del gioco e permette di cambiarla nelle opzioni di esportazione o con `/fcontext language`. Sono disponibili 10 lingue; il rapporto resta in inglese e i nomi del gioco mantengono la lingua del client. La scelta si applica subito a tutto l’account. [Guida alle lingue](LOCALIZATION.md). [README](../README.md) · [All Rights Reserved](../LICENSE).
 
 Tutti i diritti sui nuovi contenuti originali dalla v1.0.2 sono riservati, salvo i permessi indicati. Sono consentiti l’uso personale delle versioni ufficiali non modificate e le modifiche preparate esclusivamente per una PR al repository ufficiale; l’accettazione spetta al manutentore. Non sono autorizzate la commercializzazione o la pubblicazione di versioni alternative. I contenuti già pubblicati sotto MIT mantengono quei permessi: questa modifica non li revoca. Termini completi in inglese: [LICENSE](../LICENSE).

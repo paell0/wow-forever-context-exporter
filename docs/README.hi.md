@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.2.0](https://img.shields.io/static/v1?label=version&message=1.2.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.2.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![114 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=114+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.3.0](https://img.shields.io/static/v1?label=version&message=1.3.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.3.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![132 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=132+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -25,7 +25,7 @@
 
 ## इंस्टॉल करना और उपयोग
 
-1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) से `ForeverContext-1.2.0.zip` डाउनलोड करें।
+1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) से `ForeverContext-1.3.0.zip` डाउनलोड करें।
 2. गेम बंद करें और `ForeverContext` फ़ोल्डर को `World of Warcraft/_forever_/Interface/AddOns/` में निकालें।
 3. सुनिश्चित करें कि पथ `AddOns/ForeverContext/ForeverContext.toc` है और ऐडऑन चालू करें। पुराना ContextoPJ इंस्टॉल हो तो उसका फ़ोल्डर पहले हटा दें।
 4. युद्ध के बाहर **`/fcontext`** लिखें।
@@ -39,10 +39,10 @@
 
 ## स्थिति और सीमाएँ
 
-इंटरफ़ेस **16001** के लिए सार्वजनिक पूर्वावलोकन। **Lua 5.1 के 114 सिम्युलेटेड परीक्षण** सफल हैं; वास्तविक WoW Forever सत्र में अभी परीक्षण नहीं हुआ है।
+इंटरफ़ेस **16001** के लिए सार्वजनिक पूर्वावलोकन। **Lua 5.1 के 132 सिम्युलेटेड परीक्षण** सफल हैं; वास्तविक WoW Forever सत्र में अभी परीक्षण नहीं हुआ है।
 
 पात्र का नाम डिफ़ॉल्ट रूप से छिपा रहता है। डेटा भेजा नहीं जाता और API कुंजी नहीं चाहिए। बैग केवल विकल्प चालू करने पर निर्यात होते हैं; बैंक, डाक और दूसरे पात्र शामिल नहीं हैं। प्रोफ़ाइल, स्रोत और पसंद हर पात्र के लिए अलग सहेजे जाते हैं। स्पॉइलर-रहित मोड रिपोर्ट फ़िल्टर करता है और AI को निर्देश देता है, लेकिन उसके जवाब या आपके लिखे पाठ को नियंत्रित नहीं करता। अनुपलब्ध डेटा अज्ञात दिखता है। इस संस्करण की खेल में जाँच अभी बाकी है।
 
-ऐडऑन के नियंत्रण और रिपोर्ट लेबल अंग्रेज़ी में हैं। गेम के नाम और विवरण क्लाइंट की भाषा में रहते हैं। यह केवल दस्तावेज़ का अनुवाद है, हिन्दी गेम क्लाइंट समर्थन का दावा नहीं। विकास और पूरी सीमाओं के लिए [अंग्रेज़ी README](../README.md) देखें। लाइसेंस: [All Rights Reserved](../LICENSE)।
+इंटरफ़ेस खेल की भाषा पहचानता है। निर्यात विकल्पों या `/fcontext language` से 10 भाषाओं में से चुनें; हिन्दी इंटरफ़ेस अभी शामिल नहीं है। रिपोर्ट अंग्रेज़ी में रहती है और खेल के नाम क्लाइंट की भाषा में रहते हैं। चयन बिना रीलोड पूरे खाते पर लागू होता है। [भाषा गाइड](LOCALIZATION.md)। [README](../README.md) · [All Rights Reserved](../LICENSE).
 
 v1.0.2 से नई मौलिक सामग्री के सभी अधिकार सुरक्षित हैं। आधिकारिक अपरिवर्तित संस्करणों का व्यक्तिगत उपयोग और केवल आधिकारिक रिपॉज़िटरी में PR भेजने के लिए बदलाव व परीक्षण की अनुमति है; स्वीकृति रखरखावकर्ता तय करता है। व्यावसायीकरण या अलग संशोधित संस्करण प्रकाशित करने की अनुमति नहीं है। पहले MIT के तहत प्रकाशित सामग्री के अधिकार बने रहते हैं; यह बदलाव उन्हें रद्द नहीं करता। पूर्ण अंग्रेज़ी शर्तें [LICENSE](../LICENSE) में हैं।

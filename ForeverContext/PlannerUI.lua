@@ -26,23 +26,23 @@ local function renderPlan()
             row.check:SetChecked(status == "DONE")
             if task.kind == "MANUAL" and not planWindow.preview then row.check:Enable() else row.check:Disable() end
             local color = status == "DONE" and "|cff65d993" or status == "UNKNOWN" and "|cffaaaaaa" or "|cffffd46a"
-            row.text:SetText(color .. "[" .. status .. "]|r " .. NS.Clean(task.label) .. "\n" .. detail)
+            NS.BindText(row.text,function() return color .. "[" .. NS.L(status) .. "]|r " .. NS.Clean(task.label) .. "\n" .. NS.L(detail) end)
             row.check:Show(); row.text:Show()
         else
             row.check:Hide(); row.text:Hide()
         end
     end
     if planWindow.preview then
-        planWindow.status:SetText("DRAFT: " .. plan.title .. " — " .. #tasks .. " tasks. Click Accept plan to replace the active plan.")
+        NS.SetText(planWindow.status,"DRAFT: {1} — {2} tasks. Click Accept plan to replace the active plan.",plan.title,#tasks)
         planWindow.accept:Enable()
     elseif plan then
-        planWindow.status:SetText("ACTIVE: " .. plan.title .. " — " .. completed .. "/" .. #tasks .. " done; " .. unknown .. " unknown. Checks reflect current state.")
+        NS.SetText(planWindow.status,"ACTIVE: {1} — {2}/{3} done; {4} unknown. Checks reflect current state.",plan.title,completed,#tasks,unknown)
         planWindow.accept:Disable()
     else
-        planWindow.status:SetText("No active plan. Paste an FCPLAN/1 block, preview it, and accept the tasks you want to follow.")
+        NS.SetText(planWindow.status,"No active plan. Paste an FCPLAN/1 block, preview it, and accept the tasks you want to follow.")
         planWindow.accept:Disable()
     end
-    planWindow.pages:SetText("Page " .. planWindow.page .. "/" .. pages)
+    NS.SetText(planWindow.pages,"Page {1}/{2}",planWindow.page,pages)
 end
 
 local function makePlanWindow()
@@ -75,7 +75,7 @@ local function makePlanWindow()
             -- every equipment slot and talent node on each keystroke.
             if hadPreview then renderPlan() end
             frame.accept:Disable()
-            frame.status:SetText("Draft edited. Click Preview plan to validate; the active plan is unchanged.")
+            NS.SetText(frame.status,"Draft edited. Click Preview plan to validate; the active plan is unchanged.")
         end
     end)
     frame.previewButton = button(frame, "Preview plan", 20, -250, 135, function()
@@ -83,12 +83,12 @@ local function makePlanWindow()
         local plan, errorMessage = NS.ParsePlan(frame.input:GetText())
         frame.preview, frame.page = plan, 1
         renderPlan()
-        if not plan then frame.status:SetText(errorMessage) end
+        if not plan then NS.SetText(frame.status,errorMessage) end
     end)
     frame.accept = button(frame, "Accept plan", 165, -250, 135, function()
         if not allowed() then return end
         local ok, message = NS.AcceptPlan(frame.preview)
-        if not ok then frame.status:SetText(message); return end
+        if not ok then NS.SetText(frame.status,message); return end
         frame.preview = nil
         renderPlan()
     end)
@@ -126,7 +126,7 @@ local function makePlanWindow()
     frame.reviewBuild = button(frame, "Mark build reviewed", 455, -250, 160, function()
         if not allowed() then return end
         local ok, message = NS.ReviewPlanForBuild()
-        frame.status:SetText(ok and "Plan marked reviewed for this client build. Original reference preserved." or message)
+        NS.SetText(frame.status,ok and "Plan marked reviewed for this client build. Original reference preserved." or message)
     end)
     frame.clear:ClearAllPoints()
     frame.clear:SetPoint("TOPLEFT", 620, -250)
@@ -144,9 +144,11 @@ function NS.OpenPlanWindow()
     renderPlan()
 end
 
-local function candidateName(reference)
+local function showCandidateName(widget, reference)
+    if not reference then NS.SetText(widget,"No item selected."); return end
     local name = C_Item and NS.SafeCall(C_Item.GetItemInfo, reference)
-    return NS.Clean(name, "Item data loads when generating the comparison report.")
+    if type(name)=="string" then NS.SetText(widget,"{1}",NS.Clean(name))
+    else NS.SetText(widget,"Item data loads when generating the comparison report.") end
 end
 
 local function makeComparisonWindow()
@@ -169,15 +171,15 @@ local function makeComparisonWindow()
             if reference then
                 input:SetText(reference)
                 input:ClearFocus()
-                frame.names[slot]:SetText(candidateName(reference))
-                frame.status:SetText("Candidate " .. slot .. " saved. Add both items, then click Compare with AI.")
-            else frame.status:SetText(message) end
+                showCandidateName(frame.names[slot],reference)
+                NS.SetText(frame.status,"Candidate {1} saved. Add both items, then click Compare with AI.",slot)
+            else NS.SetText(frame.status,message) end
             return reference
         end
         local function receive()
             if not allowed() then return end
             local reference, message = NS.CursorItemReference()
-            if not reference then frame.status:SetText(message); input:SetFocus(); return end
+            if not reference then NS.SetText(frame.status,message); input:SetFocus(); return end
             if save(reference) and type(ClearCursor) == "function" then ClearCursor() end
         end
         input:SetScript("OnEnterPressed", function(self) save(self:GetText()) end)
@@ -191,7 +193,10 @@ local function makeComparisonWindow()
         if not allowed() then return end
         local a, messageA = NS.NormalizeItem(frame.inputs.A:GetText())
         local b, messageB = NS.NormalizeItem(frame.inputs.B:GetText())
-        if not a or not b then frame.status:SetText("Add both candidates. " .. (messageA or messageB or "")); return end
+        if not a or not b then
+            NS.BindText(frame.status,function() return NS.L("Add both candidates. {1}",NS.L(messageA or messageB or "")) end)
+            return
+        end
         NS.SetCandidate("A", a); NS.SetCandidate("B", b)
         NS.OpenReport("compare")
     end)
@@ -199,8 +204,8 @@ local function makeComparisonWindow()
         local state = NS.CharacterState()
         state.candidates = {}
         NS.TouchAdvice()
-        for _, key in ipairs({"A", "B"}) do frame.inputs[key]:SetText(""); frame.names[key]:SetText("") end
-        frame.status:SetText("Candidates cleared.")
+        for _, key in ipairs({"A", "B"}) do frame.inputs[key]:SetText(""); NS.SetText(frame.names[key],"") end
+        NS.SetText(frame.status,"Candidates cleared.")
     end)
     frame:HookScript("OnHide", function(self) self.inputs.A:ClearFocus(); self.inputs.B:ClearFocus() end)
 end
@@ -211,9 +216,9 @@ function NS.OpenComparisonWindow()
     local candidates = NS.CharacterState().candidates
     for _, key in ipairs({"A", "B"}) do
         comparisonWindow.inputs[key]:SetText(candidates[key] or "")
-        comparisonWindow.names[key]:SetText(candidates[key] and candidateName(candidates[key]) or "No item selected.")
+        showCandidateName(comparisonWindow.names[key],candidates[key])
     end
-    comparisonWindow.status:SetText("Drop an item on each button, or paste a game link and press Enter. Full links preserve item variants.")
+    NS.SetText(comparisonWindow.status,"Drop an item on each button, or paste a game link and press Enter. Full links preserve item variants.")
     showPopup(comparisonWindow)
 end
 

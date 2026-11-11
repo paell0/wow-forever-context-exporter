@@ -1,5 +1,5 @@
 local _, NS = ...
-NS.VERSION = "1.2.0"
+NS.VERSION = "1.3.0"
 
 -- Only public addon APIs. Exporting is disabled in combat by UI.lua.
 local function secret(value)

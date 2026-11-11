@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.2.0](https://img.shields.io/static/v1?label=version&message=1.2.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.2.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![114 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=114+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.3.0](https://img.shields.io/static/v1?label=version&message=1.3.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.3.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![132 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=132+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -25,7 +25,7 @@
 
 ## การติดตั้งและใช้งาน
 
-1. ดาวน์โหลด `ForeverContext-1.2.0.zip` จาก [Releases](https://github.com/paell0/wow-forever-context-exporter/releases)
+1. ดาวน์โหลด `ForeverContext-1.3.0.zip` จาก [Releases](https://github.com/paell0/wow-forever-context-exporter/releases)
 2. ปิดเกมแล้วแตกโฟลเดอร์ `ForeverContext` ลงใน `World of Warcraft/_forever_/Interface/AddOns/`
 3. ตรวจสอบว่ามีไฟล์ `AddOns/ForeverContext/ForeverContext.toc` และเปิดใช้งานแอดออน หากเคยติดตั้ง ContextoPJ ให้ลบโฟลเดอร์เก่าก่อน
 4. ขณะไม่ได้ต่อสู้ ให้พิมพ์ **`/fcontext`**
@@ -39,10 +39,10 @@
 
 ## สถานะและข้อจำกัด
 
-รุ่นทดลองสาธารณะสำหรับอินเทอร์เฟซ **16001** ผ่านการทดสอบจำลอง **Lua 5.1 จำนวน 114 รายการ** แต่ยังไม่ได้ทดสอบในเซสชัน WoW Forever จริง
+รุ่นทดลองสาธารณะสำหรับอินเทอร์เฟซ **16001** ผ่านการทดสอบจำลอง **Lua 5.1 จำนวน 132 รายการ** แต่ยังไม่ได้ทดสอบในเซสชัน WoW Forever จริง
 
 ค่าเริ่มต้นไม่แสดงชื่อตัวละคร ไม่มีการส่งข้อมูลและไม่ต้องใช้คีย์ API ส่งออกกระเป๋าเฉพาะเมื่อเปิดตัวเลือก ไม่รวมธนาคาร จดหมาย หรือตัวละครอื่น โปรไฟล์ แหล่งไอเทม และค่าตั้งบันทึกแยกตามตัวละคร โหมดไม่สปอยล์กรองรายงานและกำชับ AI แต่ควบคุมคำตอบหรือข้อความที่คุณเขียนเองไม่ได้ ข้อมูลที่อ่านไม่ได้จะแสดงว่าไม่ทราบ รุ่นนี้ยังต้องตรวจสอบในเกม
 
-ปุ่มและป้ายกำกับรายงานเป็นภาษาอังกฤษ ชื่อและคำอธิบายในเกมยังเป็นภาษาของไคลเอนต์ นี่เป็นการแปลเอกสารเท่านั้น ไม่ได้เพิ่มการรองรับไคลเอนต์ภาษาไทย ดูรายละเอียดและการพัฒนาที่ [README ภาษาอังกฤษ](../README.md) สัญญาอนุญาต: [All Rights Reserved](../LICENSE)
+หน้าต่างจะใช้ภาษาของเกมโดยอัตโนมัติ เปลี่ยนได้ในตัวเลือกส่งออกหรือด้วย `/fcontext language` มี 10 ภาษาให้เลือก แต่ยังไม่มีภาษาไทย รายงานยังเป็นภาษาอังกฤษ และชื่อในเกมคงภาษาของไคลเอนต์ การเลือกมีผลทั้งบัญชีทันทีโดยไม่ต้องโหลดใหม่ [คู่มือภาษา](LOCALIZATION.md) [README](../README.md) · [All Rights Reserved](../LICENSE).
 
 สงวนสิทธิ์ในเนื้อหาต้นฉบับใหม่ตั้งแต่ v1.0.2 อนุญาตให้ใช้รุ่นทางการที่ไม่แก้ไขเป็นการส่วนตัว และแก้ไขหรือทดสอบเพื่อส่ง PR ไปยังคลังทางการเท่านั้น โดยผู้ดูแลเป็นผู้ตัดสินใจรับการเปลี่ยนแปลง ไม่อนุญาตให้นำไปจำหน่ายหรือเผยแพร่รุ่นดัดแปลงแยกต่างหาก เนื้อหาที่เคยเผยแพร่ภายใต้ MIT ยังคงมีสิทธิ์เดิม การเปลี่ยนแปลงนี้ไม่เพิกถอนสิทธิ์นั้น ดูข้อกำหนดภาษาอังกฤษฉบับเต็มใน [LICENSE](../LICENSE)

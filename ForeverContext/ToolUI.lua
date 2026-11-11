@@ -3,7 +3,7 @@ local windows, returnToReport, switching = {}, false, false
 
 function NS.ToolsAllowed()
     if InCombatLockdown and InCombatLockdown() then
-        if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("ForeverContext: leave combat to use these tools.") end
+        if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage(NS.L("ForeverContext: leave combat to use these tools.")) end
         return false
     end
     return true
@@ -28,7 +28,7 @@ function NS.ToolLabel(parent, text, x, y, width)
     font:SetPoint("TOPLEFT", x, y)
     font:SetWidth(width or 700)
     font:SetJustifyH("LEFT")
-    font:SetText(text)
+    NS.SetText(font,text)
     return font
 end
 
@@ -36,7 +36,7 @@ function NS.ToolButton(parent, text, x, y, width, action)
     local widget = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     widget:SetPoint("TOPLEFT", x, y)
     widget:SetSize(width, 26)
-    widget:SetText(text)
+    NS.SetText(widget,text)
     widget:SetScript("OnClick", action)
     return widget
 end
@@ -56,7 +56,7 @@ function NS.ToolCheck(parent, text, x, y, checked, action)
     local check = CreateFrame("CheckButton", nil, parent, "UICheckButtonTemplate")
     check:SetPoint("TOPLEFT", x, y)
     check:SetChecked(checked == true)
-    check.Text:SetText(text)
+    NS.SetText(check.Text,text)
     check:SetScript("OnClick", function(self) action(self:GetChecked() and true or false) end)
     return check
 end

@@ -13,6 +13,7 @@ from lupa.lua51 import LuaRuntime
 ADDON = ROOT / 'ForeverContext'
 MOCK = r'''
 NS = {}
+ForeverContextDB = {language = 'enUS'}
 combat = false
 messages = {}
 requests = 0
@@ -193,6 +194,13 @@ function widget:GetCenter() return self.centerX or 500, self.centerY or 500 end
 function widget:GetEffectiveScale() return self.scale or 1 end
 function widget:GetFrameLevel() return self.frameLevel or 0 end
 function widget:SetFrameLevel(value) self.frameLevel = value end
+function widget:GetFont() return self.fontFile or 'Fonts\\FRIZQT__.TTF', self.fontHeight or 12, self.fontFlags or '' end
+function widget:SetFont(path, height, flags) self.fontFile=path; self.fontHeight=height; self.fontFlags=flags; return true end
+function widget:GetFontString()
+    if self.kind~='Button' then return nil end
+    if not self.labelFont then self.labelFont=newWidget(); self.labelFont.parent=self; self.labelFont.kind='FontString' end
+    return self.labelFont
+end
 function widget:GetFrameStrata() return self.strata or (self.parent and self.parent:GetFrameStrata()) or 'MEDIUM' end
 function widget:SetFrameStrata(value)
     local strata = {BACKGROUND=true, LOW=true, MEDIUM=true, HIGH=true, DIALOG=true, FULLSCREEN=true, FULLSCREEN_DIALOG=true, TOOLTIP=true}
@@ -273,6 +281,8 @@ class AddonTests(unittest.TestCase):
     def setUp(self):
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.lua.execute(MOCK)
+        self.load('Localization.lua')
+        self.load('Locales.lua')
         self.load('Core.lua')
         self.load('Progress.lua')
         self.load('Advice.lua')
@@ -454,7 +464,7 @@ class AddonTests(unittest.TestCase):
         self.assertIn('## Interface: 16001', toc)
         self.assertIn('## SavedVariables: ForeverContextDB', toc)
         files = [line for line in toc.splitlines() if line and not line.startswith('#')]
-        self.assertEqual(files, ['Core.lua', 'Progress.lua', 'Advice.lua', 'Inventory.lua', 'Loadouts.lua', 'Workflow.lua', 'UI.lua', 'ToolUI.lua', 'PlannerUI.lua', 'AdviceUI.lua', 'Minimap.lua'])
+        self.assertEqual(files, ['Localization.lua', 'Locales.lua', 'Core.lua', 'Progress.lua', 'Advice.lua', 'Inventory.lua', 'Loadouts.lua', 'Workflow.lua', 'UI.lua', 'ToolUI.lua', 'PlannerUI.lua', 'AdviceUI.lua', 'Minimap.lua'])
         self.assertIn('## SavedVariablesPerCharacter: ForeverContextCharacterDB', toc)
         for file in files:
             self.assertTrue((ADDON / file).is_file())

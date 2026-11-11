@@ -3,7 +3,7 @@ local window, elapsed, tries, lastPending, lastWarnings
 local MAX_TRIES, RETRY_SECONDS = 8, 0.5
 
 local function say(text)
-    if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cff65d9ffForeverContext:|r " .. text) end
+    if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("|cff65d9ffForeverContext:|r " .. NS.L(text)) end
 end
 
 local function inCombat()
@@ -28,7 +28,7 @@ end
 local function showStaleReportStatus()
     window.text:ClearFocus()
     window.select:Disable()
-    window.status:SetText("Context changed. Click Generate / refresh before copying updated advice.")
+    NS.SetText(window.status,"Context changed. Click Generate / refresh before copying updated advice.")
 end
 
 local function selectReport()
@@ -37,7 +37,7 @@ local function selectReport()
     window.text:SetFocus()
     window.text:HighlightText(0, -1)
     window.scroll:SetVerticalScroll(0)
-    window.status:SetText("All selected. Press Ctrl+C, then paste into your AI with Ctrl+V.")
+    NS.SetText(window.status,"All selected. Press Ctrl+C, then paste into your AI with Ctrl+V.")
 end
 
 local function finish()
@@ -47,9 +47,9 @@ local function finish()
     window.select:Enable()
     NS.CommitExport(window.snapshot)
     if lastPending and lastPending > 0 then
-        window.status:SetText("Report ready with pending data. Check the warnings and generate again.")
+        NS.SetText(window.status,"Report ready with pending data. Check the warnings and generate again.")
     elseif lastWarnings and lastWarnings > 0 then
-        window.status:SetText("Report ready with warnings. Click Select all, then Ctrl+C.")
+        NS.SetText(window.status,"Report ready with warnings. Click Select all, then Ctrl+C.")
     else
         selectReport()
     end
@@ -58,7 +58,7 @@ end
 local function collect()
     if inCombat() then
         window.loading = false
-        window.status:SetText("Leave combat, then click Generate.")
+        NS.SetText(window.status,"Leave combat, then click Generate.")
         window:SetScript("OnUpdate", nil)
         window.generate:Enable()
         window.select:Enable()
@@ -74,7 +74,7 @@ local function collect()
     window.text:SetCursorPosition(0)
     window.scroll:SetVerticalScroll(0)
     lastPending, lastWarnings = pending, warnings
-    window.counter:SetText(string.format("%d bytes of text", #report))
+    NS.SetText(window.counter,"{1} bytes of text",#report)
     return true
 end
 
@@ -88,7 +88,7 @@ local function generate()
     tries, elapsed = 1, 0
     if not collect() then return end
     if lastPending == 0 then finish(); return end
-    window.status:SetText("Loading item and talent data…")
+    NS.SetText(window.status,"Loading item and talent data…")
     window:SetScript("OnUpdate", function(self, delta)
         elapsed = elapsed + delta
         if elapsed < RETRY_SECONDS then return end
@@ -103,7 +103,7 @@ local function button(parent, label, width, point, relative, relativePoint, x, y
     local widget = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
     widget:SetSize(width, 26)
     widget:SetPoint(point, relative, relativePoint, x, y)
-    widget:SetText(label)
+    NS.SetText(widget,label)
     widget:SetScript("OnClick", click)
     return widget
 end
@@ -130,16 +130,16 @@ local function createWindow()
     frame:SetBackdropBorderColor(0.3, 0.65, 0.8, 1)
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     frame.title:SetPoint("TOPLEFT", 20, -17)
-    frame.title:SetText("ForeverContext |cff65d9ff— WoW Forever|r")
+    NS.SetText(frame.title,"ForeverContext |cff65d9ff— WoW Forever|r")
     frame.subtitle = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.subtitle:SetPoint("TOPLEFT", 20, -43)
-    frame.subtitle:SetText("Generate the report, select the text, and press Ctrl+C to copy it to your AI.")
+    NS.SetText(frame.subtitle,"Generate the report, select the text, and press Ctrl+C to copy it to your AI.")
     frame.close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
     frame.close:SetPoint("TOPRIGHT", -5, -5)
 
     frame.goalLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.goalLabel:SetPoint("TOPLEFT", 20, -74)
-    frame.goalLabel:SetText("Your goal (optional):")
+    NS.SetText(frame.goalLabel,"Your goal (optional):")
     frame.goal = CreateFrame("EditBox", nil, frame, "InputBoxTemplate")
     frame.goal:SetSize(610, 24)
     frame.goal:SetPoint("TOPLEFT", 175, -68)
@@ -153,12 +153,12 @@ local function createWindow()
     frame.nameCheck = CreateFrame("CheckButton", "ForeverContextNameCheck", frame, "UICheckButtonTemplate")
     frame.nameCheck:SetPoint("TOPLEFT", 16, -100)
     frame.nameCheck:SetChecked(db.includeName and true or false)
-    frame.nameCheck.Text:SetText("Include character name")
+    NS.SetText(frame.nameCheck.Text,"Include character name")
     frame.nameCheck:SetScript("OnClick", function(self) settings().includeName = self:GetChecked() and true or false end)
     frame.extraCheck = CreateFrame("CheckButton", "ForeverContextExtraCheck", frame, "UICheckButtonTemplate")
     frame.extraCheck:SetPoint("TOPLEFT", 310, -100)
     frame.extraCheck:SetChecked(db.extended)
-    frame.extraCheck.Text:SetText("Include extra details for this question")
+    NS.SetText(frame.extraCheck.Text,"Include extra details for this question")
     frame.extraCheck:SetScript("OnClick", function(self) settings().extended = self:GetChecked() and true or false end)
 
     frame.panel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
@@ -211,19 +211,19 @@ local function createWindow()
     end
     frame.counter = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.counter:SetPoint("BOTTOMRIGHT", -25, 24)
-    frame.counter:SetText("")
+    NS.SetText(frame.counter,"")
     frame.status = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.status:SetPoint("BOTTOMLEFT", 22, 24)
     frame.status:SetWidth(590)
     frame.status:SetJustifyH("LEFT")
-    frame.status:SetText("")
+    NS.SetText(frame.status,"")
     frame:SetScript("OnHide", function(self)
         self:SetScript("OnUpdate", nil)
         if self.loading then
             self.loading = false
             self.generate:Enable()
             self.select:Enable()
-            self.status:SetText("Loading paused. Click Generate / refresh to finish loading missing data.")
+            NS.SetText(self.status,"Loading paused. Click Generate / refresh to finish loading missing data.")
         end
         self.goal:ClearFocus()
         self.text:ClearFocus()
@@ -245,7 +245,11 @@ local function open()
     window.nameCheck:SetChecked(db.includeName == true)
     window.extraCheck:SetChecked(db.extended ~= false)
     for key, widget in pairs(window.modes) do
-        widget:SetText((db.mode == key or not db.mode and key == "overview") and "|cffffd46a" .. NS.ModeLabels[key] .. "|r" or NS.ModeLabels[key])
+        local modeKey=key
+        NS.BindText(widget,function()
+            local text=NS.L(NS.ModeLabels[modeKey])
+            return (db.mode == modeKey or not db.mode and modeKey == "overview") and "|cffffd46a" .. text .. "|r" or text
+        end)
     end
     window:Show()
     generate()
@@ -285,7 +289,7 @@ SLASH_FOREVER_CONTEXT3 = "/pjia"
 SlashCmdList["FOREVER_CONTEXT"] = function(message)
     message = (message or ""):lower():match("^%s*(.-)%s*$")
     if message == "help" then
-        say("/fcontext opens the report. Tools: options, bags, keep, sources, loadouts, plan, compare. Reports: talents, gear, session, review, overview. Use minimap to hide/show the button. Copy with Ctrl+C.")
+        say("/fcontext opens the report. Tools: /fcontext options, /fcontext bags, /fcontext keep, /fcontext sources, /fcontext loadouts, /fcontext plan, /fcontext compare. Reports: /fcontext talents, /fcontext gear, /fcontext session, /fcontext review. Language: /fcontext language. Copy with Ctrl+C.")
     elseif message == "minimap" then
         NS.ToggleMinimap()
     elseif message == "plan" then
@@ -293,6 +297,10 @@ SlashCmdList["FOREVER_CONTEXT"] = function(message)
     elseif message == "compare" then
         NS.OpenComparisonWindow()
     elseif message == "options" then NS.OpenPreferencesWindow()
+    elseif message == "language" then NS.OpenLanguageWindow()
+    elseif message:match("^language%s+") then
+        local ok,errorMessage=NS.SetLanguage(message:match("^language%s+(.+)$"))
+        say(ok and NS.L("Language updated.") or errorMessage)
     elseif message == "bags" then NS.OpenBagWindow()
     elseif message == "keep" then NS.OpenKeepWindow()
     elseif message == "sources" then NS.OpenSourcesWindow()

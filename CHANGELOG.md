@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.3.0 — 2026-11-11
+
+- Added automatic interface-language detection and an immediate manual selector in Export options → Language, also available through `/fcontext language`, `/fcontext language <locale>` and `/fcontext language auto`.
+- Bundled 232 UI strings in English, Spanish, Brazilian Portuguese, French, German, Italian, Russian, Simplified Chinese, Traditional Chinese and Korean. Unsupported locales fall back to English; enGB/esMX share English/Spanish catalogs.
+- Saved language preferences account-wide without resetting per-character plans, profiles, notes, goals or export options. Switching updates existing controls without a reload or a new report snapshot.
+- Kept report labels, AI instructions and import/export protocols in English. Game names/descriptions and player-authored text remain untouched.
+- Translated tool labels, statuses, validation messages, progress checks and minimap help. Added client-font selection for addon-owned CJK/Cyrillic text, retained exclusive-window/combat handling, and reserved more space in export options for translated labels.
+- Added offline catalog compilation with key/token validation, integrated it into packaging and documented translation editing and quality limits. Updated all 13 README languages. Catalogs include machine-assisted drafts and curated common controls; native-speaker review is welcome.
+- Added 18 localization checks, including switching languages across all tools, account-wide overrides, English report preservation, item/draft integrity, native font contracts and cleared-candidate/keep-row/status refresh regressions.
+
+Validation: 132 simulated Lua 5.1 tests passed. Actual client rendering, wrapping and translated layouts still need in-game verification.
+
 ## v1.2.0 — 2026-11-11
 
 - Added a per-character item-source notebook: referenced dungeon/quest/vendor/profession origins, explicit player confirmation, direct merchant/displayed-quest-reward observations, and unconfirmed/outdated status. Unknown origins stay unknown; no complete loot database is claimed.

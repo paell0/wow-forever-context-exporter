@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md) · [New sources, profiles, bags and preference tools](COMMUNITY-TOOLS.md)
 
+Controls follow your selected interface language; this guide uses their English names. Reports and import formats remain English. [Change the interface language](LOCALIZATION.md).
+
 ## Follow the four-step loop
 
 1. Open ForeverContext and select **Overview**, **Talent points**, **Gear advice**, or **Next session**. Enter your goal and generate a report.

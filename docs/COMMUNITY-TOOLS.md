@@ -2,7 +2,7 @@
 
 [Main README](../README.md) · [Progress plans](PROGRESS-PLAN.md) · [Implementation plan](IMPLEMENTATION-PLAN-1.2.md)
 
-Version 1.2.0 implements seven community-requested improvements. All controls and report labels are English; game-provided text keeps the client's language. These tools assist your decisions and never apply talents, equip/move/sell/destroy items or contact an AI.
+Version 1.2.0 implements seven community-requested improvements. Since v1.3.0, controls follow the game language or your manual selection; reports stay English and game-provided text keeps the client's language. See the [language guide](LOCALIZATION.md). These tools assist your decisions and never apply talents, equip/move/sell/destroy items or contact an AI.
 
 ## Open the tools
 
@@ -111,6 +111,6 @@ Identity/client basics remain included. The purpose buttons and **Include extra 
 
 ## Storage, limits and validation
 
-All new settings, source records, keep preferences and profiles are local and per character in `ForeverContextCharacterDB`. Minimap preferences remain account-level. Plans retain the two-archive limit. No API key, desktop helper, clipboard-access permission or AI account is required by the addon; you manually choose which AI receives the copied text.
+All new settings, source records, keep preferences and profiles are local and per character in `ForeverContextCharacterDB`. Minimap and language preferences remain account-level. Choose **Export options → Language** or use `/fcontext language`; changes take effect immediately. Restoring export defaults preserves this account-wide choice. Plans retain the two-archive limit. No API key, desktop helper, clipboard-access permission or AI account is required by the addon; you manually choose which AI receives the copied text.
 
 Validation uses strict Lua 5.1 simulation, including the documented Forever [Container API](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/ContainerDocumentation.lua), [item metadata](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/ItemDocumentation.lua), [native talent export API](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/SharedTraitsDocumentation.lua), and the client's [merchant](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_UIPanels_Game/Mainline/MerchantFrame.lua) and [quest-reward UI](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_UIPanels_Game/Mainline/QuestInfo.lua). Live client verification is still pending for this release.

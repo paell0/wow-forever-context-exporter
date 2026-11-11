@@ -1,36 +1,41 @@
 local _, NS = ...
 local label, button, edit, check = NS.ToolLabel, NS.ToolButton, NS.ToolEdit, NS.ToolCheck
 local preferences, bags, keep, sources, loadouts
+local languageWindow
 
 local function dropInto(input, status)
     local reference, message = NS.CursorItemReference()
     if reference then
         input:SetText(reference)
         NS.SafeCall(ClearCursor)
-        status:SetText("Item selected. Review the fields, then save.")
-    else status:SetText(message) end
+        NS.SetText(status,"Item selected. Review the fields, then save.")
+    else NS.SetText(status,message) end
 end
 
 local function makePreferences()
-    local frame=NS.CreateToolWindow("ForeverContextOptionsWindow", "ForeverContext — Export options", "Choose your report categories. Identity/client basics stay included. Settings are per character.", 610)
+    local frame=NS.CreateToolWindow("ForeverContextOptionsWindow", "ForeverContext — Export options", "Choose your report categories. Identity/client basics stay included. Settings are per character.", 670)
     preferences=frame
     frame.checks={}
     for i,row in ipairs(NS.ModuleDefinitions) do
         local key=row[1]
         frame.checks[key]=check(frame,row[2],20+math.floor((i-1)/8)*370,-85-((i-1)%8)*33,false,function(value) NS.SetModule(key,value) end)
+        frame.checks[key].Text:SetWidth(310)
     end
     frame.spoilers=check(frame,"Spoiler-free advice (hides quests and item origins)",20,-365,false,function(value) NS.SetSpoilerFree(value) end)
     frame.observe=check(frame,"Record sources from visited merchants / displayed quest rewards",20,-403,true,function(value)
         NS.AdviceState().options.observeSources=value; NS.TouchAdvice()
     end)
     label(frame,"Skills, spells, quests and reputations also follow the report's extra-details switch and purpose.\nThe AI is asked to honor spoiler preferences; its replies cannot be controlled by the addon.",20,-450,710)
-    frame.status=label(frame,"",20,-501,710)
-    frame.defaults=button(frame,"Restore defaults",20,-555,155,function()
+    frame.status=label(frame,"",20,-515,710)
+    frame.languageLabel=label(frame,"Language",20,-555,140)
+    frame.language=button(frame,"",170,-550,360,function() NS.OpenLanguageWindow() end)
+    NS.BindText(frame.language,function() return NS.LanguageLabel() end)
+    frame.defaults=button(frame,"Restore defaults",20,-610,155,function()
         local options=NS.AdviceState().options
         options.modules={}; options.spoilerFree=false; options.observeSources=true
         NS.TouchAdvice(); NS.OpenPreferencesWindow()
     end)
-    frame.report=button(frame,"Generate report",555,-555,175,function() NS.OpenReport() end)
+    frame.report=button(frame,"Generate report",555,-610,175,function() NS.OpenReport() end)
 end
 
 function NS.OpenPreferencesWindow()
@@ -40,8 +45,33 @@ function NS.OpenPreferencesWindow()
     for key,widget in pairs(preferences.checks) do widget:SetChecked(NS.ModuleEnabled(options,key)) end
     preferences.spoilers:SetChecked(options.spoilerFree==true)
     preferences.observe:SetChecked(options.observeSources~=false)
-    preferences.status:SetText("Client build " .. NS.ClientStamp().build .. "; addon " .. NS.VERSION .. ". No automatic internet rule updates.")
+    NS.SetText(preferences.status,"Client build {1}; addon {2}. No automatic internet rule updates.",NS.ClientStamp().build,NS.VERSION)
     NS.ShowToolWindow(preferences)
+end
+
+function NS.OpenLanguageWindow()
+    if not NS.ToolsAllowed() then return end
+    if not languageWindow then
+        local frame=NS.CreateToolWindow("ForeverContextLanguageWindow","ForeverContext — Language",
+            "Automatic follows the game language. A manual choice is saved for all your characters.",390)
+        languageWindow=frame
+        frame.choices={}
+        for index,row in ipairs(NS.LocaleOptions) do
+            local code,labelText=row[1],row[2]
+            local widget=button(frame,labelText,20+((index-1)%2)*365,-85-math.floor((index-1)/2)*43,345,function()
+                NS.SetLanguage(code)
+                NS.OpenPreferencesWindow()
+            end)
+            NS.BindText(widget,function()
+                local text=code=="auto" and NS.L(labelText) or labelText
+                return NS.GetLanguageSetting()==code and "|cff65d993* " .. text .. "|r" or text
+            end)
+            if code~="auto" then NS.SetWidgetLanguageFont(widget,code) end
+            frame.choices[code]=widget
+        end
+        frame.note=label(frame,"Only addon controls/messages are translated. AI exports stay English; game names keep the client language.",20,-351,710)
+    end
+    NS.ShowToolWindow(languageWindow)
 end
 
 local function renderBags(refresh)
@@ -55,17 +85,17 @@ local function renderBags(refresh)
     bags.index=math.max(1,math.min(bags.index or 1,#bags.rows))
     local row=bags.rows[bags.index]
     if row then
-        bags.item:SetText(row.name .. " — item " .. (row.itemID or "unknown"))
+        NS.SetText(bags.item,"{1} — item {2}",row.name,row.itemID or "unknown")
         bags.text:SetText(NS.BagItemText(row,NS.CharacterSettings(),true))
-        bags.pages:SetText("Item " .. bags.index .. "/" .. #bags.rows)
+        NS.SetText(bags.pages,"Item {1}/{2}",bags.index,#bags.rows)
     else
-        bags.item:SetText("No items match this filter.")
+        NS.SetText(bags.item,"No items match this filter.")
         bags.text:SetText(table.concat(bags.issues or {},"\n"))
-        bags.pages:SetText("0 items")
+        NS.SetText(bags.pages,"0 items")
     end
     bags.text:SetCursorPosition(0)
     bags.scroll:SetVerticalScroll(0)
-    bags.status:SetText((#(bags.issues or {})>0 and "Some bag data is unavailable. " or "") .. "No items are sold, destroyed, equipped or moved.")
+    NS.SetText(bags.status,(#(bags.issues or {})>0 and "Some bag data is unavailable. " or "") .. "No items are sold, destroyed, equipped or moved.")
 end
 
 local function makeBags()
@@ -79,15 +109,15 @@ local function makeBags()
     frame.reason=edit(frame,"ForeverContextBagKeepReason",160,-442,555,240)
     frame.keep=button(frame,"Keep this item",20,-485,155,function()
         local row=frame.rows[frame.index]
-        if not row then frame.status:SetText("Select an item first."); return end
+        if not row then NS.SetText(frame.status,"Select an item first."); return end
         local id,message=NS.KeepItem(row.reference or row.itemID,frame.reason:GetText())
-        if id then renderBags(); frame.status:SetText("All copies/variants of item " .. id .. " marked KEEP.") else frame.status:SetText(message) end
+        if id then renderBags(); NS.SetText(frame.status,"All copies/variants of item {1} marked KEEP.",id) else NS.SetText(frame.status,message) end
     end)
     local function candidate(slot)
         local row=frame.rows[frame.index]
-        if not row then frame.status:SetText("Select an item first."); return end
+        if not row then NS.SetText(frame.status,"Select an item first."); return end
         local reference,message=NS.SetCandidate(slot,row.reference or (row.itemID and tostring(row.itemID)))
-        frame.status:SetText(reference and "Candidate " .. slot .. " selected. Browse another item or open Compare." or message)
+        if reference then NS.SetText(frame.status,"Candidate {1} selected. Browse another item or open Compare.",slot) else NS.SetText(frame.status,message) end
     end
     frame.a=button(frame,"Use as A",185,-485,115,function() candidate("A") end)
     frame.b=button(frame,"Use as B",310,-485,115,function() candidate("B") end)
@@ -114,11 +144,11 @@ local function renderKeep()
         local id=ids[(keep.page-1)*6+i]
         row.id=id
         if id then
-            row.text:SetText(NS.ItemName(id) .. " [" .. id .. "]\n" .. NS.Clean(NS.AdviceState().keepItems[id].reason))
+            NS.SetText(row.text,"{1}",NS.ItemName(id) .. " [" .. id .. "]\n" .. NS.Clean(NS.AdviceState().keepItems[id].reason))
             row.text:Show(); row.remove:Show()
         else row.text:Hide(); row.remove:Hide() end
     end
-    keep.pages:SetText(#ids .. "/100 protected IDs; page " .. keep.page .. "/" .. math.max(1,math.ceil(#ids/6)))
+    NS.SetText(keep.pages,"{1}/100 protected IDs; page {2}/{3}",#ids,keep.page,math.max(1,math.ceil(#ids/6)))
 end
 
 local function makeKeep()
@@ -132,7 +162,7 @@ local function makeKeep()
     frame.reason=edit(frame,"ForeverContextKeepReason",170,-125,550,240)
     frame.save=button(frame,"Save keep preference",20,-170,190,function()
         local id,message=NS.KeepItem(frame.item:GetText(),frame.reason:GetText())
-        if id then renderKeep(); frame.status:SetText("Item " .. id .. " protected across all its variants.") else frame.status:SetText(message) end
+        if id then renderKeep(); NS.SetText(frame.status,"Item {1} protected across all its variants.",id) else NS.SetText(frame.status,message) end
     end)
     frame.status=label(frame,"",20,-213,710)
     frame.rows={}
@@ -163,11 +193,13 @@ local function renderSources()
     local selected=sources.records[sources.index]
     if selected then
         local r=selected.record
-        sources.text:SetText("Item " .. r.itemID .. " — " .. NS.ItemName(r.itemID) .. "\n" .. NS.SourceStatus(r) .. "\n"
-            .. r.kind .. " — " .. r.location .. "\nReference: " .. NS.Clean(r.reference) .. "\nRecorded: " .. r.at .. "; build " .. r.build)
-    else sources.text:SetText("No source record for this item/filter. Unknown origins stay NOT CONFIRMED.\nAdd a dungeon/boss, quest, vendor or profession source with its reference.") end
+        NS.BindText(sources.text,function()
+            return NS.L("Item {1} — {2}\n{3}\n{4} — {5}\nReference: {6}\nRecorded: {7}; build {8}",r.itemID,NS.ItemName(r.itemID),
+                NS.L(NS.SourceStatus(r)),NS.L(r.kind),r.location,NS.Clean(r.reference),r.at,r.build)
+        end)
+    else NS.SetText(sources.text,"No source record for this item/filter. Unknown origins stay NOT CONFIRMED.\nAdd a dungeon/boss, quest, vendor or profession source with its reference.") end
     sources.text:SetCursorPosition(0)
-    sources.pages:SetText("Record " .. (#sources.records>0 and sources.index or 0) .. "/" .. #sources.records)
+    NS.SetText(sources.pages,"Record {1}/{2}",#sources.records>0 and sources.index or 0,#sources.records)
 end
 
 local function makeSources()
@@ -180,7 +212,7 @@ local function makeSources()
     frame.kindIndex=1
     label(frame,"Source type",20,-130,140)
     frame.kind=button(frame,NS.SourceKinds[1],170,-125,140,function()
-        frame.kindIndex=frame.kindIndex%#NS.SourceKinds+1; frame.kind:SetText(NS.SourceKinds[frame.kindIndex])
+        frame.kindIndex=frame.kindIndex%#NS.SourceKinds+1; NS.SetText(frame.kind,NS.SourceKinds[frame.kindIndex])
     end)
     label(frame,"Place / boss / recipe",330,-130,200)
     frame.location=edit(frame,"ForeverContextSourceLocation",480,-125,240,160)
@@ -189,11 +221,11 @@ local function makeSources()
     frame.confirmed=check(frame,"I checked this source in Forever on this client build",20,-210,false,function() end)
     frame.save=button(frame,"Save source",20,-255,150,function()
         local key,message=NS.SaveItemSource(frame.item:GetText(),NS.SourceKinds[frame.kindIndex],frame.location:GetText(),frame.reference:GetText(),frame.confirmed:GetChecked())
-        if key then frame.confirmed:SetChecked(false); renderSources(); frame.status:SetText("Source saved with its provenance and client build.") else frame.status:SetText(message) end
+        if key then frame.confirmed:SetChecked(false); renderSources(); NS.SetText(frame.status,"Source saved with its provenance and client build.") else NS.SetText(frame.status,message) end
     end)
     frame.observe=button(frame,"Observe current offers",180,-255,190,function()
         local total=NS.ObserveMerchantSources()+NS.ObserveQuestSources()
-        renderSources(); frame.status:SetText(total .. " offers/rewards read. Open a merchant or quest-reward window first.")
+        renderSources(); NS.SetText(frame.status,"{1} offers/rewards read. Open a merchant or quest-reward window first.",total)
     end)
     frame.filter=button(frame,"Filter / refresh",380,-255,150,function() frame.index=1; renderSources() end)
     frame.status=label(frame,"",20,-297,710)
@@ -207,8 +239,8 @@ local function makeSources()
         frame.item:SetText(tostring(r.itemID)); frame.location:SetText(r.location)
         frame.reference:SetText(r.reference:match("^https://") and r.reference or "")
         frame.confirmed:SetChecked(false)
-        for i,kind in ipairs(NS.SourceKinds) do if kind==r.kind then frame.kindIndex=i; frame.kind:SetText(kind) end end
-        frame.status:SetText("Review the source and explicitly check confirmation if you verified it on this build.")
+        for i,kind in ipairs(NS.SourceKinds) do if kind==r.kind then frame.kindIndex=i; NS.SetText(frame.kind,kind) end end
+        NS.SetText(frame.status,"Review the source and explicitly check confirmation if you verified it on this build.")
     end)
     frame.remove=button(frame,"Remove selected",380,-550,150,function()
         local selected=frame.records[frame.index]
@@ -235,9 +267,9 @@ local function selectProfile(index)
         loadouts.name:SetText(profile.name); loadouts.activity:SetText(profile.activity)
         loadouts.text:SetText(NS.TalentProfileText(profile))
         loadouts.text:SetCursorPosition(0); loadouts.scroll:SetVerticalScroll(0)
-        loadouts.status:SetText("Selected " .. name .. "; saved build " .. profile.build .. "; current build " .. NS.ClientStamp().build .. ".")
-    else loadouts.status:SetText("No saved profiles. Capture your committed build or paste an FCLOADOUT/1 block.") end
-    loadouts.pages:SetText("Profile " .. (#names>0 and loadouts.index or 0) .. "/" .. #names .. " (maximum 12)")
+        NS.SetText(loadouts.status,"Selected {1}; saved build {2}; current build {3}.",name,profile.build,NS.ClientStamp().build)
+    else NS.SetText(loadouts.status,"No saved profiles. Capture your committed build or paste an FCLOADOUT/1 block.") end
+    NS.SetText(loadouts.pages,"Profile {1}/{2} (maximum 12)",#names>0 and loadouts.index or 0,#names)
     loadouts.preview=nil
     loadouts.import:Disable()
 end
@@ -251,31 +283,31 @@ local function makeLoadouts()
     frame.activity=edit(frame,"ForeverContextProfileActivity",170,-123,550,120)
     frame.capture=button(frame,"Save current build",20,-170,170,function()
         local profile,message=NS.CaptureTalentProfile(frame.name:GetText(),frame.activity:GetText())
-        if not profile then frame.status:SetText(message); return end
+        if not profile then NS.SetText(frame.status,message); return end
         local ok,errorMessage=NS.SaveTalentProfile(profile)
-        if not ok then frame.status:SetText(errorMessage); return end
+        if not ok then NS.SetText(frame.status,errorMessage); return end
         local names=NS.TalentProfileNames()
         for i,name in ipairs(names) do if name==profile.name then selectProfile(i) end end
     end)
     frame.previewButton=button(frame,"Preview import",200,-170,150,function()
         local profile,message=NS.ParseTalentProfile(frame.text:GetText())
         frame.preview=profile
-        if profile then frame.import:Enable(); frame.status:SetText("DRAFT: " .. profile.name .. " for " .. profile.class .. ", build " .. profile.build .. ". Click Import profile to save.")
-        else frame.import:Disable(); frame.status:SetText(message) end
+        if profile then frame.import:Enable(); NS.SetText(frame.status,"DRAFT: {1} for {2}, build {3}. Click Import profile to save.",profile.name,profile.class,profile.build)
+        else frame.import:Disable(); NS.SetText(frame.status,message) end
     end)
     frame.import=button(frame,"Import profile",360,-170,150,function()
         if not frame.preview then return end
         local name=frame.preview.name
         local ok,message=NS.SaveTalentProfile(frame.preview)
-        if not ok then frame.status:SetText(message); return end
+        if not ok then NS.SetText(frame.status,message); return end
         for i,candidate in ipairs(NS.TalentProfileNames()) do if candidate==name then selectProfile(i) end end
     end)
     frame.import:Disable()
     frame.compare=button(frame,"Compare with AI",555,-170,175,function()
-        if frame.preview then frame.status:SetText("Import this preview to select it before comparing. The saved profile has not been replaced."); return end
-        if not NS.AdviceState().selectedTalentProfile then frame.status:SetText("Select a saved profile with Previous / Next, or save/import one first."); return end
+        if frame.preview then NS.SetText(frame.status,"Import this preview to select it before comparing. The saved profile has not been replaced."); return end
+        if not NS.AdviceState().selectedTalentProfile then NS.SetText(frame.status,"Select a saved profile with Previous / Next, or save/import one first."); return end
         if not NS.ModuleEnabled(NS.CharacterSettings(),"talents") or not NS.ModuleEnabled(NS.CharacterSettings(),"loadouts") then
-            frame.status:SetText("Enable Current talents and Selected talent profile in Export options to compare."); return
+            NS.SetText(frame.status,"Enable Current talents and Selected talent profile in Export options to compare."); return
         end
         NS.OpenReport("talents")
     end)
@@ -288,18 +320,18 @@ local function makeLoadouts()
     frame.copy=button(frame,"Copy profile",20,-585,140,function()
         local state=NS.AdviceState()
         local profile=state.talentProfiles[state.selectedTalentProfile or ""]
-        if not profile then frame.status:SetText("Select a saved profile first."); return end
+        if not profile then NS.SetText(frame.status,"Select a saved profile first."); return end
         frame.preview=nil; frame.import:Disable()
         frame.text:SetText(NS.TalentProfileText(profile)); frame.text:SetFocus(); frame.text:HighlightText(0,-1)
-        frame.status:SetText("Profile selected. Press Ctrl+C to share or back up. This is an addon profile, not the game's import code.")
+        NS.SetText(frame.status,"Profile selected. Press Ctrl+C to share or back up. This is an addon profile, not the game's import code.")
     end)
     frame.native=button(frame,"Copy game code",170,-585,155,function()
         local state=NS.AdviceState()
         local profile=state.talentProfiles[state.selectedTalentProfile or ""]
-        if not profile or not profile.native then frame.status:SetText("No game code available. Capture a current build after opening Talents."); return end
+        if not profile or not profile.native then NS.SetText(frame.status,"No game code available. Capture a current build after opening Talents."); return end
         frame.preview=nil; frame.import:Disable()
         frame.text:SetText(profile.native); frame.text:SetFocus(); frame.text:HighlightText(0,-1)
-        frame.status:SetText("Press Ctrl+C. Check class/build compatibility and confirm manually in the game's talent UI.")
+        NS.SetText(frame.status,"Press Ctrl+C. Check class/build compatibility and confirm manually in the game's talent UI.")
     end)
     frame.remove=button(frame,"Remove selected",335,-585,155,function()
         local name=NS.AdviceState().selectedTalentProfile
@@ -308,7 +340,7 @@ local function makeLoadouts()
     frame.previous=button(frame,"Previous",20,-640,100,function() selectProfile((frame.index or 1)-1) end)
     frame.next=button(frame,"Next",130,-640,100,function() selectProfile((frame.index or 1)+1) end)
     frame.none=button(frame,"Clear selection",240,-640,140,function()
-        NS.SelectTalentProfile(nil); frame.status:SetText("No activity profile will be included in reports until you select one.")
+        NS.SelectTalentProfile(nil); NS.SetText(frame.status,"No activity profile will be included in reports until you select one.")
     end)
     frame.pages=label(frame,"",20,-690,710)
 end
@@ -322,7 +354,7 @@ function NS.OpenLoadoutsWindow()
     for i,name in ipairs(names) do if name==selected then index=i end end
     -- Merely opening the editor must not select a profile that was explicitly cleared.
     if selected then selectProfile(index)
-    else loadouts.status:SetText("Save your current build or paste a profile, preview it, then import. Use Previous/Next to select a saved profile.") end
+    else NS.SetText(loadouts.status,"Save your current build or paste a profile, preview it, then import. Use Previous/Next to select a saved profile.") end
     NS.ShowToolWindow(loadouts)
 end
 

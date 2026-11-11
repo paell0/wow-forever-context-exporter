@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.2.0](https://img.shields.io/static/v1?label=version&message=1.2.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.2.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![114 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=114+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.3.0](https://img.shields.io/static/v1?label=version&message=1.3.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.3.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![132 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=132+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -25,7 +25,7 @@ WoW Forever 캐릭터의 특성, 전문 기술, 장비, 능력치를 일반 텍�
 
 ## 설치 및 사용
 
-1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases)에서 `ForeverContext-1.2.0.zip`을 다운로드합니다.
+1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases)에서 `ForeverContext-1.3.0.zip`을 다운로드합니다.
 2. 게임을 종료하고 `ForeverContext` 폴더를 `World of Warcraft/_forever_/Interface/AddOns/`에 압축 해제합니다.
 3. 경로가 `AddOns/ForeverContext/ForeverContext.toc`인지 확인하고 애드온을 활성화합니다. 이전 ContextoPJ가 있다면 해당 폴더를 먼저 제거하세요.
 4. 전투 중이 아닐 때 **`/fcontext`**를 입력합니다.
@@ -39,10 +39,10 @@ WoW Forever 캐릭터의 특성, 전문 기술, 장비, 능력치를 일반 텍�
 
 ## 상태 및 제한
 
-인터페이스 **16001**용 공개 미리 보기 버전입니다. **Lua 5.1 모의 테스트 114개**를 통과했지만 실제 WoW Forever 게임 세션에서는 아직 검증하지 않았습니다.
+인터페이스 **16001**용 공개 미리 보기 버전입니다. **Lua 5.1 모의 테스트 132개**를 통과했지만 실제 WoW Forever 게임 세션에서는 아직 검증하지 않았습니다.
 
 캐릭터 이름은 기본적으로 제외합니다. 데이터를 전송하지 않으며 API 키도 필요하지 않습니다. 가방은 설정을 켠 경우에만 내보내고 은행, 우편, 다른 캐릭터는 제외합니다. 프로필, 획득처, 설정은 캐릭터별로 저장합니다. 스포일러 방지 모드는 보고서를 걸러내고 AI에 요청하지만 답변이나 직접 작성한 글까지 통제하지 않습니다. 읽을 수 없는 정보는 알 수 없음으로 표시합니다. 이 버전은 게임 내 확인이 필요합니다.
 
-애드온 버튼과 보고서 레이블은 영어이며 게임의 이름과 설명은 클라이언트 언어를 유지합니다. 이 문서는 번역된 안내서이며 게임 클라이언트 언어 지원을 추가하지 않습니다. 개발 및 전체 제한 사항은 [영문 README](../README.md)를 참고하세요. 라이선스: [All Rights Reserved](../LICENSE).
+인터페이스는 게임 언어를 자동으로 따릅니다. 내보내기 옵션이나 `/fcontext language`에서 10개 언어 중 하나를 선택할 수 있습니다. 보고서는 영어로 유지되며 게임 이름은 클라이언트 언어를 따릅니다. 선택은 재시작 없이 계정 전체에 적용됩니다. [언어 안내](LOCALIZATION.md). [README](../README.md) · [All Rights Reserved](../LICENSE).
 
 v1.0.2부터 새롭게 작성된 자료의 권리는 명시된 허용 범위를 제외하고 보유합니다. 수정하지 않은 공식 버전의 개인적 사용과 공식 저장소에 PR을 제출하기 위한 수정·테스트만 허용하며, 수락 여부는 관리자가 결정합니다. 상업화 또는 별도 수정판 배포는 허용하지 않습니다. 기존 MIT 자료에 부여된 권한은 유지되며 이 변경으로 철회되지 않습니다. 전체 영문 조건은 [LICENSE](../LICENSE)를 참고하세요.

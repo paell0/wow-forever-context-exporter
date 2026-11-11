@@ -8,7 +8,7 @@ class WorkflowTests(unittest.TestCase):
     def setUp(self):
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.lua.execute(MOCK)
-        for name in ('Core.lua', 'Progress.lua', 'Advice.lua', 'Inventory.lua', 'Loadouts.lua', 'Workflow.lua', 'UI.lua', 'ToolUI.lua', 'PlannerUI.lua', 'AdviceUI.lua', 'Minimap.lua'):
+        for name in ('Localization.lua', 'Locales.lua', 'Core.lua', 'Progress.lua', 'Advice.lua', 'Inventory.lua', 'Loadouts.lua', 'Workflow.lua', 'UI.lua', 'ToolUI.lua', 'PlannerUI.lua', 'AdviceUI.lua', 'Minimap.lua'):
             self.lua.execute('assert(loadstring(...))("ForeverContext", NS)', (ADDON / name).read_text(encoding='utf-8'))
         self.ns = self.lua.globals().NS
 
