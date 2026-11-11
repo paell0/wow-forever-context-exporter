@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.1.2](https://img.shields.io/static/v1?label=version&message=1.1.2&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.1.2) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![78 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=78+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.2.0](https://img.shields.io/static/v1?label=version&message=1.2.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.2.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![114 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=114+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -20,9 +20,12 @@
 
 1.1.0 新增按角色保存的成长计划、双物品比较、按问题生成报告和旧建议回顾。在 **Progress plan** 粘贴 AI 返回的计划块，点击 **Preview plan** 检查后再用 **Accept plan** 接受。可验证目标按角色数据更新，手动任务使用勾选框。在 **Compare items** 拖入两个物品即可生成比较上下文。使用 **Talent points**、**Gear advice**、**Next session** 或 **Review plan** 选择报告目的。报告会包含已接受目标及相对参考快照的变化。[完整英文指南与计划格式](PROGRESS-PLAN.md)。
 
+
+1.2.0 新增七项功能：带参考资料和确认状态的物品来源、按活动保存的天赋配置、版本变化提醒、可选背包导出、物品保留清单、无剧透模式及可选导出分类。请打开 **Item sources**、**Talent profiles**、**Browse bags**、**Keep items** 和 **Export options**。游戏中观察到的来源、玩家确认的来源与未确认笔记会明确区分；不包含完整掉落数据库。[七项工具英文指南](COMMUNITY-TOOLS.md)。
+
 ## 安装与使用
 
-1. 从 [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) 下载 `ForeverContext-1.1.2.zip`。
+1. 从 [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) 下载 `ForeverContext-1.2.0.zip`。
 2. 关闭游戏，将 `ForeverContext` 文件夹解压到 `World of Warcraft/_forever_/Interface/AddOns/`。
 3. 确认路径为 `AddOns/ForeverContext/ForeverContext.toc`，然后启用插件。如果安装过旧版 ContextoPJ，请先移除其文件夹。
 4. 在非战斗状态下输入 **`/fcontext`**。
@@ -36,9 +39,9 @@
 
 ## 状态与限制
 
-面向接口版本 **16001** 的公开预览版。已通过 **78 项模拟 Lua 5.1 测试**，尚未在真实 WoW Forever 游戏会话中验证。
+面向接口版本 **16001** 的公开预览版。已通过 **114 项模拟 Lua 5.1 测试**，尚未在真实 WoW Forever 游戏会话中验证。
 
-默认不导出角色姓名。插件不会传输数据，也不需要 API 密钥。不包含背包和银行。未应用的天赋改动不会作为当前天赋导出；待加载或不可用的数据会明确标注。如有缺失，请打开天赋或专业界面后重新生成。
+默认省略角色姓名。不发送数据，也不需要 API 密钥。仅在启用后导出背包；银行、邮件和其他角色不在范围内。配置、来源和偏好按角色保存。无剧透模式会过滤报告并要求 AI 遵守，但无法控制其回复，也不会删除你自己写的文字。无法读取的数据标为未知。本版本仍需游戏内验证。
 
 插件界面与报告标签为英文，游戏返回的名称和说明保留客户端语言。此处仅翻译文档，并不代表新增客户端语言支持。开发说明和完整限制请参阅[英文 README](../README.md)。许可证：[All Rights Reserved](../LICENSE)。
 

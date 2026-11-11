@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.1.2](https://img.shields.io/static/v1?label=version&message=1.1.2&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.1.2) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![78 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=78+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.2.0](https://img.shields.io/static/v1?label=version&message=1.2.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.2.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![114 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=114+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -20,9 +20,12 @@
 
 1.1.0 में हर पात्र के लिए प्रगति योजना, दो वस्तुओं की तुलना, प्रश्न के अनुसार रिपोर्ट और पिछले सुझावों की समीक्षा जोड़ी गई है। **Progress plan** में AI का योजना ब्लॉक चिपकाएँ, **Preview plan** से जाँचें और **Accept plan** से स्वीकार करें। सत्यापित किए जा सकने वाले लक्ष्य पात्र के डेटा से अपडेट होते हैं; अन्य कार्य मैन्युअल चेकबॉक्स से पूरे होते हैं। **Compare items** में दो वस्तुएँ खींचें। **Talent points**, **Gear advice**, **Next session** या **Review plan** चुनें। रिपोर्ट में स्वीकार किए गए लक्ष्य और संदर्भ से बदलाव शामिल होते हैं। [पूरी अंग्रेज़ी मार्गदर्शिका और योजना प्रारूप](PROGRESS-PLAN.md)।
 
+
+1.2.0 में सात सुधार हैं: संदर्भ और पुष्टि के साथ वस्तुओं के स्रोत, गतिविधि के अनुसार टैलेंट प्रोफ़ाइल, संस्करण बदलने की चेतावनी, वैकल्पिक बैग निर्यात, सुरक्षित रखने वाली वस्तुओं की सूची, स्पॉइलर-रहित मोड और निर्यात श्रेणियों का चयन। **Item sources**, **Talent profiles**, **Browse bags**, **Keep items** और **Export options** खोलें। खेल में देखी गई जानकारी, खिलाड़ी की पुष्टि और अपुष्ट नोट अलग दिखते हैं; पूरा लूट डेटाबेस शामिल नहीं है। [सात टूल की अंग्रेज़ी गाइड](COMMUNITY-TOOLS.md)।
+
 ## इंस्टॉल करना और उपयोग
 
-1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) से `ForeverContext-1.1.2.zip` डाउनलोड करें।
+1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) से `ForeverContext-1.2.0.zip` डाउनलोड करें।
 2. गेम बंद करें और `ForeverContext` फ़ोल्डर को `World of Warcraft/_forever_/Interface/AddOns/` में निकालें।
 3. सुनिश्चित करें कि पथ `AddOns/ForeverContext/ForeverContext.toc` है और ऐडऑन चालू करें। पुराना ContextoPJ इंस्टॉल हो तो उसका फ़ोल्डर पहले हटा दें।
 4. युद्ध के बाहर **`/fcontext`** लिखें।
@@ -36,9 +39,9 @@
 
 ## स्थिति और सीमाएँ
 
-इंटरफ़ेस **16001** के लिए सार्वजनिक पूर्वावलोकन। **Lua 5.1 के 78 सिम्युलेटेड परीक्षण** सफल हैं; वास्तविक WoW Forever सत्र में अभी परीक्षण नहीं हुआ है।
+इंटरफ़ेस **16001** के लिए सार्वजनिक पूर्वावलोकन। **Lua 5.1 के 114 सिम्युलेटेड परीक्षण** सफल हैं; वास्तविक WoW Forever सत्र में अभी परीक्षण नहीं हुआ है।
 
-पात्र का नाम डिफ़ॉल्ट रूप से शामिल नहीं होता। ऐडऑन डेटा नहीं भेजता और API कुंजी नहीं माँगता। बैग और बैंक शामिल नहीं हैं। लागू न किए गए प्रतिभा बदलाव सक्रिय नहीं माने जाते। अधूरे डेटा के लिए चेतावनी मिलती है; प्रतिभा या पेशे की विंडो खोलकर रिपोर्ट फिर बनाएँ।
+पात्र का नाम डिफ़ॉल्ट रूप से छिपा रहता है। डेटा भेजा नहीं जाता और API कुंजी नहीं चाहिए। बैग केवल विकल्प चालू करने पर निर्यात होते हैं; बैंक, डाक और दूसरे पात्र शामिल नहीं हैं। प्रोफ़ाइल, स्रोत और पसंद हर पात्र के लिए अलग सहेजे जाते हैं। स्पॉइलर-रहित मोड रिपोर्ट फ़िल्टर करता है और AI को निर्देश देता है, लेकिन उसके जवाब या आपके लिखे पाठ को नियंत्रित नहीं करता। अनुपलब्ध डेटा अज्ञात दिखता है। इस संस्करण की खेल में जाँच अभी बाकी है।
 
 ऐडऑन के नियंत्रण और रिपोर्ट लेबल अंग्रेज़ी में हैं। गेम के नाम और विवरण क्लाइंट की भाषा में रहते हैं। यह केवल दस्तावेज़ का अनुवाद है, हिन्दी गेम क्लाइंट समर्थन का दावा नहीं। विकास और पूरी सीमाओं के लिए [अंग्रेज़ी README](../README.md) देखें। लाइसेंस: [All Rights Reserved](../LICENSE)।
 

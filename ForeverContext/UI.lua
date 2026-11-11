@@ -28,7 +28,7 @@ end
 local function showStaleReportStatus()
     window.text:ClearFocus()
     window.select:Disable()
-    window.status:SetText("Plan changed. Click Generate / refresh before copying updated progress.")
+    window.status:SetText("Context changed. Click Generate / refresh before copying updated advice.")
 end
 
 local function selectReport()
@@ -113,7 +113,7 @@ local function createWindow()
     local frame = CreateFrame("Frame", "ForeverContextWindow", UIParent, "BackdropTemplate")
     window = frame
     frame:Hide()
-    frame:SetSize(820, 720)
+    frame:SetSize(820, 780)
     frame:SetPoint("CENTER")
     frame:SetFrameStrata("DIALOG")
     frame:SetClampedToScreen(true)
@@ -163,7 +163,7 @@ local function createWindow()
 
     frame.panel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     frame.panel:SetPoint("TOPLEFT", 18, -181)
-    frame.panel:SetPoint("BOTTOMRIGHT", -18, 91)
+    frame.panel:SetPoint("BOTTOMRIGHT", -18, 128)
     frame.panel:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
     frame.panel:SetBackdropColor(0.015, 0.02, 0.03, 1)
     -- Keep client frame, template, and method identifiers unchanged when translating labels.
@@ -197,6 +197,11 @@ local function createWindow()
     frame.select = button(frame, "Select all", 150, "LEFT", frame.generate, "RIGHT", 12, 0, selectReport)
     frame.plan = button(frame, "Progress plan", 135, "BOTTOMRIGHT", frame, "BOTTOMRIGHT", -20, 51, function() NS.OpenPlanWindow() end)
     frame.compare = button(frame, "Compare items", 135, "RIGHT", frame.plan, "LEFT", -10, 0, function() NS.OpenComparisonWindow() end)
+    frame.options = button(frame, "Export options", 145, "BOTTOMLEFT", frame, "BOTTOMLEFT", 20, 91, function() NS.OpenPreferencesWindow() end)
+    frame.bags = button(frame, "Browse bags", 145, "LEFT", frame.options, "RIGHT", 10, 0, function() NS.OpenBagWindow() end)
+    frame.keep = button(frame, "Keep items", 145, "LEFT", frame.bags, "RIGHT", 10, 0, function() NS.OpenKeepWindow() end)
+    frame.sources = button(frame, "Item sources", 145, "LEFT", frame.keep, "RIGHT", 10, 0, function() NS.OpenSourcesWindow() end)
+    frame.loadouts = button(frame, "Talent profiles", 145, "LEFT", frame.sources, "RIGHT", 10, 0, function() NS.OpenLoadoutsWindow() end)
     frame.modes = {}
     for index, key in ipairs({"overview", "talents", "gear", "session", "review"}) do
         local modeKey = key
@@ -224,8 +229,8 @@ local function createWindow()
         self.text:ClearFocus()
     end)
     frame:SetScript("OnShow", function(self)
-        local scale = math.min(1, (UIParent:GetWidth() - 40) / 820, (UIParent:GetHeight() - 40) / 720)
-        self:SetScale(math.max(0.4, scale))
+        local scale = math.min(1, (UIParent:GetWidth() - 40) / 820, (UIParent:GetHeight() - 40) / 780)
+        self:SetScale(scale)
     end)
     UISpecialFrames = UISpecialFrames or {}
     table.insert(UISpecialFrames, "ForeverContextWindow")
@@ -280,13 +285,18 @@ SLASH_FOREVER_CONTEXT3 = "/pjia"
 SlashCmdList["FOREVER_CONTEXT"] = function(message)
     message = (message or ""):lower():match("^%s*(.-)%s*$")
     if message == "help" then
-        say("/fcontext opens the report. Use /fcontext plan, compare, talents, gear, session, review, or minimap. Copy reports with Ctrl+C.")
+        say("/fcontext opens the report. Tools: options, bags, keep, sources, loadouts, plan, compare. Reports: talents, gear, session, review, overview. Use minimap to hide/show the button. Copy with Ctrl+C.")
     elseif message == "minimap" then
         NS.ToggleMinimap()
     elseif message == "plan" then
         NS.OpenPlanWindow()
     elseif message == "compare" then
         NS.OpenComparisonWindow()
+    elseif message == "options" then NS.OpenPreferencesWindow()
+    elseif message == "bags" then NS.OpenBagWindow()
+    elseif message == "keep" then NS.OpenKeepWindow()
+    elseif message == "sources" then NS.OpenSourcesWindow()
+    elseif message == "loadouts" then NS.OpenLoadoutsWindow()
     elseif NS.ModeLabels[message] then
         NS.OpenReport(message)
     else

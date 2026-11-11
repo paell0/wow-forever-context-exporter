@@ -217,24 +217,26 @@ function NS.CommitExport(snapshot)
     if snapshot then NS.CharacterState().lastExport = copy(snapshot) end
 end
 
-local function changes(before, now)
+local function changes(before, now, options)
     local lines = {}
     if not before then return {"No previous snapshot is available yet."} end
     lines[#lines + 1] = "Reference: " .. clean(before.at) .. "; client " .. clean(before.client) .. " build " .. clean(before.build)
     if before.build ~= now.build then lines[#lines + 1] = "Client build changed: recheck whether prior advice and talent IDs still apply to the new game rules." end
     if before.level and now.level and before.level ~= now.level then lines[#lines + 1] = "Level: " .. before.level .. " -> " .. now.level end
     if before.money and now.money and before.money ~= now.money then lines[#lines + 1] = string.format("Gold balance change: %+.2f gold", (now.money - before.money) / 10000) end
-    for slot = 1, 19 do
+    for slot = 1, NS.ModuleEnabled(options, "equipment") and 19 or 0 do
         local old, current = before.slots[slot], now.slots[slot]
         if old ~= nil and current ~= nil and old ~= current then
             lines[#lines + 1] = "Equipment slot " .. slot .. ": " .. (old == 0 and "empty" or "item " .. old) .. " -> " .. (current == 0 and "empty" or "item " .. current)
         end
     end
-    for id, skill in pairs(now.skills) do
+    local professionIDs = NS.ProfessionSkillIDs()
+    for id, skill in pairs((NS.ModuleEnabled(options, "professions") or NS.ModuleEnabled(options, "skills")) and now.skills or {}) do
         local old = before.skills[id]
-        if old and old.rank ~= skill.rank then lines[#lines + 1] = clean(skill.name) .. " [skill " .. id .. "]: " .. old.rank .. " -> " .. skill.rank end
+        local module = professionIDs[id] and "professions" or "skills"
+        if NS.ModuleEnabled(options, module) and old and old.rank ~= skill.rank then lines[#lines + 1] = clean(skill.name) .. " [skill " .. id .. "]: " .. old.rank .. " -> " .. skill.rank end
     end
-    if before.talentsReadable and now.talentsReadable then
+    if NS.ModuleEnabled(options, "talents") and before.talentsReadable and now.talentsReadable then
         for id, rank in pairs(now.talents) do
             if before.talents[id] ~= nil and before.talents[id] ~= rank then lines[#lines + 1] = "Talent node " .. id .. ": " .. before.talents[id] .. " -> " .. rank end
         end
@@ -243,30 +245,41 @@ local function changes(before, now)
     return lines
 end
 
-function NS.ProgressText(snapshot)
+function NS.ProgressText(snapshot, options)
     local state = NS.CharacterState()
     local lines = {"=== ACCEPTED PROGRESS PLAN ==="}
     local plan = state.plan
+    local professionIDs = NS.ProfessionSkillIDs()
+    local function taskModule(task)
+        if task.kind == "SKILL" then return professionIDs[task.id] and "professions" or "skills" end
+        return ({TALENT="talents", ITEM="equipment", SLOT="equipment"})[task.kind]
+    end
     if plan then
         lines[#lines + 1] = clean(plan.title) .. "; revision " .. plan.revision .. "; accepted " .. clean(plan.acceptedAt)
         for index, task in ipairs(plan.tasks) do
+            local module = taskModule(task)
+            if not module or NS.ModuleEnabled(options, module) then
             local status, detail = NS.EvaluateTask(task, snapshot)
             lines[#lines + 1] = index .. ". [" .. status .. "] " .. clean(task.label) .. " — " .. detail
+            else lines[#lines+1] = index .. ". Task details withheld by export options." end
         end
         lines[#lines + 1] = "Automatic checks reflect current state and can become pending again. UNKNOWN is not failure. Manual tasks are checked only by the player."
     else
         lines[#lines + 1] = "No plan accepted. Suggested or imported draft tasks are not accepted advice."
     end
     lines[#lines + 1] = "\n=== CHANGES SINCE PLAN REFERENCE / LAST GENERATED REPORT ==="
-    for _, line in ipairs(changes(plan and plan.baseline or state.lastExport, snapshot)) do lines[#lines + 1] = line end
+    for _, line in ipairs(changes(plan and plan.baseline or state.lastExport, snapshot, options)) do lines[#lines + 1] = line end
     if state.history[1] then
         lines[#lines + 1] = "\nPrevious archived plan: " .. clean(state.history[1].title) .. "; accepted " .. clean(state.history[1].acceptedAt)
         for _, task in ipairs(state.history[1].tasks) do
+            local module = taskModule(task)
+            if not module or NS.ModuleEnabled(options, module) then
             local status, detail = NS.EvaluateTask(task, snapshot)
             lines[#lines + 1] = "- [" .. status .. " now] " .. clean(task.label) .. " — " .. detail
+            else lines[#lines+1] = "- Archived task details withheld by export options." end
         end
         lines[#lines + 1] = "Changes since that archived plan's reference:"
-        for _, line in ipairs(changes(state.history[1].baseline, snapshot)) do lines[#lines + 1] = line end
+        for _, line in ipairs(changes(state.history[1].baseline, snapshot, options)) do lines[#lines + 1] = line end
     end
     return table.concat(lines, "\n")
 end

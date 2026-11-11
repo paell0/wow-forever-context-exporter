@@ -1,87 +1,8 @@
 local _, NS = ...
 local planWindow, comparisonWindow
-local returnToReport, switchingWindow = false, false
 local PAGE_SIZE = 6
-
-local function allowed()
-    if type(InCombatLockdown) == "function" and InCombatLockdown() then
-        if DEFAULT_CHAT_FRAME then DEFAULT_CHAT_FRAME:AddMessage("ForeverContext: leave combat to use the planner or comparison.") end
-        return false
-    end
-    return true
-end
-
-function NS.CloseAuxiliaryWindows()
-    returnToReport = false
-    if planWindow and planWindow:IsShown() then planWindow:Hide() end
-    if comparisonWindow and comparisonWindow:IsShown() then comparisonWindow:Hide() end
-end
-
-local function showPopup(frame)
-    returnToReport = NS.SuspendReportWindow() or returnToReport
-    switchingWindow = true
-    local other
-    if frame == planWindow then other = comparisonWindow else other = planWindow end
-    if other and other:IsShown() then other:Hide() end
-    switchingWindow = false
-    frame:Show()
-end
-
-local function popupHidden()
-    if returnToReport and not switchingWindow then
-        returnToReport = false
-        NS.RestoreReportWindow()
-    end
-end
-
-local function label(parent, text, x, y, width)
-    local font = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    font:SetPoint("TOPLEFT", x, y)
-    font:SetWidth(width or 700)
-    font:SetJustifyH("LEFT")
-    font:SetText(text)
-    return font
-end
-
-local function button(parent, text, x, y, width, action)
-    local widget = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    widget:SetPoint("TOPLEFT", x, y)
-    widget:SetSize(width, 26)
-    widget:SetText(text)
-    widget:SetScript("OnClick", action)
-    return widget
-end
-
-local function popup(name, title, subtitle, height)
-    local frame = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
-    frame:Hide()
-    frame:SetSize(760, height)
-    frame:SetPoint("CENTER")
-    -- A report's scroll child has its own frame level. Keep tools above that
-    -- entire strata as well as hiding the report while an editor is active.
-    frame:SetFrameStrata("FULLSCREEN_DIALOG")
-    frame:SetClampedToScreen(true)
-    frame:SetMovable(true)
-    frame:EnableMouse(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart", frame.StartMoving)
-    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-    frame:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8", edgeFile="Interface\\Tooltips\\UI-Tooltip-Border", edgeSize=16,
-        insets={left=4,right=4,top=4,bottom=4}})
-    frame:SetBackdropColor(0.035, 0.05, 0.075, 1)
-    frame:SetBackdropBorderColor(0.3, 0.65, 0.8, 1)
-    frame.title = label(frame, "|cffffd46a" .. title .. "|r", 20, -20)
-    frame.subtitle = label(frame, subtitle, 20, -45)
-    frame.close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-    frame.close:SetPoint("TOPRIGHT", -5, -5)
-    frame:SetScript("OnShow", function(self)
-        self:SetScale(math.min(1, (UIParent:GetWidth()-40)/760, (UIParent:GetHeight()-40)/height))
-    end)
-    frame:SetScript("OnHide", popupHidden)
-    UISpecialFrames = UISpecialFrames or {}
-    table.insert(UISpecialFrames, name)
-    return frame
-end
+local allowed, showPopup = NS.ToolsAllowed, NS.ShowToolWindow
+local label, button, popup = NS.ToolLabel, NS.ToolButton, NS.CreateToolWindow
 
 local function renderPlan()
     if not planWindow then return end
@@ -202,6 +123,14 @@ local function makePlanWindow()
     frame.next = button(frame, "Next", 130, -600, 100, function() frame.page = frame.page+1; renderPlan() end)
     frame.refresh = button(frame, "Refresh", 240, -600, 110, renderPlan)
     frame.review = button(frame, "Review with AI", 560, -600, 175, function() NS.OpenReport("review") end)
+    frame.reviewBuild = button(frame, "Mark build reviewed", 455, -250, 160, function()
+        if not allowed() then return end
+        local ok, message = NS.ReviewPlanForBuild()
+        frame.status:SetText(ok and "Plan marked reviewed for this client build. Original reference preserved." or message)
+    end)
+    frame.clear:ClearAllPoints()
+    frame.clear:SetPoint("TOPLEFT", 620, -250)
+    frame.clear:SetWidth(115)
     frame.pages = label(frame, "", 370, -609, 165)
     frame:HookScript("OnHide", function(self) self:SetScript("OnUpdate", nil); self.input:ClearFocus() end)
 end
@@ -269,6 +198,7 @@ local function makeComparisonWindow()
     frame.clear = button(frame, "Clear candidates", 210, -325, 150, function()
         local state = NS.CharacterState()
         state.candidates = {}
+        NS.TouchAdvice()
         for _, key in ipairs({"A", "B"}) do frame.inputs[key]:SetText(""); frame.names[key]:SetText("") end
         frame.status:SetText("Candidates cleared.")
     end)

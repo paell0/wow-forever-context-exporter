@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.2.0 — 2026-11-11
+
+- Added a per-character item-source notebook: referenced dungeon/quest/vendor/profession origins, explicit player confirmation, direct merchant/displayed-quest-reward observations, and unconfirmed/outdated status. Unknown origins stay unknown; no complete loot database is claimed.
+- Added activity talent profiles with capture of committed nodes, native game export codes when available, bounded FCLOADOUT/1 preview/import/export, selection and rank/entry comparison. Profiles never apply talents. Wrong classes, old builds and impossible client targets are flagged.
+- Added client-build/date freshness information and explicit plan-review acknowledgement without changing the original snapshot reference. No automatic internet rule-update service is implied.
+- Added opt-in carried-bag reports and a browser with item quantities, exact variants, reagent/equipment metadata, known vendor prices and A/B selection. Bank/mail/other characters are excluded; unknown data is not zero or empty.
+- Added per-character keep reasons covering all variants/copies of an item ID, editable protected lists and an unprotected-alternatives filter. Exports ask before disposal; no inventory action is automated.
+- Added spoiler-free exports that suppress quest/source discovery details and ask the AI to avoid future rewards, plot, boss names and routes.
+- Added 16 report-category switches, source-observation controls, commands and toolbar buttons. Profession data and plan deltas respect category choices. Existing defaults migrate with bags off.
+- Unified all tool windows under the existing exclusive-window navigation, cache/focus guards and combat closure. Reference snapshots remain stable when returning without refreshing.
+- Added 36 community-tool checks, expanded documentation in all 13 README languages, and included the implementation plan and full workflow guide.
+
+Validation: 114 simulated Lua 5.1 tests passed. Live verification of the new tools and layouts remains pending.
+
 ## v1.1.2 — 2026-11-10
 
 - Use the same equipment-slot reader for reports and progress snapshots. A pending item ID no longer records an occupied slot as empty or invents an equipment removal; a readable item link can resolve its ID. Failed texture reads cannot confirm an empty slot.

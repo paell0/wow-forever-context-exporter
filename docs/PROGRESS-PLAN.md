@@ -1,6 +1,6 @@
 # Progress plans, focused questions, and item comparison
 
-[Back to the main README](../README.md)
+[Back to the main README](../README.md) · [New sources, profiles, bags and preference tools](COMMUNITY-TOOLS.md)
 
 ## Follow the four-step loop
 
@@ -87,6 +87,6 @@ The report contains both candidates and your current gear, talents, stats, goals
 | `/fcontext compare` | Choose two item candidates. |
 | `/fcontext minimap` | Hide/show the minimap button. |
 
-Plans, goals, candidate references, and snapshots are stored per character in `ForeverContextCharacterDB`. Existing account-level goal/options are used as initial defaults when migrating; future changes are separate per character. Minimap position/visibility remain in the account-level `ForeverContextDB`.
+Plans, goals, candidate references, snapshots, source records, keep preferences and talent profiles are stored per character in `ForeverContextCharacterDB`. Existing account-level goal/options are used as initial defaults when migrating; future changes are separate per character. Minimap position/visibility remain in the account-level `ForeverContextDB`.
 
 Player-entered goals, accepted task labels, and selected comparison references are included in the reports you choose to export. No account identifier is added to snapshots. AI advice and imported labels are player-supplied context, not verified game rules.

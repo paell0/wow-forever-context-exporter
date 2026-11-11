@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.1.2](https://img.shields.io/static/v1?label=version&message=1.1.2&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.1.2) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![78 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=78+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.2.0](https://img.shields.io/static/v1?label=version&message=1.2.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.2.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](../LICENSE) [![114 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=114+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -20,9 +20,12 @@ WoW Forever のキャラクターのタレント、専門技能、装備、ス�
 
 1.1.0 ではキャラクター別の進行計画、2つのアイテム比較、質問別のレポート、以前の助言の見直しを追加しました。**Progress plan** に AI の計画ブロックを貼り付け、**Preview plan** で確認して **Accept plan** で承認します。確認可能な目標はキャラクターデータで更新され、手動タスクはチェックボックスで管理します。**Compare items** に2つのアイテムをドラッグできます。**Talent points**、**Gear advice**、**Next session**、**Review plan** から目的を選べます。承認済み目標と基準からの変化も出力されます。[英語の完全ガイドと計画形式](PROGRESS-PLAN.md)。
 
+
+1.2.0では、参照情報と確認状態付きのアイテム入手先、活動別タレントプロファイル、バージョン変更の警告、任意のバッグ出力、保管アイテム一覧、ネタバレ防止モード、出力カテゴリ選択の7機能を追加しました。**Item sources**、**Talent profiles**、**Browse bags**、**Keep items**、**Export options**から利用できます。ゲーム内の観測、プレイヤーの確認、未確認メモを区別し、完全なドロップデータベースは含みません。[7機能の英語ガイド](COMMUNITY-TOOLS.md)。
+
 ## インストールと使い方
 
-1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) から `ForeverContext-1.1.2.zip` をダウンロードします。
+1. [Releases](https://github.com/paell0/wow-forever-context-exporter/releases) から `ForeverContext-1.2.0.zip` をダウンロードします。
 2. ゲームを終了し、`ForeverContext` フォルダーを `World of Warcraft/_forever_/Interface/AddOns/` に展開します。
 3. `AddOns/ForeverContext/ForeverContext.toc` を確認してアドオンを有効にします。旧 ContextoPJ がある場合は、そのフォルダーを先に削除してください。
 4. 非戦闘時に **`/fcontext`** を入力します。
@@ -36,9 +39,9 @@ WoW Forever のキャラクターのタレント、専門技能、装備、ス�
 
 ## 状態と制限
 
-インターフェース **16001** 向けの公開プレビューです。**Lua 5.1 の模擬テスト 78 件**に合格していますが、実際の WoW Forever セッションでは未検証です。
+インターフェース **16001** 向けの公開プレビューです。**Lua 5.1 の模擬テスト 114 件**に合格していますが、実際の WoW Forever セッションでは未検証です。
 
-キャラクター名は既定で除外されます。データの送信や API キーは不要です。バッグと銀行は含みません。未適用のタレント変更を現在の構成として出力せず、不足データには警告を表示します。必要に応じてタレントや専門技能画面を開き、再生成してください。
+キャラクター名は初期設定で省略されます。データ送信やAPIキーは不要です。バッグは有効にした場合のみ出力し、銀行・郵便・別キャラクターは対象外です。プロファイル・入手先・設定はキャラクター別に保存します。ネタバレ防止モードは出力を絞りAIに指示しますが、返信や自分で書いた文章までは制御しません。取得できないデータは不明として表示します。この版はゲーム内での確認が必要です。
 
 操作画面とレポートのラベルは英語です。ゲーム内の名称と説明はクライアントの言語を保持します。これは文書の翻訳であり、日本語クライアントへの対応を追加するものではありません。詳細と開発手順は[英語 README](../README.md) を参照してください。ライセンス：[All Rights Reserved](../LICENSE)。
 

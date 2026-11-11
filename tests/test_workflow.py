@@ -8,7 +8,7 @@ class WorkflowTests(unittest.TestCase):
     def setUp(self):
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.lua.execute(MOCK)
-        for name in ('Core.lua', 'Progress.lua', 'Workflow.lua', 'UI.lua', 'PlannerUI.lua', 'Minimap.lua'):
+        for name in ('Core.lua', 'Progress.lua', 'Advice.lua', 'Inventory.lua', 'Loadouts.lua', 'Workflow.lua', 'UI.lua', 'ToolUI.lua', 'PlannerUI.lua', 'AdviceUI.lua', 'Minimap.lua'):
             self.lua.execute('assert(loadstring(...))("ForeverContext", NS)', (ADDON / name).read_text(encoding='utf-8'))
         self.ns = self.lua.globals().NS
 
@@ -444,11 +444,11 @@ MANUAL|Remember me]])
         self.assertTrue(self.ns.MarkManualTask(1, True))
         g = self.lua.globals()
         g.ForeverContextPlanWindow.close.scripts.OnClick()
-        self.assertIn('Plan changed.', g.ForeverContextWindow.status.value)
+        self.assertIn('Context changed.', g.ForeverContextWindow.status.value)
         self.assertFalse(g.ForeverContextWindow.select.enabled)
         self.assertTrue(self.lua.eval('reportReference == NS.CharacterState().lastExport'))
         g.ForeverContextWindow.select.scripts.OnClick()
-        self.assertIn('Plan changed.', g.ForeverContextWindow.status.value)
+        self.assertIn('Context changed.', g.ForeverContextWindow.status.value)
         g.ForeverContextWindow.generate.scripts.OnClick()
         self.assertIn('[DONE] Visit dungeon', g.ForeverContextWindow.report)
         self.assertTrue(g.ForeverContextWindow.select.enabled)
@@ -464,7 +464,7 @@ MANUAL|Remember me]])
         self.assertFalse(g.ForeverContextWindow.select.enabled)
         g.ForeverContextWindow.generate.scripts.OnClick()
         self.lua.execute('NS.OpenPlanWindow(); NS.ClearPlan(); ForeverContextPlanWindow.close.scripts.OnClick()')
-        self.assertIn('Plan changed.', g.ForeverContextWindow.status.value)
+        self.assertIn('Context changed.', g.ForeverContextWindow.status.value)
         self.assertFalse(g.ForeverContextWindow.select.enabled)
         g.ForeverContextWindow.generate.scripts.OnClick()
         self.assertIn('No plan accepted.', g.ForeverContextWindow.report)

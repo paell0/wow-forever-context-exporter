@@ -275,6 +275,9 @@ class AddonTests(unittest.TestCase):
         self.lua.execute(MOCK)
         self.load('Core.lua')
         self.load('Progress.lua')
+        self.load('Advice.lua')
+        self.load('Inventory.lua')
+        self.load('Loadouts.lua')
         self.load('Workflow.lua')
 
     def load(self, name):
@@ -451,7 +454,7 @@ class AddonTests(unittest.TestCase):
         self.assertIn('## Interface: 16001', toc)
         self.assertIn('## SavedVariables: ForeverContextDB', toc)
         files = [line for line in toc.splitlines() if line and not line.startswith('#')]
-        self.assertEqual(files, ['Core.lua', 'Progress.lua', 'Workflow.lua', 'UI.lua', 'PlannerUI.lua', 'Minimap.lua'])
+        self.assertEqual(files, ['Core.lua', 'Progress.lua', 'Advice.lua', 'Inventory.lua', 'Loadouts.lua', 'Workflow.lua', 'UI.lua', 'ToolUI.lua', 'PlannerUI.lua', 'AdviceUI.lua', 'Minimap.lua'])
         self.assertIn('## SavedVariablesPerCharacter: ForeverContextCharacterDB', toc)
         for file in files:
             self.assertTrue((ADDON / file).is_file())

@@ -1,5 +1,5 @@
 local _, NS = ...
-NS.VERSION = "1.1.2"
+NS.VERSION = "1.2.0"
 
 -- Only public addon APIs. Exporting is disabled in combat by UI.lua.
 local function secret(value)
@@ -636,10 +636,13 @@ local function skills(ctx)
         local skill = object(call(namespace("C_SkillInfo", "GetSkillLineInfoByID"), skillID))
         if skill and not skill.isHeader and number(skill.rank) and skill.rank > 0 then rows[skillID] = skill end
     end
+    local professionIDs = NS.ProfessionSkillIDs()
     for _, id in ipairs(sortedKeys(rows)) do
         local skill = rows[id]
+        if not professionIDs[id] or NS.ModuleEnabled(ctx.options, "professions") then
         seen[id] = true
         push(ctx, "- " .. clean(skill.name) .. ": " .. fmt(skill.rank) .. "/" .. fmt(skill.maxRank) .. "; modifier " .. fmt(skill.modifier) .. "; ID " .. id)
+        end
     end
     if not next(seen) then push(ctx, "No readable skills.") end
 end
@@ -696,7 +699,7 @@ local function section(ctx, title, fn)
     end
 end
 
-NS.ModeLabels = {overview="Overview", talents="Talent points", gear="Gear advice", session="Next session", review="Review plan", compare="Compare items"}
+NS.ModeLabels = {overview="Overview", talents="Talent points", gear="Gear advice", session="Next session", review="Review plan", compare="Compare items", sources="Source notebook"}
 NS.ModeQuestions = {
     overview="Assess whether my character is on the right track for its level and my goals in WoW Forever, using the data above.",
     talents="Recommend my next talent points for my level and goals. Explain the order and trade-offs. Use node IDs only when verified; do not invent an unlisted node ID.",
@@ -704,6 +707,7 @@ NS.ModeQuestions = {
     session="Plan a practical next play session using my level, active quests, professions, goals, and accepted progress plan. Ask about session length when it matters.",
     review="Review my accepted plan against the current character and recorded changes. Explain what is complete, pending, or unverified and suggest an updated plan.",
     compare="Compare candidate A and B for my actual character and goal. Check slot compatibility, weapon restrictions, effects and whole-loadout set changes. Distinguish observed facts from hypothetical equip results.",
+    sources="Review the item-source notebook for useful upgrades at my level and for my build. Distinguish observed offers, player-confirmed claims, unconfirmed notes and outdated records. Cite Forever references and do not invent loot tables.",
 }
 
 function NS.BuildReport(options)
@@ -714,28 +718,31 @@ function NS.BuildReport(options)
     push(ctx, "Question: " .. NS.ModeLabels[mode])
     push(ctx, "Player goal and preferences: " .. clean(ctx.options.goal, "Unspecified; ask before assuming PvE, PvP, role, or budget."))
     section(ctx, "CHARACTER", identity)
-    section(ctx, "TALENTS", talents)
-    section(ctx, "FOREVER LEGACY", legacy)
-    section(ctx, "PROFESSIONS", professions)
-    if mode ~= "talents" then section(ctx, "EQUIPMENT AND ITEM DETAILS", equipment) end
-    section(ctx, "CHARACTER STATS", statistics)
-    section(ctx, "ACTIVE BUFFS", auras)
-    section(ctx, "SUMMONED PET", pet)
+    local function enabled(key) return NS.ModuleEnabled(ctx.options, key) end
+    if enabled("talents") then section(ctx, "TALENTS", talents) end
+    if enabled("legacy") then section(ctx, "FOREVER LEGACY", legacy) end
+    if enabled("professions") then section(ctx, "PROFESSIONS", professions) end
+    if mode ~= "talents" and enabled("equipment") then section(ctx, "EQUIPMENT AND ITEM DETAILS", equipment) end
+    if enabled("stats") then section(ctx, "CHARACTER STATS", statistics) end
+    if enabled("buffs") then section(ctx, "ACTIVE BUFFS", auras) end
+    if enabled("pet") then section(ctx, "SUMMONED PET", pet) end
     if ctx.options.extended then
-        section(ctx, "SKILLS AND PROFICIENCIES", skills)
-        if mode == "overview" or mode == "talents" then section(ctx, "KNOWN SPELLS", spellbook) end
-        if mode == "overview" or mode == "review" then section(ctx, "ACTIVE QUESTS", quests) end
-        if mode == "overview" or mode == "session" then section(ctx, "REPUTATIONS", reputations) end
+        if enabled("skills") then section(ctx, "SKILLS AND PROFICIENCIES", skills) end
+        if (mode == "overview" or mode == "talents") and enabled("spells") then section(ctx, "KNOWN SPELLS", spellbook) end
+        if (mode == "overview" or mode == "review") and enabled("quests") and not ctx.options.spoilerFree then section(ctx, "ACTIVE QUESTS", quests) end
+        if (mode == "overview" or mode == "session") and enabled("reputations") then section(ctx, "REPUTATIONS", reputations) end
     end
-    if mode == "session" then section(ctx, "ACTIVE QUESTS", quests) end
+    if mode == "session" and enabled("quests") and not ctx.options.spoilerFree then section(ctx, "ACTIVE QUESTS", quests) end
     section(ctx, "COVERAGE AND WARNINGS", function()
         push(ctx, "Local out-of-combat game snapshot; excludes a complete gameplay decision history and combat performance. Accepted plans and observed changes are reported separately when available.")
-        push(ctx, "Equipment: currently equipped items only; excludes bags, bank, and alternate gear.")
+        push(ctx, "Equipment section: currently equipped items only. Carried bags are a separate opt-in section; bank and mail are excluded.")
         push(ctx, "Do not add individual item stats to the character stat totals.")
         push(ctx, "Only SET BONUS ACTIVE entries describe enabled set effects. Inactive or unknown entries are not confirmed benefits; repeated bonuses from the same set count once.")
         push(ctx, "Rank tooltips are requested for the current talent rank. REFERENCE ONLY descriptions are not verified rank totals and must not be multiplied automatically.")
         push(ctx, "Repeated talent-currency IDs refer to the same point pool; do not add repeated available balances.")
         if mode ~= "overview" then push(ctx, "Focused question mode: unrelated sections may be omitted. An omitted section does not indicate missing equipment or abilities.") end
+        push(ctx, "Export options may omit additional sections. Ask for missing context before giving advice that depends on it.")
+        if ctx.options.spoilerFree then push(ctx, "SPOILER-FREE: quest discovery details and item origins are withheld. Avoid future rewards, story, boss names, undiscovered places and routes. Ask before revealing specifics.") end
         push(ctx, "Unavailable or pending does not mean zero, unlearned, or empty.")
         push(ctx, "Account, BattleTag, chat, friends, and guild data are not exported.")
         for _, message in ipairs(sortedKeys(ctx.warnings)) do push(ctx, "WARNING: " .. message) end
@@ -745,7 +752,7 @@ function NS.BuildReport(options)
     end)
     section(ctx, "REQUEST TO THE AI", function()
         push(ctx, NS.ModeQuestions[mode])
-        push(ctx, "Prioritize changes: talents and next points, stats and gear upgrades, professions, and skills I should review.")
+        push(ctx, "Prioritize useful changes supported by the included categories. Do not infer omitted talents, equipment, professions or activities.")
         push(ctx, "Distinguish major issues from optional upgrades; explain each recommendation and consider level, money, and solo or group play.")
         push(ctx, "Verify that your sources and advice apply to Forever and this version. Do not automatically extrapolate Retail or Classic guides.")
         push(ctx, "If you do not know a Forever item, talent, or rule, say so and request the necessary information. Do not invent effects, locations, or rewards.")
