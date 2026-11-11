@@ -30,13 +30,35 @@ end
 
 function NS.BuildExport(options)
     options = options or NS.CharacterSettings()
-    local report, pending, warnings = NS.BuildReport(options)
+    local comparing=options.mode=="compare"
+    local comparison, candidateIDs, candidatePending, candidateWarnings=nil,{},0,0
+    if comparing then
+        local lines={"=== ITEM COMPARISON CANDIDATES ===",
+            "These are candidate items, not additional equipped bonuses. Set counts in their tooltips describe the current character, not a recalculated hypothetical loadout."}
+        for _, slot in ipairs({"A","B"}) do
+            local candidate=NS.CharacterState().candidates[slot]
+            if candidate then
+                local text,p,w=NS.DescribeComparisonItem(candidate,"Candidate " .. slot)
+                lines[#lines+1]=text
+                candidatePending,candidateWarnings=candidatePending+p,candidateWarnings+w
+                local id=NS.ItemID(candidate)
+                if id then candidateIDs[id]=true end
+            else
+                lines[#lines+1]="Candidate " .. slot .. ": missing. Add both items under More tools > Compare two items before deciding."
+                candidateWarnings=candidateWarnings+1
+            end
+        end
+        comparison=table.concat(lines,"\n\n")
+    end
+    local report, pending, warnings = NS.BuildReport(options,comparison)
+    pending,warnings=pending+candidatePending,warnings+candidateWarnings
     local snapshot = NS.CaptureSnapshot()
     local parts, bagRows = {report}, nil
-    if NS.ModuleEnabled(options, "progress") then parts[#parts+1] = NS.ProgressText(snapshot, options) end
+    local state=NS.CharacterState()
+    if NS.ModuleEnabled(options, "progress") and (not comparing or state.plan or state.history[1]) then parts[#parts+1] = NS.ProgressText(snapshot, options) end
     if NS.ModuleEnabled(options, "preservation") then parts[#parts+1] = NS.KeepText()
     else parts[#parts+1] = "Preservation preferences withheld. Do not recommend disposing of any item without asking the player." end
-    if NS.ModuleEnabled(options, "bags") then
+    if NS.ModuleEnabled(options, "bags") and not comparing then
         local text, p, w, rows = NS.BagsText(options)
         bagRows = rows
         parts[#parts+1] = text
@@ -47,13 +69,10 @@ function NS.BuildExport(options)
         if options.spoilerFree then
             sources[#sources+1] = "Item origins withheld by spoiler-free preference."
         else
-            local relevant = {}
+            local relevant = comparing and candidateIDs or {}
             if options.mode == "sources" then for _, entry in ipairs(NS.SourceRecords()) do relevant[entry.record.itemID]=true end end
-            if NS.ModuleEnabled(options, "equipment") and options.mode ~= "talents" then
+            if not comparing and NS.ModuleEnabled(options, "equipment") and options.mode ~= "talents" then
                 for _, id in pairs(snapshot.slots) do if id > 0 then relevant[id]=true end end
-            end
-            if options.mode == "compare" then
-                for _, value in pairs(NS.CharacterState().candidates) do local id=NS.ItemID(value); if id then relevant[id]=true end end
             end
             if NS.ModuleEnabled(options, "bags") then
                 for _, row in ipairs(bagRows or {}) do if row.itemID then relevant[row.itemID]=true end end
@@ -63,32 +82,17 @@ function NS.BuildExport(options)
         end
         parts[#parts+1] = table.concat(sources,"\n")
     end
-    if NS.ModuleEnabled(options, "loadouts") and NS.ModuleEnabled(options, "talents") then
+    if NS.ModuleEnabled(options, "loadouts") and NS.ModuleEnabled(options, "talents") and (not comparing or NS.AdviceState().selectedTalentProfile) then
         local text, w = NS.TalentProfileAdvice(snapshot, options)
         parts[#parts+1] = text
         warnings = warnings+w
     end
-    local freshness, w = NS.FreshnessText(options)
+    local freshness, w = NS.FreshnessText(options,comparing and candidateIDs or nil)
     parts[#parts+1] = freshness
     warnings=warnings+w
-    if options.mode == "compare" then
-        parts[#parts + 1] = "=== ITEM COMPARISON CANDIDATES ==="
-        parts[#parts + 1] = "These are candidate items, not additional equipped bonuses. Set counts in their tooltips describe the current character, not a recalculated hypothetical loadout."
-        for _, slot in ipairs({"A", "B"}) do
-            local candidate = NS.CharacterState().candidates[slot]
-            if candidate then
-                local text, morePending, moreWarnings = NS.DescribeComparisonItem(candidate, "Candidate " .. slot)
-                parts[#parts + 1] = text
-                pending, warnings = pending + morePending, warnings + moreWarnings
-            else
-                parts[#parts + 1] = "Candidate " .. slot .. ": missing. Add both items in Compare items before deciding."
-                warnings = warnings + 1
-            end
-        end
-    end
-    parts[#parts + 1] = "=== FOLLOW-UP REQUEST ===\n" .. (NS.ModeQuestions[options.mode] or NS.ModeQuestions.overview)
+    if not comparing then parts[#parts + 1] = "=== FOLLOW-UP REQUEST ===\n" .. (NS.ModeQuestions[options.mode] or NS.ModeQuestions.overview) end
     parts[#parts + 1] = "Use only exported categories. Player notes and selected profiles are preferences, not verified game rules. Review progress before replacing advice."
-    if NS.ModuleEnabled(options, "progress") then parts[#parts+1] = NS.PlanInstructions end
+    if not comparing and NS.ModuleEnabled(options, "progress") then parts[#parts+1] = NS.PlanInstructions end
     if options.spoilerFree then parts[#parts+1] = "SPOILER-FREE REQUEST: do not reveal future rewards, quest/story outcomes, boss names, undiscovered locations or routes. Give general advice using current exported facts; ask before spoilers." end
     return table.concat(parts, "\n\n"), pending, warnings, snapshot
 end

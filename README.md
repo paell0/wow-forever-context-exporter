@@ -1,6 +1,6 @@
 # ForeverContext
 
-[![Version 1.4.0](https://img.shields.io/static/v1?label=version&message=1.4.0&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.4.0) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](LICENSE) [![144 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=144+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
+[![Version 1.4.1](https://img.shields.io/static/v1?label=version&message=1.4.1&color=D4A64A&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/releases/tag/v1.4.1) [![Public preview](https://img.shields.io/static/v1?label=status&message=public+preview&color=E8A838&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter#privacy-and-limitations) [![Lua 5.1](https://img.shields.io/static/v1?label=Lua&message=5.1&color=2C2D72&labelColor=162033&style=for-the-badge&logo=lua&logoColor=white)](https://github.com/paell0/wow-forever-context-exporter/tree/main/ForeverContext) [![All Rights Reserved; prior MIT material retains its permissions](https://img.shields.io/static/v1?label=license&message=All+Rights+Reserved&color=B45309&labelColor=162033&style=for-the-badge)](LICENSE) [![155 simulated tests; not verified in game](https://img.shields.io/static/v1?label=tests&message=155+simulated&color=3B82B6&labelColor=162033&style=for-the-badge)](https://github.com/paell0/wow-forever-context-exporter/blob/main/tests/test_addon.py)
 
 <!-- language-selector:start -->
 
@@ -14,13 +14,13 @@
 
 Export your WoW Forever character's talents, professions, gear, and stats as plain text for AI advice.
 
-**Status: public preview.** Targets Forever interface **16001**. The addon passes 144 simulated Lua 5.1 tests. **This build still needs live verification.** Earlier builds have produced live character exports and revealed client-specific UI issues. Please report issues with your build number.
+**Status: public preview.** Targets Forever interface **16001**. The addon passes 155 simulated Lua 5.1 tests. **This build still needs live verification.** Earlier builds have produced live character exports and revealed client-specific UI issues. Please report issues with your build number.
 
 [Changelog](CHANGELOG.md)
 
 ## Install
 
-1. Download `ForeverContext-1.4.0.zip` from [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
+1. Download `ForeverContext-1.4.1.zip` from [Releases](https://github.com/paell0/wow-forever-context-exporter/releases).
 2. Close the game and extract the archive into `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Check that the final path is `AddOns/ForeverContext/ForeverContext.toc`.
 4. Start Forever and enable **ForeverContext** in the AddOns list.
@@ -42,7 +42,7 @@ Read the [beginner guide](docs/QUICKSTART.md) for numbered item comparison, AI-p
 ### Four connected features
 
 - **Track a progress plan:** up to 32 tasks saved per character. Current level, skills, equipped slots/items, committed talent ranks, and gold balance can be checked automatically; other tasks have manual checkboxes.
-- **Compare two items:** open **More tools → Compare two items**, drag in candidates A and B or paste their full game links, then click **Compare with AI**. The report includes both items and your current character context.
+- **Compare two items:** open **More tools → Compare two items**, drag in candidates A and B or paste their full game links, then click **Compare with AI**. The report starts with both items, followed by your current character and equipped loadout. Comparison skips full bag contents and limits origin notes to the two candidates, while retaining relevant saved advice.
 - **Ask a focused question:** purpose buttons select relevant sections and tailor the AI request. The overview keeps the broader export available.
 - **Review previous advice:** exports include accepted goals, current completion checks, and observed changes since the plan's reference snapshot. Replaced/cleared plans are archived, with the two most recent retained.
 
@@ -115,7 +115,7 @@ python -m unittest discover -s tests -v
 python scripts/build_release.py
 ```
 
-The build validates and compiles the bundled translation catalogs, then writes `dist/ForeverContext-1.4.0.zip` with the correct addon folder. Tests use `lupa.lua51` and a simulated client. Some fixtures deliberately use Spanish game data to verify that localized client text is preserved.
+The build validates and compiles the bundled translation catalogs, then writes `dist/ForeverContext-1.4.1.zip` with the correct addon folder. Tests use `lupa.lua51` and a simulated client. Some fixtures deliberately use Spanish game data to verify that localized client text is preserved.
 
 An earlier v1.0.3 build produced a live character export on Forever build 70862 with an esES client. The simplified workflows, translated layouts and client glyph rendering still require live verification.
 

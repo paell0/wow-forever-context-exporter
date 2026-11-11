@@ -70,7 +70,7 @@ local function collect()
     window.progressVersion = NS.ProgressVersion()
     window.snapshot = snapshot
     window.report = report
-    window.text:SetText(report)
+    NS.SetPlainText(window.text,report)
     window.text:SetCursorPosition(0)
     window.scroll:SetVerticalScroll(0)
     lastPending, lastWarnings = pending, warnings
@@ -181,8 +181,8 @@ local function createWindow()
     frame.scroll:SetScrollChild(frame.text)
     frame.text:SetScript("OnEscapePressed", function() frame:Hide() end)
     frame.text:SetScript("OnTextChanged", function(self, userInput)
-        if userInput and frame.report and self:GetText() ~= frame.report then
-            self:SetText(frame.report)
+        if userInput and frame.report and NS.GetPlainText(self) ~= frame.report then
+            NS.SetPlainText(self,frame.report)
             self:SetCursorPosition(0)
         end
     end)

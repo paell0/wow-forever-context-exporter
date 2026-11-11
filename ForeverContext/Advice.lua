@@ -226,7 +226,7 @@ function NS.ReviewPlanForBuild()
     return true
 end
 
-function NS.FreshnessText(options)
+function NS.FreshnessText(options,relevantIDs)
     options = options or NS.CharacterSettings()
     local stamp, state = NS.ClientStamp(), NS.AdviceState()
     local lines = {"=== DATA FRESHNESS ===", "Current client: " .. stamp.client .. "; build " .. stamp.build .. "; addon " .. NS.VERSION}
@@ -238,7 +238,9 @@ function NS.FreshnessText(options)
     end
     if NS.ModuleEnabled(options, "sources") and not options.spoilerFree then
         local stale = 0
-        for _, entry in ipairs(NS.SourceRecords()) do if entry.record.build ~= stamp.build then stale=stale+1 end end
+        for _, entry in ipairs(NS.SourceRecords()) do
+            if (not relevantIDs or relevantIDs[entry.record.itemID]) and entry.record.build ~= stamp.build then stale=stale+1 end
+        end
         if stale > 0 then warnings=warnings+1; lines[#lines+1] = stale .. " source records are from another build and need checking." end
     end
     lines[#lines+1] = "No automatic internet rule updates. Dates/builds show provenance, not proof that all game rules or drops are known."

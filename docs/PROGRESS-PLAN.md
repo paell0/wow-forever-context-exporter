@@ -93,3 +93,9 @@ The report contains both candidates and your current gear, talents, stats, goals
 Plans, goals, candidate references, snapshots, source records, keep preferences and talent profiles are stored per character in `ForeverContextCharacterDB`. Existing account-level goal/options are used as initial defaults when migrating; future changes are separate per character. Minimap position/visibility and interface language remain in the account-level `ForeverContextDB`.
 
 Player-entered goals, accepted task labels, and selected comparison references are included in the reports you choose to export. No account identifier is added to snapshots. AI advice and imported labels are player-supplied context, not verified game rules.
+
+## Literal separators in text boxes
+
+Starting with v1.4.1, report, plan and profile text boxes escape literal pipe characters at the display boundary. Generated report strings, import protocols and saved drafts keep their original separators. This prevents the client from consuming a delimiter followed by R as formatting when text is displayed/copied. Input readers use the client’s display-text API, with a compatibility fallback. Report protection restores encoded text without encoding it twice.
+
+The client API contract is documented in [SimpleEditBoxAPI](https://github.com/Gethe/wow-ui-source/blob/forever/Interface/AddOns/Blizzard_APIDocumentationGenerated/SimpleEditBoxAPIDocumentation.lua). The literal-pipe escape pattern is also used in the [WeakAuras text editor](https://github.com/WeakAuras/WeakAuras2/blob/main/WeakAurasOptions/OptionsFrames/TextEditor.lua). Simulated regression checks model the escaped-pipe/reset behavior observed in a live v1.4.0 report; the new clipboard round trip still needs client verification.

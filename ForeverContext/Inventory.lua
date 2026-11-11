@@ -65,13 +65,18 @@ function NS.BagItemText(row, options, detailed)
     return table.concat(lines, "\n"), row.pending and 1 or 0, 0
 end
 
+function NS.IsBagEquipment(row)
+    local slot=row.equipLoc
+    return type(slot)=="string" and slot~="" and slot~="INVTYPE_NON_EQUIP_IGNORE" and slot~="INVTYPE_BAG" and slot~="INVTYPE_QUIVER"
+end
+
 function NS.BagsText(options)
     local rows, issues = NS.ReadBags()
     local lines = {"=== CARRIED BAG ITEMS ===", "Only equipped carried bags are scanned. Bank, mail and other characters are excluded. Counts are stack quantities. No items are moved or disposed of."}
     local pending, warnings, details = 0, #issues, 0
     for _, issue in ipairs(issues) do lines[#lines+1] = "WARNING: " .. issue end
     for _, row in ipairs(rows) do
-        local detailed = row.equipLoc ~= "" and details < 80
+        local detailed = NS.IsBagEquipment(row) and details < 80
         if detailed then details=details+1 end
         local text, p, w = NS.BagItemText(row, options, detailed)
         lines[#lines+1] = text

@@ -87,7 +87,7 @@ There is no background internet rule-update service. Build matches and timestamp
 
 Carried-bag export is **off by default**. Enable **Also include the items in my bags** in **Settings**, then generate a report. Only equipped carried bags are read: no bank, mail or other-character inventories.
 
-Reports include item references/variants, stack quantities, item type, equipment slot, known reagent status and available vendor price. Vendor price is not auction value or usefulness; missing prices and data remain unknown. Equipment effects/stats are detailed for the first 80 carried equipment entries; remaining references and quantities are still included. The scan has a 400-item safety limit and reports incomplete data explicitly.
+Reports include item references/variants, stack quantities, item type, equipment slot, known reagent status and available vendor price. Vendor price is not auction value or usefulness; missing prices and data remain unknown. Equipment effects/stats are detailed for the first 80 carried weapon/armor entries; the client’s non-equippable token, containers and quivers do not use this detail budget; remaining references and quantities are still included. The scan has a 400-item safety limit and reports incomplete data explicitly.
 
 **Browse bags** works on demand even if automatic bag export is off. Use Previous/Next, **Equipment only**, and **Hide kept items / show alternatives**. Record a reason and click **Keep this item**, or select **Use as A / Use as B** and **Open Compare**. Nothing is moved, equipped or disposed of. Bag-update events refresh a visible browser once per update frame; closed tools do not poll.
 

@@ -100,17 +100,17 @@ local function renderBags(refresh)
     bags.rows={}
     local state=NS.AdviceState()
     for _,row in ipairs(bags.all or {}) do
-        if (not bags.gearOnly:GetChecked() or row.equipLoc~="") and (not bags.unprotected:GetChecked() or not state.keepItems[row.itemID]) then bags.rows[#bags.rows+1]=row end
+        if (not bags.gearOnly:GetChecked() or NS.IsBagEquipment(row)) and (not bags.unprotected:GetChecked() or not state.keepItems[row.itemID]) then bags.rows[#bags.rows+1]=row end
     end
     bags.index=math.max(1,math.min(bags.index or 1,#bags.rows))
     local row=bags.rows[bags.index]
     if row then
         NS.SetText(bags.item,"{1} — item {2}",row.name,row.itemID or "unknown")
-        bags.text:SetText(NS.BagItemText(row,NS.CharacterSettings(),true))
+        NS.SetPlainText(bags.text,NS.BagItemText(row,NS.CharacterSettings(),true))
         NS.SetText(bags.pages,"Item {1}/{2}",bags.index,#bags.rows)
     else
         NS.SetText(bags.item,"No items match this filter.")
-        bags.text:SetText(table.concat(bags.issues or {},"\n"))
+        NS.SetPlainText(bags.text,table.concat(bags.issues or {},"\n"))
         NS.SetText(bags.pages,"0 items")
     end
     bags.text:SetCursorPosition(0)
@@ -285,7 +285,7 @@ local function selectProfile(index)
         NS.SelectTalentProfile(name)
         local profile=NS.AdviceState().talentProfiles[name]
         loadouts.name:SetText(profile.name); loadouts.activity:SetText(profile.activity)
-        loadouts.text:SetText(NS.TalentProfileText(profile))
+        NS.SetPlainText(loadouts.text,NS.TalentProfileText(profile))
         loadouts.text:SetCursorPosition(0); loadouts.scroll:SetVerticalScroll(0)
         NS.SetText(loadouts.status,"Selected {1}; saved build {2}; current build {3}.",name,profile.build,NS.ClientStamp().build)
     else NS.SetText(loadouts.status,"No saved profiles. Capture your committed build or paste an FCLOADOUT/1 block.") end
@@ -310,7 +310,7 @@ local function makeLoadouts()
         for i,name in ipairs(names) do if name==profile.name then selectProfile(i) end end
     end)
     frame.previewButton=button(frame,"Preview import",200,-170,150,function()
-        local profile,message=NS.ParseTalentProfile(frame.text:GetText())
+        local profile,message=NS.ParseTalentProfile(NS.GetPlainText(frame.text))
         frame.preview=profile
         if profile then frame.import:Enable(); NS.SetText(frame.status,"DRAFT: {1} for {2}, build {3}. Click Import profile to save.",profile.name,profile.class,profile.build)
         else frame.import:Disable(); NS.SetText(frame.status,message) end
@@ -342,7 +342,7 @@ local function makeLoadouts()
         local profile=state.talentProfiles[state.selectedTalentProfile or ""]
         if not profile then NS.SetText(frame.status,"Select a saved profile first."); return end
         frame.preview=nil; frame.import:Disable()
-        frame.text:SetText(NS.TalentProfileText(profile)); frame.text:SetFocus(); frame.text:HighlightText(0,-1)
+        NS.SetPlainText(frame.text,NS.TalentProfileText(profile)); frame.text:SetFocus(); frame.text:HighlightText(0,-1)
         NS.SetText(frame.status,"Profile selected. Press Ctrl+C to share or back up. This is an addon profile, not the game's import code.")
     end)
     frame.native=button(frame,"Copy game code",170,-585,155,function()
@@ -350,7 +350,7 @@ local function makeLoadouts()
         local profile=state.talentProfiles[state.selectedTalentProfile or ""]
         if not profile or not profile.native then NS.SetText(frame.status,"No game code available. Capture a current build after opening Talents."); return end
         frame.preview=nil; frame.import:Disable()
-        frame.text:SetText(profile.native); frame.text:SetFocus(); frame.text:HighlightText(0,-1)
+        NS.SetPlainText(frame.text,profile.native); frame.text:SetFocus(); frame.text:HighlightText(0,-1)
         NS.SetText(frame.status,"Press Ctrl+C. Check class/build compatibility and confirm manually in the game's talent UI.")
     end)
     frame.remove=button(frame,"Remove selected",335,-585,155,function()

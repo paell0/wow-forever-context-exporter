@@ -83,7 +83,7 @@ local function makePlanWindow()
     end)
     frame.input:SetScript("OnTextChanged", function(self, userInput)
         if userInput then
-            NS.CharacterState().draftText = self:GetText()
+            NS.CharacterState().draftText = NS.GetPlainText(self)
             local hadPreview = frame.preview ~= nil
             frame.preview = nil
             -- Only discard rendered preview rows once. Typing must not query
@@ -95,7 +95,7 @@ local function makePlanWindow()
     end)
     frame.previewButton = button(frame, "2. Check the plan", 20, -250, 190, function()
         frame.input:ClearFocus()
-        local plan, errorMessage = NS.ParsePlanReply(frame.input:GetText())
+        local plan, errorMessage = NS.ParsePlanReply(NS.GetPlainText(frame.input))
         frame.preview, frame.page = plan, 1
         renderPlan()
         if not plan then NS.SetText(frame.status,errorMessage) end
@@ -110,7 +110,7 @@ local function makePlanWindow()
     frame.example = button(frame, "Try an example", 420, -250, 210, function()
         local level = NS.ReadNumber(NS.SafeCall(UnitLevel, "player")) or 1
         local text = "FCPLAN/1\nTITLE|My next session\nLEVEL|" .. (level + 1) .. "|Gain one level\nMANUAL|Review my next talent point"
-        frame.input:SetText(text)
+        NS.SetPlainText(frame.input,text)
         NS.CharacterState().draftText = text
         frame.preview = nil
         renderPlan()
@@ -154,7 +154,7 @@ function NS.OpenPlanWindow()
     if not allowed() then return end
     if not planWindow then makePlanWindow() end
     planWindow.preview, planWindow.page = nil, 1
-    planWindow.input:SetText(NS.CharacterState().draftText or "")
+    NS.SetPlainText(planWindow.input,NS.CharacterState().draftText or "")
     showPopup(planWindow)
     renderPlan()
 end

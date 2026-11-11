@@ -72,6 +72,7 @@ function NS.ToolTextArea(parent, name, x, y, width, height, maxLetters)
     scroll:SetPoint("TOPLEFT", x, y)
     scroll:SetSize(width, height)
     local edit = CreateFrame("EditBox", name, scroll)
+    edit.foreverPlainText=true
     edit:SetMultiLine(true)
     edit:SetAutoFocus(false)
     edit:SetFontObject(ChatFontNormal)

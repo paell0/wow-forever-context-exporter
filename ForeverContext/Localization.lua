@@ -76,7 +76,7 @@ end
 function NS.BindText(widget, resolver)
     bindings[widget]=resolver
     applyFont(widget,fontLocales[widget] or NS.GetLanguage())
-    widget:SetText(resolver())
+    if widget.foreverPlainText then NS.SetPlainText(widget,resolver()) else widget:SetText(resolver()) end
 end
 
 function NS.SetWidgetLanguageFont(widget,locale)
@@ -105,6 +105,9 @@ function NS.SetLanguage(locale)
     if not normalized then return nil,NS.L("Unsupported language.") end
     if type(ForeverContextDB)~="table" then ForeverContextDB={} end
     ForeverContextDB.language=normalized
-    for widget,resolver in pairs(bindings) do applyFont(widget,fontLocales[widget] or NS.GetLanguage()); widget:SetText(resolver()) end
+    for widget,resolver in pairs(bindings) do
+        applyFont(widget,fontLocales[widget] or NS.GetLanguage())
+        if widget.foreverPlainText then NS.SetPlainText(widget,resolver()) else widget:SetText(resolver()) end
+    end
     return true
 end

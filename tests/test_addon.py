@@ -235,6 +235,7 @@ function widget:CreateFontString(name, layer, template)
 end
 function widget:SetText(value) self.value = value; if self.scripts.OnTextChanged then self.scripts.OnTextChanged(self, false) end end
 function widget:GetText() return self.value end
+function widget:GetDisplayText() return (self.value:gsub("||", "|")) end
 function widget:SetChecked(value) self.checked = value end
 function widget:GetChecked() return self.checked end
 function widget:Enable() self.enabled = true end
@@ -443,7 +444,7 @@ class AddonTests(unittest.TestCase):
         frame = self.lua.globals().ForeverContextWindow
         self.assertEqual(frame.scroll.kind, 'ScrollFrame')
         self.assertEqual(frame.scroll.template, 'UIPanelScrollFrameTemplate')
-        self.assertEqual(frame.scroll.child.value, frame.report)
+        self.assertEqual(frame.scroll.child.GetDisplayText(frame.scroll.child), frame.report)
         self.assertIn('REQUEST TO THE AI', frame.report)
         self.assertEqual(frame.generate.value, '1. Prepare text')
         self.assertEqual(frame.select.value, '2. Select text')

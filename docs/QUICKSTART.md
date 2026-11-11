@@ -35,6 +35,8 @@ Only one tool is shown at a time. Closing a tool returns to the report you came 
 3. Read the next-step message. **3. Prepare comparison** becomes available when both references are valid.
 4. Click it, then select and copy the report into your AI as above.
 
+The exported text starts with both candidates, then includes your character and equipped loadout. Full bag contents and unrelated origin notes are omitted for this focused question, even if bags are enabled. Use Overview with bags enabled for a full carried-inventory export. Saved category choices are unchanged.
+
 This prepares the question and character context. It does not equip an item, decide for you, or contact the AI. **Start again** clears both selected items.
 
 ## Follow an AI plan

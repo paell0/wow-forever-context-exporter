@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.4.1 — 2026-11-11
+
+- Put comparison candidates A and B immediately after the report header, ahead of character/equipment context, and state the focused export scope explicitly.
+- Skip full bag scans during comparison and restrict origin notes/freshness checks to candidate IDs. Overview still uses the saved bag preference; no export settings are reset.
+- Keep current talents, professions, equipped gear, stats, buffs and any existing plans, keep preferences or selected talent profile. Omit empty advice sections, the duplicate comparison question and the unrelated plan-format example from comparison exports.
+- Encode literal pipes only at plain-text display boundaries and read displayed input back into raw protocol strings. Fixes copied examples such as LEVEL|26|Reach losing their separator/R in the client. The protection covers reports, plan examples/reopened drafts, profiles and other multiline tool buffers without double encoding.
+- Treat INVTYPE_NON_EQUIP_IGNORE as non-equippable in bag-detail expansion and the equipment filter. Consumables/quest objects remain listed in inventory exports without being expanded as combat gear.
+- Added 11 focused behavior checks. Nine fail against v1.4.0, including the buried candidates, bag/source noise and pipe-copy regressions; two retain unchanged behavior checks.
+
+Validation: 155 simulated Lua 5.1 tests passed. Clipboard checks model the pipe/reset behavior seen in a live v1.4.0 export; the new client clipboard round trip remains pending verification in game.
+
 ## v1.4.0 — 2026-11-11
 
 - Replaced the nine-button footer with two numbered copy steps, More tools and Settings. Always-visible instructions explain Ctrl+C and Ctrl+V; clipboard copying and AI interaction remain manual.

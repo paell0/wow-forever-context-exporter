@@ -1,5 +1,5 @@
 local _, NS = ...
-NS.VERSION = "1.4.0"
+NS.VERSION = "1.4.1"
 
 -- Only public addon APIs. Exporting is disabled in combat by UI.lua.
 local function secret(value)
@@ -710,13 +710,17 @@ NS.ModeQuestions = {
     sources="Review the item-source notebook for useful upgrades at my level and for my build. Distinguish observed offers, player-confirmed claims, unconfirmed notes and outdated records. Cite Forever references and do not invent loot tables.",
 }
 
-function NS.BuildReport(options)
+function NS.BuildReport(options, comparisonText)
     local ctx = { lines = {}, warnings = {}, pending = {}, options = options or {} }
     local mode = NS.ModeLabels[ctx.options.mode] and ctx.options.mode or "overview"
     push(ctx, "CHARACTER CONTEXT — ForeverContext " .. NS.VERSION)
     push(ctx, "Exported: " .. clean(call(date, "%Y-%m-%d %H:%M:%S")))
     push(ctx, "Question: " .. NS.ModeLabels[mode])
     push(ctx, "Player goal and preferences: " .. clean(ctx.options.goal, "Unspecified; ask before assuming PvE, PvP, role, or budget."))
+    if mode=="compare" and comparisonText then
+        push(ctx,"\n" .. comparisonText)
+        push(ctx,"\nComparison scope: candidates first, followed by the current character and equipped loadout. Full bag contents and unrelated source records are omitted; use Overview with bags enabled for a full carried-inventory export.")
+    end
     section(ctx, "CHARACTER", identity)
     local function enabled(key) return NS.ModuleEnabled(ctx.options, key) end
     if enabled("talents") then section(ctx, "TALENTS", talents) end
@@ -801,6 +805,20 @@ function NS.DescribeComparisonItem(value, label)
 end
 
 NS.Clean = clean
+-- Edit boxes interpret pipe escapes. Encode only at the display boundary;
+-- protocols, saved drafts and generated reports keep their literal separators.
+function NS.SetPlainText(edit, text)
+    text=type(text)=="string" and not secret(text) and text or ""
+    edit:SetText((text:gsub("|","||")))
+end
+
+function NS.GetPlainText(edit)
+    local text=call(edit.GetDisplayText,edit)
+    if type(text)=="string" and not secret(text) then return text end
+    text=call(edit.GetText,edit)
+    return type(text)=="string" and not secret(text) and (text:gsub("||","|")) or ""
+end
+
 NS.SafeCall = call
 NS.ReadNumber = number
 NS.ReadTable = object
